@@ -1,0 +1,48 @@
+name: Quality check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Không dùng secrets: an toàn cho pull request từ fork.
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Cú pháp Python
+        run: python -m compileall -q scripts tests
+      - name: Cấu hình JSON hợp lệ
+        run: for f in config/*.json; do python -m json.tool "$f" > /dev/null || exit 1; done
+      - name: Schema & đường dẫn dữ liệu
+        run: python -m scripts.validators.check_data public/data
+      - name: Unit tests
+        run: python -m pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build
