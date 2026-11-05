@@ -1,0 +1,95 @@
+{
+  "_comment": "Cấu hình pipeline. Sửa trực tiếp trên GitHub rồi bấm Commit; lần chạy kế tiếp sẽ áp dụng.",
+  "p2p": {
+    "_comment": "Mặc định TẮT. Binance P2P / OKX P2P chỉ có endpoint nội bộ của website, không phải API công khai có tài liệu. Chỉ bật sau khi bộ phận pháp chế xác nhận việc truy cập phù hợp điều khoản dịch vụ.",
+    "enabled": false,
+    "platforms": [
+      "binance",
+      "okx"
+    ],
+    "trade_sizes_vnd": [
+      50000000,
+      200000000,
+      500000000,
+      1000000000
+    ],
+    "min_completion_rate": 0.95,
+    "min_month_orders": 100,
+    "allowed_payment_keywords": [
+      "bank",
+      "vietcombank",
+      "techcombank",
+      "acb",
+      "mbbank",
+      "vietinbank",
+      "bidv",
+      "tpbank",
+      "vpbank",
+      "chuyển khoản"
+    ],
+    "depth_band_pct": 0.5
+  },
+  "reference_fx": {
+    "_comment": "Giá USD/VND tham chiếu dùng để tính P2P premium: vcb_sell (Vietcombank bán chuyển khoản) | vcb_mid | sbv_central",
+    "premium_base": "vcb_sell"
+  },
+  "staleness_hours": {
+    "crypto": 6,
+    "derivatives": 6,
+    "stablecoins": 36,
+    "sentiment": 36,
+    "fx_vn": 72,
+    "macro_daily": 120,
+    "macro_monthly": 2400,
+    "manual": 168
+  },
+  "cross_source_tolerance_pct": 1.0,
+  "risk_thresholds": {
+    "_comment": "Ngưỡng [trung bình, cao]. Giá trị >= ngưỡng thứ nhất => Trung bình, >= ngưỡng thứ hai => Cao.",
+    "usdt_vnd_spread_pct": [
+      0.5,
+      1.0
+    ],
+    "p2p_premium_abs_pct": [
+      1.5,
+      3.0
+    ],
+    "cross_exchange_spread_pct": [
+      0.3,
+      0.8
+    ],
+    "liquidity_imbalance_abs": [
+      0.3,
+      0.6
+    ],
+    "usdt_peg_deviation_abs_pct": [
+      0.2,
+      0.5
+    ],
+    "inventory_deviation_abs_pct": [
+      20,
+      40
+    ]
+  },
+  "regime": {
+    "_comment": "Quy tắc phân loại thị trường. Thứ tự ưu tiên: Liquidity Stress > High Volatility > điểm Risk-on/Risk-off.",
+    "liquidity_stress": {
+      "usdt_peg_deviation_abs_pct": 0.5,
+      "p2p_premium_abs_pct": 3.0,
+      "stablecoin_supply_7d_pct": -1.0
+    },
+    "high_volatility": {
+      "btc_realized_vol_7d_ann_pct": 75,
+      "btc_abs_change_24h_pct": 6
+    },
+    "score": {
+      "btc_7d_return_pct": 3,
+      "fear_greed_risk_on": 55,
+      "fear_greed_risk_off": 45,
+      "us10y_7d_change_bp": 10,
+      "funding_hot_pct": 0.03,
+      "risk_on_min_score": 2,
+      "risk_off_max_score": -2
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "_comment": "Dữ liệu nhập tay cho các chỉ số không có API công khai ổn định. Sửa trên GitHub (biểu tượng bút chì) rồi Commit. Để value = null nếu chưa có. date dạng YYYY-MM-DD.",
+  "sbv_central_rate": {
+    "value": null,
+    "date": null,
+    "source": "NHNN - Tỷ giá trung tâm (sbv.gov.vn)",
+    "updated_by": ""
+  },
+  "interbank_overnight_rate": {
+    "value": null,
+    "date": null,
+    "source": "NHNN - Lãi suất bình quân liên ngân hàng qua đêm",
+    "updated_by": ""
+  },
+  "internal_usdt_inventory": {
+    "_comment": "Tồn kho USDT nội bộ (USDT) và mức mục tiêu. Chỉ điền nếu được phép công khai trong phạm vi người có link.",
+    "value": null,
+    "target": null,
+    "date": null,
+    "source": "Nội bộ",
+    "updated_by": ""
+  },
+  "sbv_policy_notes": [
+    {
+      "date": null,
+      "text": "",
+      "link": ""
+    }
+  ]
+}
