@@ -1,0 +1,52 @@
+name: Deploy GitHub Pages
+
+# Chạy khi có thay đổi trên nhánh main (code, cấu hình, nhập tay) hoặc được gọi từ
+# Daily data update. Commit do bot tạo bằng GITHUB_TOKEN không tự kích hoạt workflow này,
+# nên Daily data update gọi trực tiếp qua workflow_call.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main # lấy cả commit dữ liệu vừa đẩy lên
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kiểm tra dữ liệu
+        run: python -m scripts.validators.check_data public/data
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
