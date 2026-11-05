@@ -35,7 +35,18 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-ml.txt
       - run: pip install -r requirements.txt
+      # Mô hình chấm giọng tin là phần phụ: cài lỗi thì website chỉ ẩn dòng giọng tin
+      - name: Cài mô hình chấm giọng tin
+        continue-on-error: true
+        run: pip install -r requirements-ml.txt
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-fintwitbert-da059da
       - name: Thu thập & tính toán
         env:
           COINGECKO_DEMO_KEY: ${{ secrets.COINGECKO_DEMO_KEY }}

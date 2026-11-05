@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 from .analyzers import analytics as an
-from .analyzers import digest
+from .analyzers import digest, news_signal, tone
 from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx
 from .common import VN_TZ, env, iso_vn, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
@@ -169,6 +169,9 @@ def run(out: Path, force: bool = False) -> int:
 
     finished = now_vn()
     snap["warnings"] = apply_quality(snap, settings, finished)
+    # Sau bước kiểm tra chất lượng, để số liệu cũ không bị dùng làm phản ứng trong ngày
+    news_items = snap["tables"].get("news") or []
+    news_signal.annotate(snap, tone.score_titles([n["title"] for n in news_items if n.get("lang") == "en"]))
     scheduled = dt.datetime.combine(today, dt.time(7, 10), VN_TZ) if trigger == "schedule" else None
     snap["generated_at"] = finished.isoformat()
     snap["run"] = {

@@ -86,17 +86,48 @@ function Sentiment({ v }: { v: number }) {
   )
 }
 
+const TONE = {
+  positive: ['Tích cực', 'text-up'],
+  negative: ['Tiêu cực', 'text-down'],
+  neutral: ['Trung tính', 'text-muted'],
+} as const
+
 function Story({ n }: { n: NewsItem }) {
+  const fx = n.effects ?? []
+  const tone = n.tone ? TONE[n.tone.label] : null
   return (
     <article className="py-3.5 border-b border-line">
       <div className="text-[13px] font-semibold text-accent">{n.topic_label}</div>
       <h3 className="serif text-[18px] font-semibold leading-snug mt-0.5">
         <a href={n.link} target="_blank" rel="noreferrer" className="hover:underline">{n.title}</a>
       </h3>
-      <p className="text-[14px] text-muted mt-1">{n.why}</p>
-      <div className="text-[13px] text-muted mt-1.5">
-        Ảnh hưởng: <span className="text-fg">{n.markets.join(', ')}</span>
-      </div>
+      <p className="text-[14px] text-muted mt-1">{n.effects_basis ?? n.why}</p>
+      <dl className="grid grid-cols-[108px_minmax(0,1fr)] gap-x-2 text-[13px] mt-1.5">
+        <dt className="text-muted">Hướng tác động</dt>
+        <dd>
+          {fx.length > 0
+            ? fx.map((e, i) => (
+              <span key={e.market}>{i > 0 && ', '}<span className="whitespace-nowrap">{e.market} <b className="font-semibold">{e.dir === 'up' ? '▲ tăng' : '▼ giảm'}</b></span></span>
+            ))
+            : <span className="text-muted">Chưa rõ hướng ({n.markets.join(', ')})</span>}
+        </dd>
+        {tone && (
+          <>
+            <dt className="text-muted">Giọng tin</dt>
+            <dd className={clsx('font-medium', tone[1])}>{tone[0]} <span className="num font-normal text-muted">{Math.round(n.tone!.score * 100)}%</span></dd>
+          </>
+        )}
+        {(n.reaction?.length ?? 0) > 0 && (
+          <>
+            <dt className="text-muted">Thực tế 24 giờ</dt>
+            <dd>
+              {n.reaction!.map((r, i) => (
+                <span key={r.label}>{i > 0 && ', '}<span className="whitespace-nowrap">{r.label} <Change v={r.value} unit={r.unit} /></span></span>
+              ))}
+            </dd>
+          </>
+        )}
+      </dl>
       <div className="text-[12.5px] text-muted mt-0.5">
         {n.sources.join(', ')} · <span className="num">{fmtTime(n.published)}</span>
       </div>
@@ -157,7 +188,7 @@ export default function Overview() {
       </Card>
 
       {news.length > 0 && (
-        <Card title="Tin lớn trong ngày" subtitle="Những tin có thể tác động cùng lúc đến nhiều thị trường, xếp theo mức độ quan trọng.">
+        <Card title="Tin lớn trong ngày" subtitle="Hướng tác động là diễn biến thường thấy theo quy tắc. Giọng tin do mô hình tự động chấm, chỉ với tin tiếng Anh, và có thể sai. Thực tế 24 giờ là biến động cùng kỳ, không chứng minh tin nào gây ra.">
           <div className="grid gap-x-10 lg:grid-cols-2">
             {news.map((n) => <Story key={n.link} n={n} />)}
           </div>

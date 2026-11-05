@@ -179,6 +179,10 @@ export interface NewsItem {
   markets: string[]
   score: number
   lang: 'vi' | 'en'
+  effects?: { market: string; dir: 'up' | 'down' }[]
+  effects_basis?: string | null
+  tone?: { label: 'positive' | 'negative' | 'neutral'; score: number } | null
+  reaction?: { label: string; value: number; unit: string }[]
 }
 
 export interface Digest {

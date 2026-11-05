@@ -108,3 +108,55 @@ def test_free_market_parsers():
     from scripts.collectors import vn_fx
     assert vn_fx.parse_tygiausd('content="chợ đen hôm nay 05-11-2026 22giờ: Mua-26,070; Bán-26,130, x"') == (26070, 26130)
     assert vn_fx.parse_tygia_vn("<b>USD tự do</b><i>26,070\n   / 26,130</i>") == (26070, 26130)
+
+
+def _fx(title, topic):
+    from scripts.analyzers import news_signal
+    return {e["market"]: e["dir"] for e in news_signal.effects(title, topic)["effects"]}
+
+
+def test_effects_on_real_headlines():
+    # Các tiêu đề thật từng bị gắn sai ở lần chạy thử đầu tiên
+    assert _fx("Bitcoin Erases Election Rally as AI Stocks Plunge, $428 Million in Crypto Longs Get Wiped Out", "politics") == {
+        "Crypto": "down", "Chứng khoán": "down"}
+    assert _fx("Bitcoin crashes 6% to 7-week low as US stocks erase election gains", "politics") == {
+        "Crypto": "down", "Chứng khoán": "down"}
+    assert _fx("Canton Coin Gets SEC Nod as Wall Street Tokenization Heats Up", "crypto_policy") == {}
+    assert _fx("Gate CEO says crypto exchanges must prove they can survive a hack like Binance’s", "crypto_risk") == {}
+    assert _fx("Binance bù đắp 98% tài sản sau vụ hack 6,3 tỷ USD", "crypto_risk") == {}
+    # Các tiêu đề đúng phải giữ nguyên
+    assert _fx("Tỷ giá USD giảm mạnh nhất một tháng", "sbv") == {"USD/VND": "down"}
+    assert _fx("Giá vàng thế giới tăng mạnh nhất 3 tháng", "gold") == {"Vàng": "up"}
+    assert _fx("Live updates: Bitcoin plunges as Nasdaq falls 4% in panicky selloff", "crypto_flow") == {
+        "Crypto": "down", "Chứng khoán": "down"}
+    assert _fx("Mercado Bitcoin hack continued hours after exchange said attack was contained", "crypto_risk") == {"Crypto": "down"}
+
+
+def test_effects_need_the_right_context():
+    # Ngân hàng trung ương khác không suy ra hướng USD; "tăng cường" không phải "tăng"; câu hỏi không kết luận
+    assert _fx("Bank of England hikes interest rate for the first time since Iran war", "fed") == {}
+    assert _fx("NHNN Khu vực 2 tăng cường theo dõi lãi suất với các giao dịch phát sinh", "sbv") == {}
+    assert _fx("Will the Fed cut rates? Bitcoin could surge", "fed") == {}
+    fed = _fx("Fed cuts interest rates by a quarter point", "fed")
+    assert fed["USD"] == "down" and fed["Crypto"] == "up"
+    war = _fx("Missile attack on Gulf port rattles region", "geo")
+    assert war["Dầu"] == "up" and war["Chứng khoán"] == "down"
+
+
+def test_tone_keeps_only_confident_known_labels():
+    from scripts.analyzers import tone
+    got = tone.read_results(["a", "b", "c"], [{"label": "BEARISH", "score": 0.91}, {"label": "BULLISH", "score": 0.5},
+                                               {"label": "OTHER", "score": 0.99}])
+    assert got == {"a": {"label": "negative", "score": 0.91}}
+
+
+def test_annotate_uses_only_fresh_metrics_for_reaction():
+    from scripts.analyzers import news_signal
+    snap = {"metrics": {"btc_price": {"change_24h": -5.0, "quality": "ok"},
+                        "dtwexbgs": {"change_24h": 0.1, "quality": "stale"}},
+            "tables": {"news": [{"title": "Bitcoin plunges", "topic": "crypto_flow", "markets": ["Crypto", "USD"]}]}}
+    news_signal.annotate(snap, {"Bitcoin plunges": {"label": "negative", "score": 0.9}})
+    n = snap["tables"]["news"][0]
+    assert n["effects"] == [{"market": "Crypto", "dir": "down"}]
+    assert n["tone"]["label"] == "negative"
+    assert [r["label"] for r in n["reaction"]] == ["BTC"]

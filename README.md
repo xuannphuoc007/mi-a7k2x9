@@ -46,7 +46,8 @@ Nếu một nguồn lỗi, các nguồn khác vẫn chạy; chỉ số liên qua
 - **Liquidation toàn thị trường, stablecoin exchange inflow/outflow, ngày công bố & kỳ vọng thị trường cho CPI/NFP**: cần nguồn trả phí (CoinGlass, CryptoQuant…), để Phase 2.
 - **Đơn vị Volume Delta/CVD** theo đơn vị OKX trả về (chưa xác minh là coin hay USD); đọc theo dấu và độ lớn tương đối.
 - **BTC Dominance và tương quan USD/VND ↔ USDT/VND** dùng lịch sử hệ thống tự lưu, cần tích luỹ vài tuần.
-- **Không có AI và không có quy trình duyệt** theo yêu cầu. Tín hiệu vĩ mô và market making là quy tắc định lượng, có ghi nhãn Fact/Analysis.
+- **Đánh giá tin** gồm 3 lớp tách biệt, không phải khuyến nghị: *hướng tác động* theo quy tắc (`scripts/analyzers/news_signal.py`, không khớp quy tắc thì ghi "Chưa rõ hướng"); *giọng tin* do mô hình FinTwitBERT (giấy phép MIT) chấm ngay trên máy chủ GitHub, không cần API key, chỉ tin tiếng Anh, độ tin cậy từ 70% (`scripts/analyzers/tone.py`); *thực tế 24 giờ* đặt cạnh để đối chiếu. Cả ba đều chưa được đo độ chính xác trên lịch sử dài.
+- **Không có quy trình duyệt** theo yêu cầu.
 - Lịch FOMC 2027 là dự kiến; cập nhật `config/fomc.json` khi Fed công bố.
 
 ## 5. Bảo mật & quyền riêng tư — đọc trước khi chọn Public/Private
