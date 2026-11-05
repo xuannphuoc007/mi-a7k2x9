@@ -19,7 +19,8 @@ class FetchError(Exception):
 
 
 def _request(method: str, url: str, *, params=None, json_body=None, headers=None,
-             timeout: float = 20, retries: int = 3, as_text: bool = False) -> Any:
+             timeout: float = 20, retries: int = 3, as_text: bool = False,
+             as_bytes: bool = False) -> Any:
     h = {"User-Agent": USER_AGENT, "Accept": "application/json, text/plain, */*"}
     if headers:
         h.update(headers)
@@ -34,6 +35,8 @@ def _request(method: str, url: str, *, params=None, json_body=None, headers=None
                 continue
             if r.status_code != 200:
                 raise FetchError(f"HTTP {r.status_code} từ {url}")
+            if as_bytes:
+                return r.content
             return r.text if as_text else r.json()
         except FetchError:
             raise

@@ -1,17 +1,19 @@
 {
   "_comment": "Cấu hình pipeline. Sửa trực tiếp trên GitHub rồi bấm Commit; lần chạy kế tiếp sẽ áp dụng.",
   "p2p": {
-    "_comment": "Mặc định TẮT. Binance P2P / OKX P2P chỉ có endpoint nội bộ của website, không phải API công khai có tài liệu. Chỉ bật sau khi bộ phận pháp chế xác nhận việc truy cập phù hợp điều khoản dịch vụ.",
-    "enabled": false,
+    "_comment": "Đang BẬT theo yêu cầu của chủ dự án. Các nền tảng không có API P2P công khai; collector đọc endpoint mà chính website của họ dùng, nên có thể đổi hoặc bị chặn bất cứ lúc nào.",
+    "enabled": true,
     "platforms": [
       "binance",
-      "okx"
+      "okx",
+      "bybit",
+      "bitget"
     ],
     "trade_sizes_vnd": [
+      10000000,
       50000000,
       200000000,
-      500000000,
-      1000000000
+      500000000
     ],
     "min_completion_rate": 0.95,
     "min_month_orders": 100,
@@ -27,7 +29,8 @@
       "vpbank",
       "chuyển khoản"
     ],
-    "depth_band_pct": 0.5
+    "depth_band_pct": 0.5,
+    "reference_size_vnd": 50000000
   },
   "reference_fx": {
     "_comment": "Giá USD/VND tham chiếu dùng để tính P2P premium: vcb_sell (Vietcombank bán chuyển khoản) | vcb_mid | sbv_central",
@@ -41,7 +44,8 @@
     "fx_vn": 72,
     "macro_daily": 120,
     "macro_monthly": 2400,
-    "manual": 168
+    "manual": 168,
+    "derivatives_daily": 48
   },
   "cross_source_tolerance_pct": 1.0,
   "risk_thresholds": {

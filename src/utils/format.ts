@@ -4,10 +4,10 @@ const nf = (d: number) => new Intl.NumberFormat('vi-VN', { maximumFractionDigits
 
 export function compact(v: number): string {
   const a = Math.abs(v)
-  if (a >= 1e12) return `${nf(2).format(v / 1e12)} T`
-  if (a >= 1e9) return `${nf(2).format(v / 1e9)} B`
-  if (a >= 1e6) return `${nf(2).format(v / 1e6)} M`
-  if (a >= 1e3) return `${nf(1).format(v / 1e3)} K`
+  if (a >= 1e12) return `${nf(2).format(v / 1e12)} nghìn tỷ`
+  if (a >= 1e9) return `${nf(1).format(v / 1e9)} tỷ`
+  if (a >= 1e6) return `${nf(1).format(v / 1e6)} triệu`
+  if (a >= 1e3) return `${nf(1).format(v / 1e3)} nghìn`
   return nf(2).format(v)
 }
 
@@ -43,7 +43,7 @@ export function fmtChange(v: number | null | undefined, unit = '%'): string {
   if (v === null || v === undefined || Number.isNaN(v)) return '—'
   const s = v > 0 ? '+' : ''
   if (unit === '%') return `${s}${nf(2).format(v)}%`
-  if (unit === 'bp') return `${s}${nf(0).format(v)} bp`
+  if (unit === 'bp' || unit === 'đ') return `${s}${nf(0).format(v)} ${unit}`
   return `${s}${nf(2).format(v)} ${unit}`
 }
 
@@ -60,7 +60,15 @@ export function fmtTime(iso: string | null | undefined, withDate = true): string
     timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit',
     ...(withDate ? { day: '2-digit', month: '2-digit', year: 'numeric' } : {}),
   }).format(d)
-  return `${p} (UTC+7)`
+  return p
+}
+
+/** '2026-11-05' -> 'Thứ Năm, 5 tháng 11, 2026' */
+export function fmtDateLong(day: string): string {
+  const d = new Date(`${day}T12:00:00+07:00`)
+  if (Number.isNaN(d.getTime())) return day
+  const s = new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'full' }).format(d)
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 export function fmtDateShort(ts: number): string {

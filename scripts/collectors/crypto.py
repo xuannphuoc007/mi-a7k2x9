@@ -10,7 +10,7 @@ import datetime as dt
 
 CG = "https://api.coingecko.com/api/v3"
 BINANCE = "https://data-api.binance.vision/api/v3/klines"
-ASSETS = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana"}
+ASSETS = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "XRP": "ripple", "BNB": "binancecoin"}
 STABLES = {"USDT": "tether", "USDC": "usd-coin"}
 SRC_CG = "CoinGecko"
 SRC_BN = "Binance (data-api.binance.vision)"
@@ -61,6 +61,15 @@ def collect_coingecko(ctx) -> dict:
     if btc and eth:
         out_m["eth_btc"] = metric("ETH/BTC", eth / btc, "BTC", f"{SRC_CG} (tính từ giá USD)",
                                   out_m["eth_price"]["timestamp"])
+    # USDT tính theo VND trên CoinGecko: tham chiếu quốc tế, không phải giá P2P trong nước
+    try:
+        ref = http_get(f"{CG}/simple/price", headers=_cg_headers(),
+                       params={"ids": "tether", "vs_currencies": "vnd", "include_last_updated_at": "true"})["tether"]
+        out_m["usdtvnd_reference"] = metric("USDT/VND quy đổi quốc tế", to_float(ref.get("vnd")), "VND", SRC_CG,
+                                            s_to_iso(ref["last_updated_at"]), kind="reference",
+                                            note="Quy đổi theo tỷ giá quốc tế, không phải giá mua bán thực tế ở Việt Nam")
+    except Exception:  # noqa: BLE001
+        pass  # chỉ là số tham chiếu, thiếu thì bỏ qua
     return {"metrics": out_m}
 
 

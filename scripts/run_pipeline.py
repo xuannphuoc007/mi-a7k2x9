@@ -18,7 +18,8 @@ import time
 from pathlib import Path
 
 from .analyzers import analytics as an
-from .collectors import crypto, derivatives, macro, p2p, sentiment, stablecoins, vn_fx
+from .analyzers import digest
+from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx
 from .common import VN_TZ, env, iso_vn, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
 
@@ -41,9 +42,14 @@ SOURCES = [
      "https://fred.stlouisfed.org", "FRED_API_KEY"),
     ("vietcombank", "Vietcombank — tỷ giá USD/VND niêm yết", vn_fx.collect_vcb, "fx_vn",
      "https://www.vietcombank.com.vn", None),
+    ("banks", "BIDV, Techcombank — tỷ giá USD/VND niêm yết", vn_fx.collect_banks, "fx_vn",
+     "bidv.com.vn, techcombank.com", None),
+    ("free_market", "USD chợ đen — tygiausd.org, tygia.vn", vn_fx.collect_free_market, "fx_vn",
+     "https://tygiausd.org", None),
+    ("news", "Tin tức — CNBC, BBC, Fed, CoinDesk, VnExpress, CafeF…", news.collect, "news", "RSS", None),
     ("manual", "Nhập tay — NHNN, liên ngân hàng, tồn kho nội bộ", vn_fx.collect_manual, "manual",
      "config/manual_inputs.json", None),
-    ("p2p", "USDT/VND P2P — Binance, OKX", p2p.collect, "p2p", "p2p.binance.com, okx.com/p2p", None),
+    ("p2p", "USDT/VND P2P — Binance, OKX, Bybit, Bitget", p2p.collect, "p2p", "website P2P của từng sàn", None),
 ]
 MONTHLY_KEYS = {"cpiaucsl", "cpilfesl", "pcepi", "pcepilfe", "payems", "unrate"}
 LIGHT_DROP = ("series", "candles")
@@ -142,13 +148,15 @@ def run(out: Path, force: bool = False) -> int:
     clean_series(snap)
     snap["metrics"].update({k: {**m, "category": "derived"} for k, m in an.fx_derived(snap, settings).items()})
     if snap["candles"]:
-        for sym in ("BTC", "ETH", "SOL"):
+        for sym in crypto.ASSETS:
             cl = [c["close"] for c in snap["candles"].get(sym, {}).get("1d", [])]
             v7, v30 = an.realized_vol_ann(cl, 7), an.realized_vol_ann(cl, 30)
             snap["tables"].setdefault("volatility", {})[sym] = {"vol_7d": v7, "vol_30d": v30,
                                                                   "source": "Binance Spot 1D (tính)"}
 
     hist = load_history(out, today)
+    an.fx_day_change(snap, hist)
+    snap["tables"]["fx"] = an.fx_board(snap)
     snap["tables"]["risk"] = an.risk_table(snap, settings, hist)
     snap["regime"] = an.regime(snap, settings)
     levels = an.build_level_series(snap, history_levels(hist))
@@ -157,6 +165,7 @@ def run(out: Path, force: bool = False) -> int:
     snap["tables"]["mm_signals"] = an.mm_signals(snap, settings)
     snap["tables"]["fomc"] = macro.fomc_schedule(ROOT / "config", today)
     snap["tables"]["thresholds"] = settings["risk_thresholds"]
+    snap["tables"]["digest"] = digest.build(snap, today)
 
     finished = now_vn()
     snap["warnings"] = apply_quality(snap, settings, finished)

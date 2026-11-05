@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
 type Theme = 'dark' | 'light'
-const Ctx = createContext<{ theme: Theme; toggle: () => void }>({ theme: 'dark', toggle: () => {} })
+const Ctx = createContext<{ theme: Theme; toggle: () => void }>({ theme: 'light', toggle: () => {} })
+const KEY = 'mi-theme-v2'
 
 function read(): Theme {
   try {
-    return localStorage.getItem('mi-theme') === 'light' ? 'light' : 'dark'
+    return localStorage.getItem(KEY) === 'dark' ? 'dark' : 'light'
   } catch {
-    return 'dark'
+    return 'light'
   }
 }
 
@@ -19,7 +20,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   })
   useEffect(() => {
     try {
-      localStorage.setItem('mi-theme', theme)
+      localStorage.setItem(KEY, theme)
     } catch {
       /* bỏ qua khi trình duyệt chặn storage */
     }

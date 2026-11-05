@@ -16,8 +16,8 @@ export function lastDays(points: [number, number][] | undefined, days: number): 
 }
 
 export const RANGES = [
-  { value: '1', label: '1D' },
-  { value: '7', label: '7D' },
-  { value: '30', label: '30D' },
-  { value: '90', label: '90D' },
+  { value: '1', label: '1 ngày' },
+  { value: '7', label: '7 ngày' },
+  { value: '30', label: '30 ngày' },
+  { value: '90', label: '90 ngày' },
 ] as const

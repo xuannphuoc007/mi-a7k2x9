@@ -3,8 +3,8 @@ import { compact, fmtChange, fmtPct, toCsv, toneOf } from './format'
 
 describe('format', () => {
   it('compact', () => {
-    expect(compact(3.5e12)).toContain('T')
-    expect(compact(2.1e9)).toContain('B')
+    expect(compact(3.5e12)).toContain('nghìn tỷ')
+    expect(compact(2.1e9)).toContain('tỷ')
   })
   it('pct & change', () => {
     expect(fmtPct(1.234)).toMatch(/^\+1,23%$/)

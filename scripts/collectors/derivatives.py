@@ -1,7 +1,7 @@
 """Phái sinh — OKX public API v5 (không cần key).
 
 Chỉ số lấy từ MỘT sàn (OKX), không phải toàn thị trường. Dữ liệu toàn thị trường
-(liquidation, OI tổng hợp) cần CoinGlass — Phase 2.
+(liquidation, OI tổng hợp) cần nguồn trả phí nên không hiển thị.
 
 Volume Delta / CVD: dùng endpoint taker-volume của OKX, nơi volume đã được phân loại
 theo bên chủ động (taker buy / taker sell), nên được phép tính delta và cộng dồn.
@@ -12,7 +12,7 @@ from ..common import http_get, metric, missing, ms_to_iso, to_float
 
 API = "https://www.okx.com/api/v5"
 SRC = "OKX"
-COINS = ("BTC", "ETH", "SOL")
+COINS = ("BTC", "ETH", "SOL", "XRP", "BNB")
 
 
 def _data(path: str, params: dict) -> list:
@@ -127,9 +127,10 @@ def collect(ctx) -> dict:
             errors.append(f"{c} basis: {e}")
             metrics[f"{k}_basis"] = missing(f"{c} Perp Basis", "%", SRC, f"Lỗi nguồn: {e}")
 
-        metrics[f"{k}_liquidations"] = missing(
-            f"{c} Liquidation Long/Short", "USD", "—",
-            "Chưa có dữ liệu: cần nguồn tổng hợp toàn thị trường (CoinGlass, cần API key trả phí) — Phase 2")
+        # L/S và Volume Delta là số theo ngày, mốc thời gian là đầu ngày nên không áp ngưỡng 6 giờ
+        for key in (f"{k}_ls_ratio", f"{k}_volume_delta"):
+            if key in metrics:
+                metrics[key]["category"] = "derivatives_daily"
 
     if errors and len(errors) >= len(COINS) * 5:
         raise RuntimeError("; ".join(errors[:3]))

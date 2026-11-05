@@ -130,6 +130,64 @@ export interface FomcMeeting {
   tentative?: boolean
 }
 
+export interface FxBank {
+  id: string
+  name: string
+  buy_cash: number | null
+  buy_transfer: number | null
+  sell: number | null
+  timestamp: string | null
+}
+
+export interface FxFreeQuote {
+  source: string
+  url: string
+  buy: number
+  sell: number
+  timestamp: string
+}
+
+export interface FxPlatform extends P2PPlatform {
+  id: string
+  name: string
+  by_size: P2PSize[]
+}
+
+export interface FxGap {
+  vnd: number
+  pct: number
+}
+
+export interface FxBoard {
+  banks: FxBank[]
+  free: FxFreeQuote[]
+  platforms: FxPlatform[]
+  trade_sizes_vnd: number[]
+  reference_size_vnd?: number | null
+  gaps: { free_vs_bank: FxGap | null; usdt_vs_bank: FxGap | null; usdt_vs_free: FxGap | null }
+}
+
+export interface NewsItem {
+  title: string
+  link: string
+  source: string
+  sources: string[]
+  published: string
+  topic: string
+  topic_label: string
+  why: string
+  markets: string[]
+  score: number
+  lang: 'vi' | 'en'
+}
+
+export interface Digest {
+  headline: string
+  bullets: { tag: string; text: string }[]
+  regime_vi: string
+  regime_why: string
+}
+
 export interface Snapshot {
   schema_version: number
   date: string
@@ -156,6 +214,9 @@ export interface Snapshot {
     fomc?: { source: string; next: FomcMeeting | null; last: FomcMeeting | null; upcoming: FomcMeeting[] }
     sbv_policy_notes?: { date: string; text: string; link?: string }[]
     thresholds?: Record<string, number[]>
+    fx?: FxBoard
+    news?: NewsItem[]
+    digest?: Digest
   }
   regime?: Regime
   correlation?: Correlation

@@ -123,9 +123,6 @@ def collect(ctx) -> dict:
             errors.append(f"{sid}: {e}")
             metrics[sid.lower()] = missing(label, "", f"{SRC} {sid}", f"Lỗi nguồn: {e}")
 
-    metrics["dxy"] = missing("DXY (ICE U.S. Dollar Index)", "điểm", "—",
-                             "Chưa có dữ liệu: DXY là chỉ số độc quyền của ICE, không có API miễn phí hợp lệ. "
-                             "Xem Nominal Broad USD Index (FRED DTWEXBGS) làm chỉ báo thay thế.")
     if len(errors) == len(DAILY) + len(MONTHLY):
         raise RuntimeError("; ".join(errors[:3]))
     return {"metrics": metrics, "series": series, "warnings": errors}

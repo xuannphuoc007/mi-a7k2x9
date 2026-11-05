@@ -12,6 +12,8 @@ RANGES = {  # key: (min, max)
     "usdvnd_vcb_sell": (15000, 40000), "usdvnd_vcb_buy_transfer": (15000, 40000),
     "usdvnd_vcb_buy_cash": (15000, 40000), "sbv_central_rate": (15000, 40000),
     "usdtvnd_p2p_bid": (15000, 40000), "usdtvnd_p2p_ask": (15000, 40000),
+    "usdvnd_free_buy": (15000, 40000), "usdvnd_free_sell": (15000, 40000),
+    "usdvnd_bidv_sell": (15000, 40000), "usdvnd_tcb_sell": (15000, 40000),
     "dgs2": (-2, 25), "dgs10": (-2, 25), "dff": (-1, 25), "unrate": (0, 40),
 }
 
@@ -70,7 +72,7 @@ def apply_quality(snap: dict, settings: dict, now: dt.datetime) -> list[str]:
             warns.append(f"{key}: ngoài khoảng {rng} ({v})")
 
     tol = settings.get("cross_source_tolerance_pct", 1.0)
-    for sym in ("btc", "eth", "sol"):
+    for sym in ("btc", "eth", "sol", "xrp", "bnb"):
         a, b = metrics.get(f"{sym}_price"), metrics.get(f"{sym}_binance_last")
         if a and b and a.get("value") and b.get("value"):
             diff = abs(a["value"] / b["value"] - 1) * 100

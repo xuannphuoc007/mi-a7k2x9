@@ -1,9 +1,8 @@
-"""USDT/VND P2P — Binance P2P và OKX P2P.
+"""USDT/VND P2P — Binance, OKX, Bybit, Bitget.
 
-QUAN TRỌNG: Hai nền tảng không công bố API P2P công khai có tài liệu. Collector này gọi
-endpoint mà chính website P2P dùng để hiển thị danh sách quảng cáo. Mặc định TẮT
-(config/settings.json -> p2p.enabled = false). Chỉ bật khi đơn vị đã xác nhận việc truy cập
-phù hợp điều khoản dịch vụ, hoặc thay bằng nguồn giá OTC/nội bộ được cấp quyền.
+QUAN TRỌNG: Các nền tảng không công bố API P2P công khai có tài liệu. Collector này gọi
+endpoint mà chính website P2P dùng để hiển thị danh sách quảng cáo, nên có thể đổi hoặc bị
+chặn bất cứ lúc nào. Bật/tắt tại config/settings.json -> p2p.enabled.
 
 Giá quảng cáo P2P KHÔNG được coi là giá thực thi. "Best executable" ở đây chỉ tính trên các
 quảng cáo thoả đồng thời: hạn mức min/max chứa quy mô giao dịch, đủ lượng USDT khả dụng,
@@ -16,11 +15,16 @@ Quy ước phía giá (theo góc nhìn đơn vị muốn mua/bán USDT):
 """
 from __future__ import annotations
 
-from ..common import http_get, http_post, iso_vn, metric, missing, to_float
 import datetime as dt
+import statistics
+
+from ..common import http_get, http_post, iso_vn, metric, missing, to_float
 
 BINANCE_URL = "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search"
 OKX_URL = "https://www.okx.com/v3/c2c/tradingOrders/books"
+BYBIT_URL = "https://api2.bybit.com/fiat/otc/item/online"
+BITGET_URL = "https://www.bitget.com/v1/p2p/pub/adv/queryAdvList"
+BYBIT_PAYMENTS = {"14": "Bank Transfer"}  # Bybit trả mã số; 14 = chuyển khoản ngân hàng
 
 
 def _binance(trade_type: str) -> list[dict]:
@@ -66,6 +70,58 @@ def _okx(side: str) -> list[dict]:
             "merchant": a.get("nickName", ""),
         })
     return out
+
+
+def _bybit(side: str) -> list[dict]:
+    """side=1 -> người đăng bán USDT (ask); side=0 -> người đăng mua USDT (bid)."""
+    out = []
+    for page in (1, 2, 3):
+        j = http_post(BYBIT_URL, {"tokenId": "USDT", "currencyId": "VND", "side": side, "size": "20",
+                                  "page": str(page), "payment": []})
+        rows = (j.get("result") or {}).get("items") or []
+        for a in rows:
+            rate = to_float(a.get("recentExecuteRate"))
+            out.append({
+                "price": to_float(a.get("price")),
+                "min_vnd": to_float(a.get("minAmount")),
+                "max_vnd": to_float(a.get("maxAmount")),
+                "available_usdt": to_float(a.get("lastQuantity")),
+                "methods": [BYBIT_PAYMENTS.get(str(p), str(p)) for p in a.get("payments") or []],
+                "completion": rate / 100 if rate is not None else None,
+                "orders": to_float(a.get("recentOrderNum")),
+                "merchant": a.get("nickName", ""),
+            })
+        if len(rows) < 20:
+            break
+    return out
+
+
+def _bitget(side: int) -> list[dict]:
+    """side=1 -> người đăng bán USDT (ask); side=2 -> người đăng mua USDT (bid)."""
+    out = []
+    for page in (1, 2, 3):
+        j = http_post(BITGET_URL, {"side": side, "pageNo": page, "pageSize": 20, "coinCode": "USDT",
+                                   "fiatCode": "VND", "languageType": 0})
+        rows = (j.get("data") or {}).get("dataList") or []
+        for a in rows:
+            out.append({
+                "price": to_float(a.get("price")),
+                "min_vnd": to_float(a.get("minAmount")),
+                "max_vnd": to_float(a.get("maxAmount")),
+                "available_usdt": to_float(a.get("lastAmount")),
+                "methods": [m.get("paymethodName", "") for m in a.get("paymethodInfo") or []],
+                "completion": to_float(a.get("turnoverRate")),
+                "orders": to_float(a.get("turnoverNum")),
+                "merchant": a.get("nickName", ""),
+            })
+        if len(rows) < 10:
+            break
+    return out
+
+
+def median_or_none(values) -> float | None:
+    vals = [v for v in values if v]
+    return statistics.median(vals) if vals else None
 
 
 def eligible(ads: list[dict], size_vnd: float, cfg: dict) -> list[dict]:
@@ -116,9 +172,7 @@ def book_metrics(asks: list[dict], bids: list[dict], cfg: dict) -> dict:
 def collect(ctx) -> dict:
     cfg = ctx["settings"]["p2p"]
     if not cfg.get("enabled"):
-        note = ("Chưa có dữ liệu: collector P2P đang TẮT (config/settings.json → p2p.enabled). "
-                "Binance/OKX không có API P2P công khai; cần pháp chế xác nhận trước khi bật, "
-                "hoặc tích hợp nguồn OTC/nội bộ được cấp quyền.")
+        note = "Chưa có dữ liệu: collector P2P đang TẮT (config/settings.json → p2p.enabled)."
         return {"metrics": {
             "usdtvnd_p2p_bid": missing("USDT/VND P2P — best executable bid", "VND", "P2P", note),
             "usdtvnd_p2p_ask": missing("USDT/VND P2P — best executable ask", "VND", "P2P", note),
@@ -133,6 +187,10 @@ def collect(ctx) -> dict:
                 asks, bids = _binance("BUY"), _binance("SELL")
             elif name == "okx":
                 asks, bids = _okx("sell"), _okx("buy")
+            elif name == "bybit":
+                asks, bids = _bybit("1"), _bybit("0")
+            elif name == "bitget":
+                asks, bids = _bitget(1), _bitget(2)
             else:
                 continue
             bm = book_metrics(asks, bids, cfg)
@@ -144,23 +202,24 @@ def collect(ctx) -> dict:
     if not any("by_size" in p for p in platforms.values()):
         raise RuntimeError("; ".join(errors) or "Không có nền tảng P2P nào trả dữ liệu")
 
-    # Giá tổng hợp: ask tốt nhất & bid tốt nhất trên mọi nền tảng ở quy mô nhỏ nhất
-    best_ask = min((p["by_size"][0]["ask"] for p in platforms.values()
-                    if "by_size" in p and p["by_size"][0]["ask"]), default=None)
-    best_bid = max((p["by_size"][0]["bid"] for p in platforms.values()
-                    if "by_size" in p and p["by_size"][0]["bid"]), default=None)
+    # Giá đại diện: trung vị các sàn ở quy mô tham chiếu. Không lấy giá tốt nhất vì quảng cáo lẻ
+    # trên các sàn có thể chào chéo nhau, làm giá mua vào cao hơn giá bán ra.
+    ref_size = cfg.get("reference_size_vnd") or cfg["trade_sizes_vnd"][0]
+    rows = [r for pl in platforms.values() for r in pl.get("by_size", []) if r["size_vnd"] == ref_size]
+    best_bid = median_or_none(r["bid"] for r in rows)
+    best_ask = median_or_none(r["ask"] for r in rows)
     mid = (best_ask + best_bid) / 2 if best_ask and best_bid else None
-    size0 = cfg["trade_sizes_vnd"][0]
     src = "P2P " + ", ".join(k for k, v in platforms.items() if "by_size" in v)
-    note = f"Tốt nhất trong các quảng cáo đủ điều kiện thực thi ở quy mô {size0:,.0f} VND"
+    note = f"Trung vị các sàn, lệnh {ref_size:,.0f} đồng, chuyển khoản ngân hàng, người đăng có uy tín"
     return {"metrics": {
-        "usdtvnd_p2p_bid": metric("USDT/VND P2P — best executable bid", best_bid, "VND", src, ts,
+        "usdtvnd_p2p_bid": metric("USDT/VND P2P — mua vào", best_bid, "VND", src, ts,
                                   kind="bid", note=note),
-        "usdtvnd_p2p_ask": metric("USDT/VND P2P — best executable ask", best_ask, "VND", src, ts,
+        "usdtvnd_p2p_ask": metric("USDT/VND P2P — bán ra", best_ask, "VND", src, ts,
                                   kind="ask", note=note),
         "usdtvnd_p2p_mid": metric("USDT/VND P2P — mid", mid, "VND", src, ts, kind="mid",
-                                  note="Trung bình best executable bid và ask")},
+                                  note="Trung bình giá mua vào và bán ra")},
         "tables": {"p2p": {"enabled": True, "platforms": platforms, "config": {
             "trade_sizes_vnd": cfg["trade_sizes_vnd"], "min_completion_rate": cfg["min_completion_rate"],
-            "min_month_orders": cfg["min_month_orders"], "depth_band_pct": cfg["depth_band_pct"]}}},
+            "min_month_orders": cfg["min_month_orders"], "depth_band_pct": cfg["depth_band_pct"],
+            "reference_size_vnd": ref_size}}},
         "warnings": errors}

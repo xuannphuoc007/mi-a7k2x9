@@ -218,11 +218,6 @@ def risk_table(snap: dict, settings: dict, hist: dict[int, dict]) -> list[dict]:
     dev = (inv / target - 1) * 100 if inv is not None and target else None
     add("usdt_inventory_risk", "USDT Inventory Risk", dev, "% lệch mục tiêu", "inventory_deviation_abs_pct",
         "Độ lệch tồn kho so với mục tiêu (nhập tay). Chưa có nếu chưa nhập tồn kho và mục tiêu")
-    db = sum(p.get("depth_bid_usdt") or 0 for p in plats.values())
-    da = sum(p.get("depth_ask_usdt") or 0 for p in plats.values())
-    imb = (db - da) / (db + da) if (db + da) > 0 else None
-    add("liquidity_pressure", "Liquidity Pressure", imb, "imbalance (−1…1)", "liquidity_imbalance_abs",
-        "(độ sâu phía mua − phía bán USDT) / tổng, trong biên độ cấu hình quanh giá tốt nhất. Dương = áp lực mua USDT")
     peg = snap.get("metrics", {}).get("usdt_peg_dev", {}).get("value")
     add("usdt_peg", "USDT Peg Deviation", peg, "%", "usdt_peg_deviation_abs_pct", "Giá USDT/USD lệch khỏi 1")
 
@@ -319,6 +314,10 @@ def regime(snap: dict, settings: dict) -> dict:
 
 # ---------------------------------------------------------------- tín hiệu theo quy tắc
 
+def _vn(v: float, sign: bool = False) -> str:
+    return (f"{v:+.2f}" if sign else f"{v:.2f}").replace(".", ",")
+
+
 def macro_signals(snap: dict) -> list[dict]:
     s, m = snap.get("series", {}), snap.get("metrics", {})
     out = []
@@ -336,23 +335,23 @@ def macro_signals(snap: dict) -> list[dict]:
         d = (cur - old) * 100
         stance = "nới lỏng" if d < 0 else "thắt chặt" if d > 0 else "giữ nguyên"
         out.append({"topic": "Fed", "type": "Fact",
-                    "text": f"Cận trên lãi suất mục tiêu {cur:.2f}%, thay đổi {d:+.0f} bp trong 6 tháng → chu kỳ {stance}."})
+                    "text": f"Cận trên lãi suất mục tiêu {_vn(cur)}%, thay đổi {d:+.0f} bp trong 6 tháng: chu kỳ {stance}."})
     sp = (m.get("t10y2y") or {}).get("value")
     if sp is not None:
         out.append({"topic": "Lợi suất", "type": "Fact",
-                    "text": f"Spread 10Y−2Y = {sp:+.2f}% ({'đường cong dương' if sp > 0 else 'đường cong đảo ngược'})."})
+                    "text": f"Lợi suất 10 năm cao hơn 2 năm {_vn(sp)} điểm % ({'đường cong dương' if sp > 0 else 'đường cong đảo ngược'})."})
     cur, old = val_days_ago("dtwexbgs", 30)
     if cur and old:
         out.append({"topic": "USD", "type": "Fact",
-                    "text": f"Broad USD Index thay đổi {(cur / old - 1) * 100:+.2f}% trong 30 ngày (chỉ báo thay thế DXY)."})
+                    "text": f"Chỉ số USD rộng thay đổi {_vn((cur / old - 1) * 100, True)}% trong 30 ngày."})
     cur, old = val_days_ago("dgs10", 30)
     if cur is not None and old is not None:
         out.append({"topic": "Lợi suất", "type": "Fact",
-                    "text": f"US 10Y {cur:.2f}%, thay đổi {(cur - old) * 100:+.0f} bp trong 30 ngày."})
+                    "text": f"Lợi suất Mỹ 10 năm {_vn(cur)}%, thay đổi {(cur - old) * 100:+.0f} bp trong 30 ngày."})
     cpi = (m.get("cpilfesl") or {}).get("value")
     if cpi is not None:
         out.append({"topic": "Lạm phát", "type": "Fact",
-                    "text": f"Core CPI {cpi:.2f}% YoY (kỳ {(m['cpilfesl'].get('period') or '')})."})
+                    "text": f"CPI lõi {_vn(cpi)}% so với cùng kỳ (kỳ {(m['cpilfesl'].get('period') or '')})."})
     return out
 
 
@@ -375,3 +374,51 @@ def mm_signals(snap: dict, settings: dict) -> list[dict]:
         out.append({"topic": "Dữ liệu", "type": "Fact", "level": "info",
                     "text": "Chưa có giá P2P/OTC: các chỉ báo spread, premium, áp lực thanh khoản chưa tính được."})
     return out
+
+
+# ---------------------------------------------------------------- bảng giá đô
+BANKS = (("vcb", "Vietcombank"), ("bidv", "BIDV"), ("tcb", "Techcombank"))
+PLATFORM_NAMES = {"binance": "Binance", "okx": "OKX", "bybit": "Bybit", "bitget": "Bitget"}
+
+
+def fx_day_change(snap: dict, hist: dict[int, dict]) -> None:
+    """Thêm thay đổi so với hôm trước (đồng) cho các giá đô và USDT/VND, dựa trên bản đã lưu."""
+    old = (hist.get(1) or {}).get("metrics", {})
+    for k, m in snap.get("metrics", {}).items():
+        if not k.startswith(("usdvnd_", "usdtvnd_")) or m.get("value") is None:
+            continue
+        prev = (old.get(k) or {}).get("value")
+        if prev is not None:
+            m["change_24h"] = m["value"] - prev
+            m["change_unit"] = "đ"
+
+
+def fx_board(snap: dict) -> dict:
+    """Gom giá ngân hàng, chợ đen và USDT/VND về một bảng để giao diện so sánh."""
+    tables = snap.get("tables", {})
+    banks = []
+    for key, name in BANKS:
+        cash, transfer, sell = (_mv(snap, f"usdvnd_{key}_{f}") for f in ("buy_cash", "buy_transfer", "sell"))
+        if sell is None and transfer is None:
+            continue
+        banks.append({"id": key, "name": name, "buy_cash": cash, "buy_transfer": transfer, "sell": sell,
+                      "timestamp": snap["metrics"][f"usdvnd_{key}_sell"].get("timestamp")})
+
+    platforms = []
+    for pid, p in ((tables.get("p2p") or {}).get("platforms") or {}).items():
+        if "by_size" in p:
+            platforms.append({"id": pid, "name": PLATFORM_NAMES.get(pid, pid), "by_size": p["by_size"],
+                              "depth_ask_usdt": p.get("depth_ask_usdt"), "depth_bid_usdt": p.get("depth_bid_usdt"),
+                              "ads_ask": p.get("ads_ask"), "ads_bid": p.get("ads_bid"), "timestamp": p.get("timestamp")})
+
+    bank_sell = _mv(snap, "usdvnd_vcb_sell")
+    free_sell, usdt_mid = _mv(snap, "usdvnd_free_sell"), _mv(snap, "usdtvnd_p2p_mid")
+
+    def gap(a, b):
+        return {"vnd": a - b, "pct": (a / b - 1) * 100} if a and b else None
+
+    return {"banks": banks, "free": tables.get("free_market") or [], "platforms": platforms,
+            "trade_sizes_vnd": ((tables.get("p2p") or {}).get("config") or {}).get("trade_sizes_vnd") or [],
+            "reference_size_vnd": ((tables.get("p2p") or {}).get("config") or {}).get("reference_size_vnd"),
+            "gaps": {"free_vs_bank": gap(free_sell, bank_sell), "usdt_vs_bank": gap(usdt_mid, bank_sell),
+                     "usdt_vs_free": gap(usdt_mid, free_sell)}}

@@ -18,7 +18,7 @@ def _wave(i, base, amp=0.03):
 
 def coingecko_markets():
     rows = []
-    for cid, p in (("bitcoin", 100000), ("ethereum", 3500), ("solana", 180), ("tether", 1.0002), ("usd-coin", 0.9999)):
+    for cid, p in (("bitcoin", 100000), ("ethereum", 3500), ("solana", 180), ("ripple", 2.0), ("binancecoin", 600), ("tether", 1.0002), ("usd-coin", 0.9999)):
         rows.append({"id": cid, "current_price": p, "market_cap": p * 1e7, "total_volume": p * 1e5,
                      "price_change_percentage_24h_in_currency": 1.2,
                      "price_change_percentage_7d_in_currency": 4.5,
@@ -35,7 +35,7 @@ def coingecko_global():
 
 def klines(symbol, interval, limit):
     step = DAY if interval == "1d" else 3600
-    base = {"BTCUSDT": 100000, "ETHUSDT": 3500, "SOLUSDT": 180}[symbol]
+    base = {"BTCUSDT": 100000, "ETHUSDT": 3500, "SOLUSDT": 180, "XRPUSDT": 2.0, "BNBUSDT": 600}[symbol]
     start = NOW_MS // 1000 - step * limit
     out = []
     for i in range(limit):
@@ -114,7 +114,74 @@ def vcb_json():
             "Data": [{"currencyCode": "USD", "cash": "26,100.00", "transfer": "26,130.00", "sell": "26,380.00"}]}
 
 
-def router(method, url, params=None, body=None, as_text=False):
+RSS = """<?xml version="1.0"?><rss><channel>
+<item><title>Fed rate cut sends stocks surging</title><link>https://x.test/1</link><pubDate>{now}</pubDate></item>
+<item><title>A recipe for lunch</title><link>https://x.test/2</link><pubDate>{now}</pubDate></item>
+<item><title>Old CPI inflation story</title><link>https://x.test/3</link><pubDate>Mon, 01 Jan 2024 00:00:00 GMT</pubDate></item>
+</channel></rss>"""
+
+BIDV = {"data": [{"currency": "USD", "muaTm": "26,100", "muaCk": "26,110", "ban": "26,400"}]}
+TCB = {"exchangeRate": {"data": [
+    {"sourceCurrency": "USD", "label": "USD (1,2)", "bidRateTM": "25000", "askRateTM": "26500", "inputDate": "2026-11-05T07:00:00.000Z"},
+    {"sourceCurrency": "USD", "label": "USD (50,100)", "bidRateTM": "26090", "bidRateCK": "26120", "askRate": "26390",
+     "inputDate": "2026-11-05T07:00:00.000Z"}]}}
+TYGIAUSD = '<meta name="description" content="Tỷ giá usd chợ đen hôm nay 05-11-2026 7giờ: Mua-26,700; Bán-26,760, giá đô" />'
+TYGIAVN = "<div>USD tự do</div><div>26,700\n / 26,760</div>"
+
+
+def binance_ads(body):
+    price = 26800 if body["tradeType"] == "BUY" else 26700
+    return {"data": [{"adv": {"price": str(price), "minSingleTransAmount": "1000000", "dynamicMaxSingleTransAmount": "1000000000",
+                              "surplusAmount": "100000", "tradeMethods": [{"identifier": "BANK", "tradeMethodName": "Bank Transfer"}]},
+                      "advertiser": {"monthFinishRate": 0.99, "monthOrderCount": 500, "nickName": "a"}}]}
+
+
+def okx_ads(side):
+    price = "26820" if side == "sell" else "26720"
+    return {"data": {side: [{"price": price, "quoteMinAmountPerOrder": "1000000", "quoteMaxAmountPerOrder": "1000000000",
+                             "availableAmount": "100000", "paymentMethods": ["bank"], "completedRate": "0.99",
+                             "completedOrderQuantity": 500, "nickName": "b"}]}}
+
+
+def bybit_ads(body):
+    price = "26810" if body["side"] == "1" else "26710"
+    return {"result": {"items": [{"price": price, "minAmount": "1000000", "maxAmount": "1000000000", "lastQuantity": "100000",
+                                  "payments": ["14"], "recentExecuteRate": 99, "recentOrderNum": 500, "nickName": "c"}]}}
+
+
+def bitget_ads(body):
+    price = "26830" if body["side"] == 1 else "26690"
+    return {"data": {"dataList": [{"price": price, "minAmount": "1000000", "maxAmount": "1000000000", "lastAmount": "100000",
+                                   "paymethodInfo": [{"paymethodName": "Bank transfer"}], "turnoverRate": "0.99",
+                                   "turnoverNum": "500", "nickName": "d"}]}}
+
+
+def post_router(url, body, **kw):
+    if "binance" in url:
+        return binance_ads(body)
+    if "bybit" in url:
+        return bybit_ads(body)
+    if "bitget" in url:
+        return bitget_ads(body)
+    raise AssertionError(f"URL không có trong fake router: {url}")
+
+
+def router(method, url, params=None, body=None, as_text=False, as_bytes=False):
+    if as_bytes:
+        from email.utils import format_datetime
+        return RSS.format(now=format_datetime(dt.datetime.now(dt.timezone.utc))).encode()
+    if "bidv" in url:
+        return BIDV
+    if "techcombank" in url:
+        return TCB
+    if "tygiausd" in url:
+        return TYGIAUSD
+    if "tygia.vn" in url:
+        return TYGIAVN
+    if "c2c/tradingOrders" in url:
+        return okx_ads(params["side"])
+    if "simple/price" in url:
+        return {"tether": {"vnd": 26300, "last_updated_at": int(NOW.timestamp())}}
     if "coingecko" in url:
         return coingecko_markets() if url.endswith("/coins/markets") else coingecko_global()
     if "binance.vision" in url:

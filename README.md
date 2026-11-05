@@ -13,10 +13,10 @@ Dashboard nội bộ theo dõi crypto, stablecoin, USDT/VND, FX và vĩ mô. D�
 | Xem dữ liệu ngày cũ | Chọn ngày ở góc phải trên cùng. Link có dạng `.../#/?date=2026-11-05`, gửi được cho người khác |
 | Cập nhật tỷ giá trung tâm NHNN, lãi suất liên ngân hàng, tồn kho USDT, ghi chú chính sách | Mở `config/manual_inputs.json` trên GitHub → bút chì → sửa `value`, `date` (YYYY-MM-DD), `updated_by` → *Commit*. Website tự build lại sau ~2 phút; lần thu thập sáng hôm sau đưa số vào tính toán |
 | Đổi ngưỡng rủi ro / quy tắc regime | Sửa `config/settings.json` (`risk_thresholds`, `regime`) |
-| Bật nguồn P2P | `config/settings.json` → `p2p.enabled: true` — **chỉ sau khi pháp chế xác nhận** (xem mục 4) |
+| Tắt nguồn P2P | `config/settings.json` → `p2p.enabled: false` (xem mục 4) |
 | Chạy lại ngay | *Actions* → *Daily data update* → *Run workflow* (tick *force* nếu hôm nay đã chạy) |
 | Xuất số liệu | Nút ⬇ (CSV toàn bộ chỉ số) hoặc nút 📄 (In → Lưu thành PDF) |
-| Kiểm tra nguồn lỗi | Trang **Data Sources & Status** trên website, hoặc log trong tab *Actions* |
+| Kiểm tra nguồn lỗi | Log trong tab *Actions*, hoặc mục `sources` trong `public/data/latest.json` |
 | Huỷ một lần cập nhật sai (rollback) | Repo → *Commits* → mở commit `data: cập nhật …` sai → *Revert* → website tự build lại. Hoặc sửa file trong `public/data/` |
 
 Nếu một nguồn lỗi, các nguồn khác vẫn chạy; chỉ số liên quan hiển thị “Chưa có dữ liệu” kèm lý do. Nếu **tất cả** nguồn lỗi, hệ thống không ghi đè dữ liệu cũ.
@@ -31,16 +31,18 @@ Nếu một nguồn lỗi, các nguồn khác vẫn chạy; chỉ số liên qua
 | Fear & Greed | alternative.me | Không | |
 | Nguồn cung stablecoin | DefiLlama | Không | |
 | Lãi suất Fed, lợi suất, CPI, PCE, NFP, thất nghiệp | FRED | Không (key tuỳ chọn) | CPI/PCE hiển thị YoY và kỳ tham chiếu |
-| USD/VND niêm yết | Vietcombank (website) | Không | Mua chuyển khoản, mua tiền mặt, bán |
+| USD/VND niêm yết | Vietcombank, BIDV, Techcombank | Không | Mua chuyển khoản, mua tiền mặt, bán |
+| USD chợ đen | tygiausd.org, tygia.vn | Không | Không có nguồn chính thức; đọc từ trang web nên có thể hỏng nếu trang đổi giao diện |
+| Tin lớn | RSS: CNBC, BBC, Fed, CoinDesk, Cointelegraph, Decrypt, VnExpress, CafeF | Không | Chấm điểm bằng từ khoá trong `scripts/collectors/news.py`, không dùng AI; tiêu đề giữ ngôn ngữ gốc |
 | Tỷ giá trung tâm NHNN, LNH, tồn kho | Nhập tay | — | NHNN không có API công khai ổn định |
 | Lịch FOMC | `config/fomc.json` | — | Theo federalreserve.gov (kiểm tra 05/11/2026) |
-| USDT/VND P2P | Binance P2P, OKX P2P | Không | **Mặc định tắt** |
+| USDT/VND P2P | Binance, OKX, Bybit, Bitget | Không | **Đang bật.** Đọc endpoint nội bộ của website các sàn |
 
 ## 4. Giới hạn hiện tại (cần biết)
 
-- **Chưa kiểm thử với API thật.** Môi trường xây dựng bị chặn mạng. Toàn bộ parser được kiểm thử bằng dữ liệu giả lập theo cấu trúc tài liệu công khai. Lần chạy đầu trên GitHub mới xác nhận thật; nguồn nào sai cấu trúc sẽ hiện “Lỗi” ở trang Status, các nguồn khác không bị ảnh hưởng.
-- **USDT/VND P2P tắt mặc định.** Binance và OKX không có API P2P công khai; collector gọi endpoint nội bộ mà website của họ dùng. Bật chỉ khi pháp chế xác nhận phù hợp điều khoản, hoặc thay bằng nguồn OTC/nội bộ được cấp quyền. Khi tắt, P2P premium, spread, liquidity pressure, cross-exchange spread hiển thị “Chưa có dữ liệu”. Khi bật, máy chủ GitHub ở Mỹ có thể bị nền tảng chặn.
-- **DXY không có**: chỉ số độc quyền của ICE. Dùng *Nominal Broad USD Index* (FRED DTWEXBGS) làm chỉ báo thay thế, ghi rõ trên giao diện. Chuỗi này của FRED có độ trễ vài ngày.
+- **Chưa kiểm thử với API thật.** Môi trường xây dựng bị chặn mạng. Toàn bộ parser được kiểm thử bằng dữ liệu giả lập theo cấu trúc tài liệu công khai. Lần chạy đầu trên GitHub mới xác nhận thật; nguồn nào lỗi thì chỉ số đó bị ẩn trên website, các nguồn khác không bị ảnh hưởng.
+- **USDT/VND P2P đang bật.** Các sàn không có API P2P công khai; collector gọi endpoint nội bộ mà website của họ dùng, nên có thể đổi hoặc bị chặn và có thể không phù hợp điều khoản dịch vụ của sàn. Tắt bằng `p2p.enabled: false`.
+- **DXY không có**: chỉ số độc quyền của ICE. Dùng *Nominal Broad USD Index* (FRED DTWEXBGS) làm chỉ báo thay thế. Chuỗi này của FRED có độ trễ vài ngày.
 - **Liquidation toàn thị trường, stablecoin exchange inflow/outflow, ngày công bố & kỳ vọng thị trường cho CPI/NFP**: cần nguồn trả phí (CoinGlass, CryptoQuant…), để Phase 2.
 - **Đơn vị Volume Delta/CVD** theo đơn vị OKX trả về (chưa xác minh là coin hay USD); đọc theo dấu và độ lớn tương đối.
 - **BTC Dominance và tương quan USD/VND ↔ USDT/VND** dùng lịch sử hệ thống tự lưu, cần tích luỹ vài tuần.

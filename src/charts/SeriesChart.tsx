@@ -8,12 +8,13 @@ export interface SeriesLine {
   color?: string
 }
 
-const COLORS = ['rgb(var(--accent))', 'rgb(var(--warn))', '#a78bfa', '#f472b6']
+const COLORS = ['rgb(var(--accent))', 'rgb(var(--warn))', 'rgb(var(--up))', 'rgb(var(--muted))']
 
 function merge(lines: SeriesLine[]) {
   const rows = new Map<number, Record<string, number>>()
   lines.forEach((l) => l.points.forEach(([t, v]) => {
     const r = rows.get(t) ?? { t }
+    if (l.key === 't') throw new Error("SeriesLine.key không được là 't'")
     r[l.key] = v
     rows.set(t, r)
   }))
@@ -29,11 +30,11 @@ function TipBox({ active, payload, label, unit, labels }: {
 }) {
   if (!active || !payload?.length || label === undefined) return null
   return (
-    <div className="panel px-2.5 py-1.5 text-xs shadow-lg">
+    <div className="bg-panel border border-line px-2.5 py-1.5 text-xs">
       <div className="text-muted num mb-1">{fmtFull(label)}</div>
       {payload.map((p) => (
         <div key={p.dataKey} className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+          <span className="h-2 w-2" style={{ background: p.color }} />
           <span className="text-muted">{labels[p.dataKey]}</span>
           <span className="num ml-auto">{fmtNum(p.value)} {unit}</span>
         </div>

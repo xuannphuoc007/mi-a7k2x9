@@ -2,57 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Giấy báo và mực in: không dùng viền bo tròn, không dùng màu neon. */
 :root {
-  --bg: 246 247 249;
-  --panel: 255 255 255;
-  --panel2: 240 242 246;
-  --line: 222 226 233;
-  --fg: 17 24 39;
-  --muted: 100 110 128;
-  --accent: 8 145 178;
-  --up: 5 150 105;
-  --down: 220 38 38;
-  --warn: 202 138 4;
+  --bg: 247 244 236;
+  --panel: 253 251 245;
+  --panel2: 237 233 222;
+  --line: 214 208 193;
+  --fg: 27 25 21;
+  --muted: 108 102 90;
+  --accent: 31 66 110;
+  --up: 20 112 74;
+  --down: 176 42 36;
+  --warn: 160 102 10;
   color-scheme: light;
 }
 
 :root.dark {
-  --bg: 9 13 20;
-  --panel: 15 21 32;
-  --panel2: 21 29 43;
-  --line: 34 44 62;
-  --fg: 226 232 240;
-  --muted: 128 141 163;
-  --accent: 34 211 238;
-  --up: 34 197 94;
-  --down: 244 63 94;
-  --warn: 234 179 8;
+  --bg: 21 20 17;
+  --panel: 28 27 23;
+  --panel2: 39 37 31;
+  --line: 60 56 47;
+  --fg: 236 232 220;
+  --muted: 160 152 136;
+  --accent: 146 181 222;
+  --up: 96 188 140;
+  --down: 234 112 100;
+  --warn: 222 172 84;
   color-scheme: dark;
 }
 
 html, body, #root { height: 100%; }
 body {
   @apply bg-bg text-fg font-sans antialiased;
-  font-feature-settings: 'cv11', 'ss01';
+  font-size: 15px;
+  line-height: 1.55;
 }
 
-.num { @apply font-mono tabular-nums; }
-.panel { @apply bg-panel border border-line rounded-lg; }
-.label { @apply text-[11px] uppercase tracking-[0.08em] text-muted font-medium; }
+a { text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }
+
+.num { font-variant-numeric: tabular-nums lining-nums; }
+.serif { @apply font-serif; }
+
+/* Khối nội dung: một đường kẻ đậm phía trên, như đầu mục trên mặt báo */
+.panel { border-top: 2px solid rgb(var(--fg)); }
+.label { @apply text-[13px] text-muted; }
+
+.table-news { @apply w-full text-[14px]; border-collapse: collapse; }
+.table-news th { @apply font-normal text-[13px] text-muted py-2 pr-4 text-right whitespace-nowrap; border-bottom: 1px solid rgb(var(--line)); }
+.table-news th:first-child, .table-news td:first-child { @apply text-left; }
+.table-news td { @apply py-2.5 pr-4 text-right num whitespace-nowrap; border-bottom: 1px solid rgb(var(--line)); }
+.table-news th:last-child, .table-news td:last-child { padding-right: 0; }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: rgb(var(--line)); border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: rgb(var(--line)); }
 
-@keyframes shimmer { 0% { opacity: .45 } 50% { opacity: .8 } 100% { opacity: .45 } }
-.skeleton { animation: shimmer 1.4s ease-in-out infinite; @apply bg-panel2 rounded; }
+@keyframes shimmer { 0% { opacity: .5 } 50% { opacity: .85 } 100% { opacity: .5 } }
+.skeleton { animation: shimmer 1.4s ease-in-out infinite; @apply bg-panel2; }
 
-@keyframes fadein { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: none } }
-.fade-in { animation: fadein .25s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
 
 @media print {
   :root, :root.dark {
     --bg: 255 255 255; --panel: 255 255 255; --panel2: 245 245 245; --line: 210 210 210;
-    --fg: 0 0 0; --muted: 80 80 80; --accent: 0 110 140;
+    --fg: 0 0 0; --muted: 80 80 80; --accent: 0 60 110;
   }
   .no-print { display: none !important; }
   .print-full { margin: 0 !important; padding: 0 !important; }

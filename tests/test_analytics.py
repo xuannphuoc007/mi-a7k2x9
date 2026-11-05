@@ -83,3 +83,28 @@ def test_regime_needs_enough_inputs():
     assert an.regime({"metrics": {}}, settings)["label"] == "Không đủ dữ liệu"
     peg = {"metrics": {"usdt_peg_dev": {"value": -0.8}}}
     assert an.regime(peg, settings)["label"] == "Liquidity Stress"
+
+
+def test_news_rank_drops_old_noise_and_merges_same_story():
+    from scripts.collectors import news
+    now = dt.datetime(2026, 11, 5, 8, tzinfo=dt.timezone(dt.timedelta(hours=7)))
+
+    def item(title, source="CNBC", hours=1):
+        return {"title": title, "link": f"https://x.test/{title}{source}", "published": now - dt.timedelta(hours=hours),
+                "source": source, "weight": 1.0}
+
+    ranked = news.rank([
+        item("Fed rate cut sends stocks higher"),
+        item("Fed rate cut sends stocks higher today", "BBC"),
+        item("Bitcoin price prediction for next week"),
+        item("Lunch ideas for busy people"),
+        item("CPI inflation surprise", hours=48),
+    ], now)
+    assert [n["title"] for n in ranked] == ["Fed rate cut sends stocks higher"]
+    assert ranked[0]["sources"] == ["CNBC", "BBC"]
+
+
+def test_free_market_parsers():
+    from scripts.collectors import vn_fx
+    assert vn_fx.parse_tygiausd('content="chợ đen hôm nay 05-11-2026 22giờ: Mua-26,070; Bán-26,130, x"') == (26070, 26130)
+    assert vn_fx.parse_tygia_vn("<b>USD tự do</b><i>26,070\n   / 26,130</i>") == (26070, 26130)

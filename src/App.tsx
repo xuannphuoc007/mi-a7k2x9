@@ -10,16 +10,14 @@ const Crypto = lazy(() => import('./pages/Crypto'))
 const Stablecoin = lazy(() => import('./pages/Stablecoin'))
 const Macro = lazy(() => import('./pages/Macro'))
 const Structure = lazy(() => import('./pages/Structure'))
-const Status = lazy(() => import('./pages/Status'))
+const FxRates = lazy(() => import('./pages/FxRates'))
 
 function Loading() {
   return (
-    <div className="space-y-3">
-      <Skeleton className="h-6 w-60" />
-      <Skeleton className="h-20 w-full" />
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
-      </div>
+    <div className="space-y-4">
+      <Skeleton className="h-10 w-3/4" />
+      <Skeleton className="h-24 w-full" />
+      <Skeleton className="h-64 w-full" />
     </div>
   )
 }
@@ -29,7 +27,7 @@ function Pages() {
   if (loading && !snap) return <Loading />
   if (empty) {
     return (
-      <div className="panel">
+      <div>
         <EmptyState title="Chưa có dữ liệu">
           Hệ thống chưa chạy lần thu thập nào. Vào GitHub → Actions → “Daily data update” → Run workflow, chờ khoảng 3 phút rồi tải lại trang.
         </EmptyState>
@@ -37,18 +35,18 @@ function Pages() {
     )
   }
   if (error && !snap) {
-    return <div className="panel"><EmptyState icon="warn" title="Không tải được dữ liệu">{error}</EmptyState></div>
+    return <div><EmptyState icon="warn" title="Không tải được dữ liệu">{error}</EmptyState></div>
   }
   return (
     <Suspense fallback={<Loading />}>
-      {error && <div className="mb-3 text-xs text-down">{error}</div>}
+      {error && <div className="mb-4 text-[14px] text-down">{error}</div>}
       <Routes>
         <Route path="/" element={<Overview />} />
         <Route path="/crypto" element={<Crypto />} />
         <Route path="/stablecoin" element={<Stablecoin />} />
         <Route path="/macro" element={<Macro />} />
-        <Route path="/structure" element={<Structure />} />
-        <Route path="/status" element={<Status />} />
+        <Route path="/ty-gia" element={<FxRates />} />
+        <Route path="/lien-thi-truong" element={<Structure />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

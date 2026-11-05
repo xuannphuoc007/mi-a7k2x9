@@ -2,15 +2,30 @@ import clsx from 'clsx'
 import { useState } from 'react'
 import { LazyCorr } from '../charts/lazy'
 import RegimeBanner from '../components/RegimeBanner'
-import { Card, EmptyState, Note, PageHeader, Segmented } from '../components/ui'
+import { Card, Note, PageHeader, Segmented } from '../components/ui'
 import { useData } from '../hooks/useData'
 import { fmtNum } from '../utils/format'
 
 const PAIRS: [string, string, string][] = [
-  ['USD_BROAD', 'BTC', 'USD (thay DXY) ↔ BTC'], ['US10Y', 'BTC', 'US 10Y ↔ BTC'], ['BTC', 'ETH', 'BTC ↔ ETH'],
-  ['BTC', 'SOL', 'BTC ↔ SOL'], ['ETH', 'SOL', 'ETH ↔ SOL'], ['USDVND', 'USDTVND', 'USD/VND ↔ USDT/VND'],
-  ['BTC_FUNDING', 'BTC', 'BTC Funding ↔ BTC'], ['BTC_OI', 'BTC', 'BTC OI ↔ BTC'], ['STABLE', 'BTC', 'Stablecoin supply ↔ BTC'],
+  ['USD_BROAD', 'BTC', 'Đồng USD và BTC'], ['US10Y', 'BTC', 'Lợi suất Mỹ 10 năm và BTC'], ['BTC', 'ETH', 'BTC và ETH'],
+  ['BTC', 'SOL', 'BTC và SOL'], ['ETH', 'SOL', 'ETH và SOL'], ['USDVND', 'USDTVND', 'USD/VND và USDT/VND'],
+  ['BTC_FUNDING', 'BTC', 'Funding BTC và giá BTC'], ['BTC_OI', 'BTC', 'Hợp đồng mở BTC và giá BTC'], ['STABLE', 'BTC', 'Lượng stablecoin và BTC'],
 ]
+
+const RULE: Record<string, string> = {
+  '|USDT peg deviation| (%)': 'USDT lệch khỏi 1 USD (%)',
+  '|P2P premium| (%)': 'USDT cao hơn ngân hàng (%)',
+  'Stablecoin supply 7D (%)': 'Lượng stablecoin, 7 ngày (%)',
+  'BTC realized vol 7D annualized (%)': 'Độ biến động BTC, 7 ngày (%)',
+  '|BTC 24h| (%)': 'BTC trong 24 giờ (%)',
+  'BTC so với SMA20 (%)': 'BTC so với trung bình 20 ngày (%)',
+  'BTC 7D (%)': 'BTC trong 7 ngày (%)',
+  'Fear & Greed': 'Chỉ số sợ hãi và tham lam',
+  'US10Y 7D (bp)': 'Lợi suất Mỹ 10 năm, 7 ngày (bp)',
+  'BTC funding (%/8h)': 'Funding BTC (%/8 giờ)',
+}
+
+const GROUP: Record<string, string> = { 'Liquidity Stress': 'Căng thanh khoản', 'High Volatility': 'Biến động mạnh', Score: 'Điểm xu hướng' }
 
 export default function Structure() {
   const { snap } = useData()
@@ -26,67 +41,73 @@ export default function Structure() {
     if (i < 0 || j < 0) return { r: null, n: 0 }
     return { r: win.matrix[i][j], n: win.n[i][j] }
   }
+  const pairs = PAIRS.map(([a, b, l]) => ({ l, ...get(a, b) })).filter((p) => p.r !== null)
+  const rules = (reg?.rules ?? []).filter((r) => r.triggered !== null)
 
   return (
-    <div className="space-y-4">
-      <PageHeader title="Market Structure & Intermarket" desc="Tương quan Pearson trên chuỗi thay đổi theo ngày, đồng bộ theo ngày. Tương quan mô tả mức độ cùng chiều, không chứng minh quan hệ nhân quả." />
-      <RegimeBanner regime={reg} />
+    <div className="space-y-9">
+      <PageHeader title="Liên thị trường" desc="Các thị trường đang đi cùng chiều hay ngược chiều nhau. Tương quan chỉ mô tả mức độ cùng chiều, không chứng minh nguyên nhân."
+        right={<Segmented value={w} onChange={setW} options={[{ value: '7', label: '7 ngày' }, { value: '30', label: '30 ngày' }, { value: '90', label: '90 ngày' }]} />} />
 
-      <Card title="Ma trận tương quan" subtitle={corr ? `Kết thúc ngày ${corr.end_day}. Di chuột vào ô để xem số quan sát.` : undefined}
-        right={<Segmented value={w} onChange={setW} options={[{ value: '7', label: '7 ngày' }, { value: '30', label: '30 ngày' }, { value: '90', label: '90 ngày' }]} />}>
-        {corr && corr.assets.length > 1 ? (
-          <div className="space-y-3">
-            <LazyCorr corr={corr} window={w} />
-            <Note>{corr.method} {corr.notes}</Note>
-          </div>
-        ) : <EmptyState title="Chưa đủ dữ liệu để tính tương quan" />}
-      </Card>
+      <RegimeBanner regime={reg} why={snap.tables.digest?.regime_why} />
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <Card title="Các cặp quan hệ theo dõi" subtitle={`Cửa sổ ${w} ngày`}>
-          <table className="w-full text-xs">
-            <thead className="text-muted"><tr className="border-b border-line text-left"><th className="py-2 font-medium">Cặp</th><th className="font-medium text-right">r</th><th className="font-medium text-right">n</th><th className="font-medium pl-3">Mức</th></tr></thead>
-            <tbody>
-              {PAIRS.map(([a, b, l]) => {
-                const { r, n } = get(a, b)
-                const lvl = r === null ? 'Không đủ dữ liệu' : Math.abs(r) >= 0.7 ? 'Mạnh' : Math.abs(r) >= 0.4 ? 'Trung bình' : 'Yếu'
-                return (
-                  <tr key={l} className="border-b border-line/60">
-                    <td className="py-2">{l}</td>
-                    <td className={clsx('num text-right', r !== null && (r > 0 ? 'text-accent' : 'text-down'))}>{r === null ? '—' : r.toFixed(2)}</td>
-                    <td className="num text-right text-muted">{n}</td>
-                    <td className="pl-3 text-muted">{lvl}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          <p className="text-[11px] text-muted mt-2">Mạnh |r| ≥ 0,7 · Trung bình ≥ 0,4. USD/VND ↔ USDT/VND dùng lịch sử hệ thống tự lưu, cần tích luỹ đủ ngày và bật nguồn P2P.</p>
-        </Card>
-
-        <Card title="Quy tắc Market Regime" subtitle={reg?.method}>
-          {reg ? (
-            <table className="w-full text-xs">
-              <thead className="text-muted"><tr className="border-b border-line text-left"><th className="py-2 font-medium">Nhóm</th><th className="font-medium">Chỉ báo</th><th className="font-medium text-right">Giá trị</th><th className="font-medium pl-3">Ngưỡng</th><th className="font-medium text-right">Kết quả</th></tr></thead>
+      {pairs.length > 0 && (
+        <Card title="Các cặp đáng theo dõi" subtitle="Càng gần +1: càng đi cùng chiều. Càng gần −1: càng đi ngược chiều.">
+          <div className="overflow-x-auto">
+            <table className="table-news">
+              <thead><tr><th>Cặp</th><th className="min-w-[180px]">Tương quan</th><th>Mức</th></tr></thead>
               <tbody>
-                {reg.rules.map((r) => (
-                  <tr key={r.group + r.name} className="border-b border-line/60">
-                    <td className="py-2 text-muted whitespace-nowrap pr-2">{r.group}</td>
-                    <td className="pr-2">{r.name}</td>
-                    <td className="num text-right">{fmtNum(r.value)}</td>
-                    <td className="pl-3 text-muted num text-[11px]">{r.threshold}</td>
-                    <td className="text-right whitespace-nowrap">
-                      {r.triggered === null ? <span className="text-muted">thiếu dữ liệu</span>
-                        : r.group === 'Score' ? <span className={clsx('num', r.effect > 0 ? 'text-up' : r.effect < 0 ? 'text-down' : 'text-muted')}>{r.effect > 0 ? '+1' : r.effect < 0 ? '−1' : '0'}</span>
-                          : r.triggered ? <span className="text-down font-medium">Kích hoạt</span> : <span className="text-muted">Không</span>}
+                {pairs.map(({ l, r }) => (
+                  <tr key={l}>
+                    <td>{l}</td>
+                    <td>
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="relative w-24 h-2 bg-panel2" aria-hidden>
+                          <div className={clsx('absolute top-0 bottom-0', r! > 0 ? 'bg-accent left-1/2' : 'bg-down right-1/2')} style={{ width: `${Math.abs(r!) * 50}%` }} />
+                        </div>
+                        <span className="w-10 text-right">{r!.toFixed(2).replace('.', ',')}</span>
+                      </div>
+                    </td>
+                    <td className="text-muted">{Math.abs(r!) >= 0.7 ? 'Mạnh' : Math.abs(r!) >= 0.4 ? 'Vừa' : 'Yếu'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {corr && corr.assets.length > 1 && (
+        <Card title="Bảng tương quan đầy đủ">
+          <LazyCorr corr={corr} window={w} />
+        </Card>
+      )}
+
+      {rules.length > 0 && (
+        <Card title="Vì sao có trạng thái này" subtitle="Quy tắc cố định, không dùng AI. Ưu tiên: căng thanh khoản, rồi biến động mạnh, rồi đến điểm xu hướng.">
+          <div className="overflow-x-auto">
+            <table className="table-news">
+              <thead><tr><th>Nhóm</th><th className="!text-left">Chỉ báo</th><th>Giá trị</th><th>Ngưỡng</th><th>Kết quả</th></tr></thead>
+              <tbody>
+                {rules.map((r) => (
+                  <tr key={r.group + r.name}>
+                    <td className="text-muted">{GROUP[r.group] ?? r.group}</td>
+                    <td className="!text-left">{RULE[r.name] ?? r.name}</td>
+                    <td>{fmtNum(r.value)}</td>
+                    <td className="text-muted text-[13px]">{r.threshold}</td>
+                    <td>
+                      {r.group === 'Score'
+                        ? <span className={clsx(r.effect > 0 ? 'text-up' : r.effect < 0 ? 'text-down' : 'text-muted')}>{r.effect > 0 ? '+1' : r.effect < 0 ? '−1' : '0'}</span>
+                        : r.triggered ? <span className="text-down font-semibold">Kích hoạt</span> : <span className="text-muted">Không</span>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          ) : <EmptyState title="Chưa có dữ liệu" />}
+          </div>
         </Card>
-      </div>
+      )}
+      {corr?.notes && <Note>{corr.notes}</Note>}
     </div>
   )
 }
