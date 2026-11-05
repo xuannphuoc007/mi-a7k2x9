@@ -6,21 +6,6 @@ Dashboard nội bộ theo dõi crypto, stablecoin, USDT/VND, FX và vĩ mô. D�
 
 ---
 
-## 1. Đưa website lên mạng — checklist thao tác tay (khoảng 10 phút)
-
-1. **Tạo repo** trên GitHub (ví dụ `mi-a7k2x9`, đặt tên khó đoán). Xem mục 5 về quyền riêng tư trước khi chọn Public/Private.
-2. **Đưa code lên repo** (Claude có thể push giúp nếu bạn cấp quyền repo).
-3. **Bật GitHub Pages**: repo → *Settings* → *Pages* → *Build and deployment* → *Source* chọn **GitHub Actions**.
-4. **Cho phép Actions ghi dữ liệu**: *Settings* → *Actions* → *General* → *Workflow permissions* chọn **Read and write permissions** → *Save*.
-5. **(Tuỳ chọn) Thêm API key miễn phí**: *Settings* → *Secrets and variables* → *Actions* → *New repository secret*:
-   - `COINGECKO_DEMO_KEY` — đăng ký tại coingecko.com/en/api (giảm rủi ro bị chặn do gọi quá nhiều).
-   - `FRED_API_KEY` — đăng ký tại fred.stlouisfed.org (không có vẫn chạy qua CSV công khai).
-6. **Chạy lần đầu**: tab *Actions* → **Daily data update** → *Run workflow*. Chờ 3–5 phút.
-7. **Mở website**: *Settings* → *Pages* hiển thị đường link `https://<tài-khoản>.github.io/<tên-repo>/`. Gửi link cho người cần xem.
-8. **Bảo vệ nhánh** (khuyến nghị): *Settings* → *Branches* → *Add rule* cho `main`: bật *Require a pull request before merging* cho người khác; thêm ngoại lệ cho GitHub Actions nếu bật “Do not allow bypassing”.
-
-Sau bước 6, hệ thống tự chạy mỗi ngày. Không cần làm gì thêm.
-
 ## 2. Vận hành hằng ngày
 
 | Việc cần làm | Cách làm |
