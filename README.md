@@ -11,7 +11,7 @@ Dashboard nội bộ theo dõi crypto, stablecoin, USDT/VND, FX và vĩ mô. D�
 | Việc cần làm | Cách làm |
 |---|---|
 | Xem dữ liệu ngày cũ | Chọn ngày ở góc phải trên cùng. Link có dạng `.../#/?date=2026-11-05`, gửi được cho người khác |
-| Cập nhật tỷ giá trung tâm NHNN, lãi suất liên ngân hàng, tồn kho USDT, ghi chú chính sách | Mở `config/manual_inputs.json` trên GitHub → bút chì → sửa `value`, `date` (YYYY-MM-DD), `updated_by` → *Commit*. Website tự build lại sau ~2 phút; lần thu thập sáng hôm sau đưa số vào tính toán |
+| Nhập tay: USD/VND liên ngân hàng, forward 1 tháng (giá yết), lãi suất liên ngân hàng VND/USD qua đêm và VND 1 tháng, tồn kho USDT, ghi chú chính sách (tỷ giá trung tâm NHNN đã tự động, chỉ nhập tay khi nguồn tự động lỗi) | Mở `config/manual_inputs.json` trên GitHub → bút chì → sửa `value`, `date` (YYYY-MM-DD), `updated_by` → *Commit*. Website tự build lại sau ~2 phút; lần thu thập sáng hôm sau đưa số vào tính toán |
 | Đổi ngưỡng rủi ro / quy tắc regime | Sửa `config/settings.json` (`risk_thresholds`, `regime`) |
 | Tắt nguồn P2P | `config/settings.json` → `p2p.enabled: false` (xem mục 4) |
 | Chạy lại ngay | *Actions* → *Daily data update* → *Run workflow* (tick *force* nếu hôm nay đã chạy) |
@@ -34,7 +34,12 @@ Nếu một nguồn lỗi, các nguồn khác vẫn chạy; chỉ số liên qua
 | USD/VND niêm yết | Vietcombank, BIDV, Techcombank | Không | Mua chuyển khoản, mua tiền mặt, bán |
 | USD chợ đen | tygiausd.org, tygia.vn | Không | Không có nguồn chính thức; đọc từ trang web nên có thể hỏng nếu trang đổi giao diện |
 | Tin lớn | RSS: CNBC, BBC, Fed, CoinDesk, Cointelegraph, Decrypt, VnExpress, CafeF | Không | Chấm điểm bằng từ khoá trong `scripts/collectors/news.py`, không dùng AI; tiêu đề giữ ngôn ngữ gốc |
-| Tỷ giá trung tâm NHNN, LNH, tồn kho | Nhập tay | — | NHNN không có API công khai ổn định |
+| Tỷ giá trung tâm NHNN | allratestoday.com (bên thứ ba, chưa kiểm chứng ngoài môi trường dev) + nhập tay dự phòng | — | NHNN không có API công khai; nếu endpoint lỗi, chỉ số hiện "Chưa có dữ liệu" |
+| USD/VND thị trường quốc tế | Yahoo Finance `USDVND=X` | — | Giá tham chiếu quốc tế, có lịch sử 1 năm |
+| SOFR, tín phiếu Mỹ 4 tuần | FRED | Tuỳ chọn | Lãi suất qua đêm USD và tham chiếu 1 tháng |
+| USD/VND liên ngân hàng, lãi suất LNH VND/USD, forward 1 tháng (giá yết), tồn kho | Nhập tay | — | Không có nguồn công khai miễn phí ổn định |
+| Forward 1 tháng (tính) | Tính theo ngang giá lãi suất | — | Giá lý thuyết, không phải giá ngân hàng yết; cần spot và lãi suất VND |
+| Volatility | Tính từ chuỗi có sẵn và lịch sử tích luỹ | — | Trang Volatility; biến thiếu dữ liệu tự bị bỏ qua và tự tính khi đủ |
 | Lịch FOMC | `config/fomc.json` | — | Theo federalreserve.gov (kiểm tra 05/11/2026) |
 | USDT/VND P2P | Binance, OKX, Bybit, Bitget | Không | **Đang bật.** Đọc endpoint nội bộ của website các sàn |
 

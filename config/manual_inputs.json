@@ -1,15 +1,39 @@
 {
-  "_comment": "Dữ liệu nhập tay cho các chỉ số không có API công khai ổn định. Sửa trên GitHub (biểu tượng bút chì) rồi Commit. Để value = null nếu chưa có. date dạng YYYY-MM-DD.",
+  "_comment": "Dữ liệu nhập tay cho các chỉ số không có API công khai ổn định. Sửa trên GitHub (biểu tượng bút chì) rồi Commit. Để value = null nếu chưa có. date dạng YYYY-MM-DD. Tỷ giá trung tâm NHNN được thu thập tự động; ô nhập tay chỉ dùng khi nguồn tự động lỗi (giá trị có ngày mới hơn hoặc bằng sẽ được ưu tiên).",
   "sbv_central_rate": {
     "value": null,
     "date": null,
     "source": "NHNN - Tỷ giá trung tâm (sbv.gov.vn)",
     "updated_by": ""
   },
+  "usdvnd_interbank": {
+    "value": null,
+    "date": null,
+    "source": "NHNN - Tỷ giá bình quân liên ngân hàng",
+    "updated_by": ""
+  },
+  "usdvnd_fwd_1m_quote": {
+    "value": null,
+    "date": null,
+    "source": "Ngân hàng / Reuters / Bloomberg - USD/VND kỳ hạn 1 tháng",
+    "updated_by": ""
+  },
   "interbank_overnight_rate": {
     "value": null,
     "date": null,
     "source": "NHNN - Lãi suất bình quân liên ngân hàng qua đêm",
+    "updated_by": ""
+  },
+  "interbank_vnd_1m_rate": {
+    "value": null,
+    "date": null,
+    "source": "NHNN - Lãi suất bình quân liên ngân hàng VND kỳ hạn 1 tháng",
+    "updated_by": ""
+  },
+  "interbank_usd_overnight_rate": {
+    "value": null,
+    "date": null,
+    "source": "NHNN - Lãi suất bình quân liên ngân hàng USD qua đêm",
     "updated_by": ""
   },
   "internal_usdt_inventory": {

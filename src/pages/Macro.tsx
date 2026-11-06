@@ -52,6 +52,8 @@ export default function Macro() {
           <MetricCard m={m.dgs10} label="Lợi suất Mỹ 10 năm" />
           <MetricCard m={m.t10y2y} label="Chênh 10 năm so với 2 năm" />
           <MetricCard m={m.dtwexbgs} label="Chỉ số USD rộng (FRED)" />
+          <MetricCard m={m.sofr} label="SOFR, lãi suất qua đêm USD" />
+          <MetricCard m={m.dtb4wk} label="Tín phiếu Mỹ 4 tuần" />
         </MetricGrid>
       </Card>
 
@@ -80,7 +82,8 @@ export default function Macro() {
         <Card title="Việt Nam">
           <MetricGrid>
             <MetricCard m={m.sbv_central_rate} label="Tỷ giá trung tâm NHNN" />
-            <MetricCard m={m.interbank_overnight_rate} label="Lãi suất liên ngân hàng qua đêm" />
+            <MetricCard m={m.interbank_overnight_rate} label="Lãi suất liên ngân hàng qua đêm VND" />
+            <MetricCard m={m.interbank_usd_overnight_rate} label="Lãi suất liên ngân hàng qua đêm USD" />
           </MetricGrid>
           {notes.length > 0 && (
             <ul className="mt-4 text-[15px]">

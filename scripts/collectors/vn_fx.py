@@ -186,7 +186,13 @@ def collect_manual(ctx) -> dict:
 
     man("sbv_central_rate", "Tỷ giá trung tâm NHNN", "VND", kind="reference",
         note="Tỷ giá tham chiếu do NHNN công bố, không phải giá giao dịch")
-    man("interbank_overnight_rate", "Lãi suất LNH qua đêm (bình quân)", "%/năm")
+    man("usdvnd_interbank", "USD/VND liên ngân hàng", "VND", kind="mid",
+        note="Tỷ giá bình quân liên ngân hàng, nhập tay từ NHNN hoặc nguồn có bản quyền")
+    man("usdvnd_fwd_1m_quote", "USD/VND kỳ hạn 1 tháng (giá yết)", "VND", kind="mid",
+        note="Giá forward 1 tháng do ngân hàng hoặc nhà cung cấp dữ liệu yết, nhập tay")
+    man("interbank_overnight_rate", "Lãi suất LNH qua đêm VND (bình quân)", "%/năm")
+    man("interbank_vnd_1m_rate", "Lãi suất LNH VND kỳ hạn 1 tháng", "%/năm")
+    man("interbank_usd_overnight_rate", "Lãi suất LNH qua đêm USD (trong nước)", "%/năm")
     man("internal_usdt_inventory", "Tồn kho USDT nội bộ", "USDT")
     inv = cfg.get("internal_usdt_inventory") or {}
     notes = [n for n in cfg.get("sbv_policy_notes", []) if n.get("text")]

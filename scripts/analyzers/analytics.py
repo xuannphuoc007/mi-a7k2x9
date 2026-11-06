@@ -385,7 +385,7 @@ def fx_day_change(snap: dict, hist: dict[int, dict]) -> None:
     """Thêm thay đổi so với hôm trước (đồng) cho các giá đô và USDT/VND, dựa trên bản đã lưu."""
     old = (hist.get(1) or {}).get("metrics", {})
     for k, m in snap.get("metrics", {}).items():
-        if not k.startswith(("usdvnd_", "usdtvnd_")) or m.get("value") is None:
+        if not k.startswith(("usdvnd_", "usdtvnd_")) or m.get("value") is None or k.startswith("usdvnd_fwd_1m_points"):
             continue
         prev = (old.get(k) or {}).get("value")
         if prev is not None:

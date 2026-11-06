@@ -18,8 +18,8 @@ import time
 from pathlib import Path
 
 from .analyzers import analytics as an
-from .analyzers import digest, news_signal, tone
-from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx
+from .analyzers import digest, fx_forward, news_signal, tone, volatility
+from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx, vn_rates
 from .common import VN_TZ, env, iso_vn, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
 
@@ -46,6 +46,10 @@ SOURCES = [
      "bidv.com.vn, techcombank.com", None),
     ("free_market", "USD chợ đen — tygiausd.org, tygia.vn", vn_fx.collect_free_market, "fx_vn",
      "https://tygiausd.org", None),
+    ("sbv_rate", "NHNN — tỷ giá trung tâm (bên thứ ba)", vn_rates.collect_sbv, "fx_vn",
+     "https://allratestoday.com", None),
+    ("market_fx", "Yahoo Finance — USD/VND thị trường quốc tế", vn_rates.collect_market_fx, "fx_vn",
+     "https://finance.yahoo.com/quote/USDVND=X", None),
     ("news", "Tin tức — CNBC, BBC, Fed, CoinDesk, VnExpress, CafeF…", news.collect, "news", "RSS", None),
     ("manual", "Nhập tay — NHNN, liên ngân hàng, tồn kho nội bộ", vn_fx.collect_manual, "manual",
      "config/manual_inputs.json", None),
@@ -93,6 +97,18 @@ def history_levels(hist: dict[int, dict]) -> dict[str, dict[str, float]]:
     return lv
 
 
+def _accept(old: dict | None, new: dict) -> bool:
+    """Quy tắc gộp khi hai nguồn cùng khoá: không để chỗ trống ghi đè số có thật;
+    nhập tay chỉ thay số tự động khi có ngày mới hơn hoặc bằng."""
+    if not old or old.get("value") is None:
+        return True
+    if new.get("value") is None:
+        return False
+    if new.get("quality") == "manual":
+        return (new.get("period") or "") >= (old.get("period") or (old.get("timestamp") or "")[:10])
+    return True
+
+
 def run(out: Path, force: bool = False) -> int:
     started = now_vn()
     today = started.date()
@@ -120,6 +136,8 @@ def run(out: Path, force: bool = False) -> int:
             for k, m in res.get("metrics", {}).items():
                 m.setdefault("category", "macro_monthly" if k in MONTHLY_KEYS else
                              "macro_daily" if cat == "macro" else cat)
+                if not _accept(snap["metrics"].get(k), m):
+                    continue
                 snap["metrics"][k] = m
             snap["series"].update(res.get("series", {}))
             snap["candles"].update(res.get("candles", {}))
@@ -155,8 +173,12 @@ def run(out: Path, force: bool = False) -> int:
                                                                   "source": "Binance Spot 1D (tính)"}
 
     hist = load_history(out, today)
+    fwd = fx_forward.build(snap, settings)
+    snap["metrics"].update({k: {**m, "category": "derived"} for k, m in fwd["metrics"].items()})
+    snap["tables"]["forward"] = fwd["table"]
     an.fx_day_change(snap, hist)
     snap["tables"]["fx"] = an.fx_board(snap)
+    snap["tables"]["vol_board"] = volatility.build(snap, hist, settings, today)
     snap["tables"]["risk"] = an.risk_table(snap, settings, hist)
     snap["regime"] = an.regime(snap, settings)
     levels = an.build_level_series(snap, history_levels(hist))

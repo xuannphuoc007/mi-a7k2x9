@@ -167,6 +167,37 @@ export interface FxBoard {
   gaps: { free_vs_bank: FxGap | null; usdt_vs_bank: FxGap | null; usdt_vs_free: FxGap | null }
 }
 
+export interface VolRow {
+  key: string
+  label: string
+  group: string
+  method: 'log' | 'abs'
+  unit: string
+  status: 'ok' | 'accumulating' | 'stale' | 'no_data'
+  note?: string
+  vol_7d: number | null
+  vol_30d: number | null
+  vol_90d: number | null
+  obs?: number
+  last_date?: string
+}
+
+export interface ForwardTable {
+  tenor_days: number
+  spot_key: string | null
+  vnd_rate_key: string | null
+  usd_rate_key: string | null
+  spot: number | null
+  r_vnd: number | null
+  r_usd: number | null
+  implied: number | null
+  points: number | null
+  quote: number | null
+  quote_vs_implied: number | null
+  missing: string[]
+  caveats: string[]
+}
+
 export interface NewsItem {
   title: string
   link: string
@@ -219,6 +250,8 @@ export interface Snapshot {
     sbv_policy_notes?: { date: string; text: string; link?: string }[]
     thresholds?: Record<string, number[]>
     fx?: FxBoard
+    vol_board?: VolRow[]
+    forward?: ForwardTable
     news?: NewsItem[]
     digest?: Digest
   }

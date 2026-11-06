@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 import FxLadder from '../components/FxLadder'
+import { MetricCard, MetricGrid } from '../components/MetricCard'
 import { Card, EmptyState, PageHeader, Segmented } from '../components/ui'
 import { useData } from '../hooks/useData'
 import type { FxGap } from '../types/snapshot'
@@ -22,6 +23,7 @@ const best = (cond: boolean) => clsx(cond && 'font-semibold text-up')
 export default function FxRates() {
   const { snap } = useData()
   const fx = snap?.tables.fx
+  const fwd = snap?.tables.forward
   const sizes = fx?.trade_sizes_vnd ?? []
   const [picked, setPicked] = useState<string | null>(null)
   if (!snap) return null
@@ -49,6 +51,29 @@ export default function FxRates() {
         <Gap label="USDT so với ngân hàng" g={fx.gaps.usdt_vs_bank} />
         <Gap label="USDT so với chợ đen" g={fx.gaps.usdt_vs_free} />
       </div>
+
+      <Card title="Tỷ giá điều hành, lãi suất qua đêm và kỳ hạn 1 tháng"
+        subtitle="Chỉ số nào chưa có nguồn sẽ không hiện số. Giá trị nhập tay ghi rõ ngày nhập.">
+        <MetricGrid>
+          <MetricCard m={snap.metrics.sbv_central_rate} label="Tỷ giá trung tâm NHNN" />
+          <MetricCard m={snap.metrics.usdvnd_interbank} label="USD/VND liên ngân hàng" />
+          <MetricCard m={snap.metrics.usdvnd_market} label="USD/VND thị trường quốc tế" />
+          <MetricCard m={snap.metrics.interbank_overnight_rate} label="Lãi suất qua đêm VND (liên ngân hàng)" />
+          <MetricCard m={snap.metrics.interbank_usd_overnight_rate} label="Lãi suất qua đêm USD (liên ngân hàng)" />
+          <MetricCard m={snap.metrics.sofr} label="SOFR, qua đêm USD (Mỹ)" />
+          <MetricCard m={snap.metrics.usdvnd_fwd_1m_quote} label="Forward 1 tháng, giá yết" />
+          <MetricCard m={snap.metrics.usdvnd_fwd_1m_implied} label="Forward 1 tháng, tính theo CIP" />
+          <MetricCard m={snap.metrics.usdvnd_fwd_1m_points} label="Điểm swap 1 tháng (tính)" />
+        </MetricGrid>
+        {fwd && (
+          <div className="mt-4 text-[14px] text-muted space-y-1 max-w-3xl">
+            {fwd.missing.length > 0 && <p>Chưa tính được forward theo CIP vì thiếu: {fwd.missing.join(', ')}. Nhập trong config/manual_inputs.json.</p>}
+            {fwd.implied != null && <p>Công thức: spot {fmtNum(fwd.spot, 0)} × (1 + {fmtNum(fwd.r_vnd, 2)}% × {fwd.tenor_days}/365) / (1 + {fmtNum(fwd.r_usd, 2)}% × {fwd.tenor_days}/360). Đây là giá lý thuyết, không phải giá ngân hàng yết.</p>}
+            {fwd.caveats.map((c, i) => <p key={i}>{c}</p>)}
+            {fwd.quote_vs_implied != null && <p>Giá yết chênh so với CIP: {fwd.quote_vs_implied > 0 ? '+' : ''}{fmtNum(fwd.quote_vs_implied, 0)} đồng.</p>}
+          </div>
+        )}
+      </Card>
 
       {fx.banks.length > 0 && (
         <Card title="Ngân hàng" subtitle="Tỷ giá niêm yết của từng ngân hàng, đồng trên 1 USD.">

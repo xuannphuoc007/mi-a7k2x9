@@ -23,6 +23,8 @@ DAILY = {
     "DGS10": ("US Treasury 10Y", "%"),
     "T10Y2Y": ("Spread 10Y − 2Y", "%"),
     "DTWEXBGS": ("Nominal Broad USD Index (thay thế DXY)", "điểm"),
+    "SOFR": ("SOFR, lãi suất qua đêm USD (có bảo đảm)", "%"),
+    "DTB4WK": ("Tín phiếu Mỹ 4 tuần (tham chiếu USD 1 tháng)", "%"),
 }
 MONTHLY = {
     "CPIAUCSL": ("CPI (YoY)", "yoy"),

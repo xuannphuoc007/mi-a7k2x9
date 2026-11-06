@@ -12,6 +12,7 @@ const NAV = [
   { to: '/crypto', label: 'Crypto' },
   { to: '/stablecoin', label: 'Stablecoin' },
   { to: '/macro', label: 'Vĩ mô' },
+  { to: '/volatility', label: 'Volatility' },
   { to: '/lien-thi-truong', label: 'Liên thị trường' },
 ]
 

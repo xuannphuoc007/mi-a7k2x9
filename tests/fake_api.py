@@ -96,7 +96,7 @@ def fred_csv(sid):
             lines.append(f"{d0.year + y}-{m + 1:02d}-01,{300 + i * 0.8:.3f}")
     else:
         base = {"DFEDTARU": 4.0, "DFEDTARL": 3.75, "DFF": 3.88, "DGS2": 3.6, "DGS10": 4.1,
-                "T10Y2Y": 0.5, "DTWEXBGS": 120.0}[sid]
+                "T10Y2Y": 0.5, "DTWEXBGS": 120.0, "SOFR": 3.65, "DTB4WK": 3.7}[sid]
         d = dt.date(2025, 10, 1)
         i = 0
         while d <= dt.date(2026, 11, 4):
@@ -166,10 +166,30 @@ def post_router(url, body, **kw):
     raise AssertionError(f"URL không có trong fake router: {url}")
 
 
+def sbv_json():
+    return {"rates": [{"base": "USD", "quote": "VND", "type": "reference", "value": 25100},
+                      {"base": "USD", "quote": "VND", "type": "buy", "value": 24800},
+                      {"base": "USD", "quote": "VND", "type": "sell", "value": 26400}],
+            "rate_date": "2026-11-05"}
+
+
+def yahoo_json():
+    t0 = int(dt.datetime(2025, 11, 6, tzinfo=dt.timezone.utc).timestamp())
+    stamps = [t0 + 86400 * i for i in range(365)]
+    closes = [25000 + 3 * i + 20 * math.sin(i) for i in range(365)]
+    return {"chart": {"result": [{"meta": {"regularMarketPrice": closes[-1], "regularMarketTime": stamps[-1]},
+                                  "timestamp": stamps, "indicators": {"quote": [{"close": closes}]}}],
+                      "error": None}}
+
+
 def router(method, url, params=None, body=None, as_text=False, as_bytes=False):
     if as_bytes:
         from email.utils import format_datetime
         return RSS.format(now=format_datetime(dt.datetime.now(dt.timezone.utc))).encode()
+    if "allratestoday" in url:
+        return sbv_json()
+    if "finance.yahoo" in url:
+        return yahoo_json()
     if "bidv" in url:
         return BIDV
     if "techcombank" in url:

@@ -4,11 +4,11 @@ from pathlib import Path
 import pytest
 
 from scripts import run_pipeline
-from scripts.collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx
+from scripts.collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx, vn_rates
 from scripts.validators.quality import check_snapshot
 from tests import fake_api
 
-MODULES = (crypto, derivatives, macro, sentiment, stablecoins, vn_fx, p2p, news)
+MODULES = (crypto, derivatives, macro, sentiment, stablecoins, vn_fx, vn_rates, p2p, news)
 
 
 @pytest.fixture

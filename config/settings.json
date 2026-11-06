@@ -95,5 +95,33 @@
       "risk_on_min_score": 2,
       "risk_off_max_score": -2
     }
+  },
+  "forward": {
+    "tenor_days": 30,
+    "spot_priority": [
+      "usdvnd_interbank",
+      "usdvnd_vcb_mid",
+      "usdvnd_market"
+    ],
+    "vnd_rate_priority": [
+      "interbank_vnd_1m_rate",
+      "interbank_overnight_rate"
+    ],
+    "usd_rate_priority": [
+      "dtb4wk",
+      "sofr"
+    ]
+  },
+  "volatility": {
+    "windows_days": [
+      7,
+      30,
+      90
+    ],
+    "min_returns": {
+      "7": 4,
+      "30": 12,
+      "90": 35
+    }
   }
 }

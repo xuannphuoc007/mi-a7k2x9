@@ -11,6 +11,7 @@ const Stablecoin = lazy(() => import('./pages/Stablecoin'))
 const Macro = lazy(() => import('./pages/Macro'))
 const Structure = lazy(() => import('./pages/Structure'))
 const FxRates = lazy(() => import('./pages/FxRates'))
+const Volatility = lazy(() => import('./pages/Volatility'))
 
 function Loading() {
   return (
@@ -46,6 +47,7 @@ function Pages() {
         <Route path="/stablecoin" element={<Stablecoin />} />
         <Route path="/macro" element={<Macro />} />
         <Route path="/ty-gia" element={<FxRates />} />
+        <Route path="/volatility" element={<Volatility />} />
         <Route path="/lien-thi-truong" element={<Structure />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
