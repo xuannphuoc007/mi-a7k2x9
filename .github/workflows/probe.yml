@@ -7,25 +7,25 @@ jobs:
       - name: probe
         run: |
           UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
-          for u in \
-            "https://stockbiz.vn/vi-mo/du-lieu/lai-suat-lien-ngan-hang" \
-            "https://stockbiz.vn/ma-chung-khoan/USD-VND" \
-            "https://sbv.gov.vn/en/l%C3%A3i-su%E1%BA%A5t1" \
-            "https://sbv.gov.vn/vi/lãi-suất1" \
-            "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1" \
-            "https://sbv.gov.vn/en/w/sbv570245" \
-            "https://tradingeconomics.com/vietnam/interbank-rate" \
-            "https://allratestoday.com/api/open/central-bank/sbv?source=USD&target=VND" ; do
-            echo "=== $u"
-            curl -sS -L -m 30 -A "$UA" -o /tmp/o.html -w "http=%{http_code} size=%{size_download}\n" "$u" || true
-            head -c 600 /tmp/o.html | tr '\n' ' ' ; echo
-          done
-          echo "=== stockbiz table sample"
-          curl -sS -L -m 30 -A "$UA" "https://stockbiz.vn/vi-mo/du-lieu/lai-suat-lien-ngan-hang" -o /tmp/s.html
-          grep -o -i '04/11/2026[^<]*<[^>]*>[^<]*' /tmp/s.html | head -5
-          grep -o -i 'api[^"'"'"' ]*' /tmp/s.html | sort -u | head -20
+          curl -sS -L -m 40 -A "$UA" "https://sbv.gov.vn/vi/lãi-suất1" -o /tmp/ls.html
+          curl -sS -L -m 40 -A "$UA" "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1" -o /tmp/tg.html
+          curl -sS -L -m 40 -A "$UA" "https://stockbiz.vn/vi-mo/du-lieu/lai-suat-lien-ngan-hang" -o /tmp/sb.html
           python3 - <<'PY'
-          import re
-          s=open('/tmp/s.html',encoding='utf-8',errors='ignore').read()
-          i=s.find('04/11/2026'); print(s[max(0,i-400):i+400])
+          import re,html
+          def txt(p):
+              s=open(p,encoding='utf-8',errors='ignore').read()
+              s=re.sub(r'(?is)<(script|style)[^>]*>.*?</\1>',' ',s)
+              s=re.sub(r'(?s)<[^>]+>','\n',s)
+              s=html.unescape(s)
+              return re.sub(r'\n\s*\n+','\n',re.sub(r'[ \t]+',' ',s))
+          for name,p,keys in (("LAI-SUAT","/tmp/ls.html",["iên ngân hàng"]),("TY-GIA","/tmp/tg.html",["rung tâm","iên ngân hàng"])):
+              t=txt(p)
+              print("=====",name,len(t))
+              for k in keys:
+                  for m in list(re.finditer(k,t))[:4]:
+                      print("--",k,":",t[max(0,m.start()-300):m.start()+700].replace("\n"," | "))
+          s=open('/tmp/sb.html',encoding='utf-8',errors='ignore').read()
+          print("===== STOCKBIZ")
+          i=s.find('04/11/2026'); print(i, s[max(0,i-300):i+500] if i>=0 else s[-1500:])
+          for m in list(re.finditer(r'(?i)(https?:)?//[a-z0-9./_-]*api[a-z0-9./_?=&-]*',s))[:10]: print(m.group(0))
           PY
