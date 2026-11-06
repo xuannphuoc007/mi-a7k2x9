@@ -188,7 +188,7 @@ export default function Overview() {
       </Card>
 
       {news.length > 0 && (
-        <Card title="Tin lớn trong ngày" subtitle="Hướng tác động là diễn biến thường thấy theo quy tắc. Giọng tin do mô hình tự động chấm, chỉ với tin tiếng Anh, và có thể sai. Thực tế 24 giờ là biến động cùng kỳ, không chứng minh tin nào gây ra.">
+        <Card title="Tin lớn trong ngày" subtitle="Biến động giá 24 giờ phản ánh toàn cảnh thị trường trong ngày, không đồng nghĩa tin tức đó là nguyên nhân chính dẫn đến biến động.">
           <div className="grid gap-x-10 lg:grid-cols-2">
             {news.map((n) => <Story key={n.link} n={n} />)}
           </div>
