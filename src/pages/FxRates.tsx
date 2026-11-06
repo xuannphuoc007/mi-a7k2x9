@@ -96,13 +96,13 @@ export default function FxRates() {
         <Card title="Tỷ giá và lãi suất tham chiếu" subtitle="Mỗi dòng ghi rõ thị trường tham chiếu. Chỉ số chưa có dữ liệu thì không hiển thị.">
           <div className="overflow-x-auto">
             <table className="table-news">
-              <thead><tr><th>Chỉ số</th><th>Thị trường tham chiếu</th><th>Giá trị</th><th className="hidden sm:table-cell">Cập nhật</th></tr></thead>
+              <thead><tr><th>Chỉ số</th><th>Giá trị</th><th>Thị trường tham chiếu</th><th className="hidden sm:table-cell">Cập nhật</th></tr></thead>
               <tbody>
                 {board.map((r) => (
                   <tr key={r.name}>
-                    <td className="font-semibold">{r.name}</td>
-                    <td className="text-[13.5px] text-muted max-w-md">{r.ref}{r.note ? ` ${r.note}` : ''}</td>
+                    <td className="font-semibold !whitespace-normal min-w-[150px]">{r.name}</td>
                     <td className="num whitespace-nowrap">{r.text} <span className="text-[13px] text-muted">{r.unit}</span></td>
+                    <td className="!whitespace-normal !text-left text-[13.5px] text-muted min-w-[240px] max-w-md pl-4 !text-left leading-snug">{r.ref}{r.note ? ` ${r.note}` : ''}</td>
                     <td className="hidden sm:table-cell text-muted text-[13px]">{r.when}</td>
                   </tr>
                 ))}
