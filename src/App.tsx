@@ -47,7 +47,6 @@ function Pages() {
         <Route path="/stablecoin" element={<Stablecoin />} />
         <Route path="/macro" element={<Macro />} />
         <Route path="/ty-gia" element={<FxRates />} />
-        <Route path="/volatility" element={<Volatility />} />
         <Route path="/lien-thi-truong" element={<Structure />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
