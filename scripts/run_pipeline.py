@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 from .analyzers import analytics as an
-from .analyzers import digest, fx_forward, news_signal, tone, volatility
+from .analyzers import digest, fx_forward, news_signal, tone
 from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx, vn_rates
 from .common import VN_TZ, env, iso_vn, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
@@ -178,7 +178,6 @@ def run(out: Path, force: bool = False) -> int:
     snap["tables"]["forward"] = fwd["table"]
     an.fx_day_change(snap, hist)
     snap["tables"]["fx"] = an.fx_board(snap)
-    snap["tables"]["vol_board"] = volatility.build(snap, hist, settings, today)
     snap["tables"]["risk"] = an.risk_table(snap, settings, hist)
     snap["regime"] = an.regime(snap, settings)
     levels = an.build_level_series(snap, history_levels(hist))

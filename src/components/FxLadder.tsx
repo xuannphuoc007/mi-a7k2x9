@@ -28,8 +28,6 @@ function rows(snap: Snapshot): Row[] {
       bid: val(m.sbv_buy_rate), ask: val(m.sbv_sell_rate), color: 'bg-muted' },
     { key: 'interbank', name: 'Liên ngân hàng', hint: 'Một giá bình quân, nhập tay', bid: val(m.usdvnd_interbank), ask: null,
       bidCh: m.usdvnd_interbank?.change_24h, color: 'bg-muted' },
-    { key: 'market', name: 'Thị trường quốc tế', hint: 'Yahoo Finance USDVND=X, một giá', bid: val(m.usdvnd_market), ask: null,
-      bidCh: m.usdvnd_market?.change_24h, color: 'bg-muted' },
     { key: 'fwd', name: 'Kỳ hạn 1 tháng', hint: m.usdvnd_fwd_1m_quote?.value != null ? 'Giá yết nhập tay' : 'Tính theo CIP, không phải giá yết',
       bid: val(m.usdvnd_fwd_1m_quote) ?? val(m.usdvnd_fwd_1m_implied), ask: null, color: 'bg-muted' },
   ]

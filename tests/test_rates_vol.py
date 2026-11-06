@@ -69,6 +69,3 @@ def test_pipeline_end_to_end(tmp_path, fake_http):
     # chưa nhập lãi suất VND nên chưa tính forward, và nói rõ lý do
     assert m["usdvnd_fwd_1m_implied"]["value"] is None
     assert "lãi suất VND" in s["tables"]["forward"]["missing"]
-    keys = {r["key"]: r for r in s["tables"]["vol_board"]}
-    assert keys["usdvnd_market"]["status"] == "ok"
-    assert keys["usdvnd_interbank"]["status"] == "no_data"

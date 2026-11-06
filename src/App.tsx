@@ -11,7 +11,6 @@ const Stablecoin = lazy(() => import('./pages/Stablecoin'))
 const Macro = lazy(() => import('./pages/Macro'))
 const Structure = lazy(() => import('./pages/Structure'))
 const FxRates = lazy(() => import('./pages/FxRates'))
-const Volatility = lazy(() => import('./pages/Volatility'))
 
 function Loading() {
   return (
