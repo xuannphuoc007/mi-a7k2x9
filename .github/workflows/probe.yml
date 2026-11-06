@@ -1,0 +1,31 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: probe
+        run: |
+          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
+          for u in \
+            "https://stockbiz.vn/vi-mo/du-lieu/lai-suat-lien-ngan-hang" \
+            "https://stockbiz.vn/ma-chung-khoan/USD-VND" \
+            "https://sbv.gov.vn/en/l%C3%A3i-su%E1%BA%A5t1" \
+            "https://sbv.gov.vn/vi/lãi-suất1" \
+            "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1" \
+            "https://sbv.gov.vn/en/w/sbv570245" \
+            "https://tradingeconomics.com/vietnam/interbank-rate" \
+            "https://allratestoday.com/api/open/central-bank/sbv?source=USD&target=VND" ; do
+            echo "=== $u"
+            curl -sS -L -m 30 -A "$UA" -o /tmp/o.html -w "http=%{http_code} size=%{size_download}\n" "$u" || true
+            head -c 600 /tmp/o.html | tr '\n' ' ' ; echo
+          done
+          echo "=== stockbiz table sample"
+          curl -sS -L -m 30 -A "$UA" "https://stockbiz.vn/vi-mo/du-lieu/lai-suat-lien-ngan-hang" -o /tmp/s.html
+          grep -o -i '04/11/2026[^<]*<[^>]*>[^<]*' /tmp/s.html | head -5
+          grep -o -i 'api[^"'"'"' ]*' /tmp/s.html | sort -u | head -20
+          python3 - <<'PY'
+          import re
+          s=open('/tmp/s.html',encoding='utf-8',errors='ignore').read()
+          i=s.find('04/11/2026'); print(s[max(0,i-400):i+400])
+          PY
