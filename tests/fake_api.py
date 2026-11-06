@@ -173,6 +173,14 @@ def sbv_json():
             "rate_date": "2026-11-05"}
 
 
+SBV_PAGE = """<html><body><h3>Tỷ giá trung tâm</h3><p>NHNN công bố tỷ giá trung tâm của Đồng Việt Nam với Đô la Mỹ, áp dụng cho ngày 05/11/2026 như sau:</p>
+<table><tr><td>1 Đô la Mỹ =</td><td>25.615 VND</td></tr></table><p>Tỷ giá áp dụng cho ngày</p><p>05/11/2026</p>
+<table><tr><td>1</td><td>USD</td><td>Đô la Mỹ</td><td>24.385,00</td><td>26.845,00</td></tr></table></body></html>"""
+
+STOCKBIZ_ON = ('<html><dl><div><dt>Số mới nhất · 04/11/2026</dt><dd>5,02%</dd></div>'
+               '<div><dt>Lần trước · 03/11/2026</dt><dd>3,81%</dd></div></dl></html>')
+
+
 def yahoo_json():
     t0 = int(dt.datetime(2025, 11, 6, tzinfo=dt.timezone.utc).timestamp())
     stamps = [t0 + 86400 * i for i in range(365)]
@@ -186,6 +194,10 @@ def router(method, url, params=None, body=None, as_text=False, as_bytes=False):
     if as_bytes:
         from email.utils import format_datetime
         return RSS.format(now=format_datetime(dt.datetime.now(dt.timezone.utc))).encode()
+    if "sbv.gov.vn" in url:
+        return SBV_PAGE
+    if "stockbiz" in url:
+        return STOCKBIZ_ON
     if "allratestoday" in url:
         return sbv_json()
     if "finance.yahoo" in url:

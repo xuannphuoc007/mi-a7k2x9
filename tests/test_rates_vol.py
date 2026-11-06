@@ -17,6 +17,16 @@ def test_parse_sbv_and_errors():
         vn_rates.parse_sbv({"rates": []})
 
 
+def test_parse_sbv_official_page_and_stockbiz():
+    p = vn_rates.parse_sbv_page(fake_api.SBV_PAGE)
+    assert p == {"central": 25615.0, "date": "2026-11-05", "buy": 24385.0, "sell": 26845.0}
+    assert vn_rates.parse_stockbiz_on(fake_api.STOCKBIZ_ON) == (5.02, "2026-11-04")
+    with pytest.raises(RuntimeError):
+        vn_rates.parse_sbv_page("<html>đổi giao diện</html>")
+    with pytest.raises(RuntimeError):
+        vn_rates.parse_stockbiz_on("<html></html>")
+
+
 def test_parse_yahoo():
     price, when, pts = vn_rates.parse_yahoo(fake_api.yahoo_json())
     assert len(pts) == 365 and price == pts[-1][1]
@@ -64,8 +74,9 @@ def test_pipeline_end_to_end(tmp_path, fake_http):
     import json
     s = json.loads((tmp_path / "latest.json").read_text(encoding="utf-8"))
     m = s["metrics"]
-    assert m["sbv_central_rate"]["value"] == 25100 and m["sbv_central_rate"]["quality"] != "missing"
+    assert m["sbv_central_rate"]["value"] == 25615 and m["sbv_central_rate"]["quality"] != "missing"
     assert m["usdvnd_market"]["value"] and m["sofr"]["value"]
-    # chưa nhập lãi suất VND nên chưa tính forward, và nói rõ lý do
-    assert m["usdvnd_fwd_1m_implied"]["value"] is None
-    assert "lãi suất VND" in s["tables"]["forward"]["missing"]
+    assert m["interbank_overnight_rate"]["value"] == 5.02 and m["sbv_sell_rate"]["value"] == 26845
+    # có lãi suất VND qua đêm nên tính được forward, kèm cảnh báo dùng ON thay kỳ hạn 1 tháng
+    assert m["usdvnd_fwd_1m_implied"]["value"] > m["usdvnd_vcb_mid"]["value"]
+    assert any("qua đêm" in c for c in s["tables"]["forward"]["caveats"])

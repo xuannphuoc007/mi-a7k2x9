@@ -50,6 +50,9 @@ def build(snap: dict, settings: dict) -> dict:
         return {"metrics": metrics, "table": table}
     f = implied(spot, rv, ru, days)
     table.update(implied=round(f, 2), points=round(f - spot, 2))
+    if sk != "usdvnd_interbank":
+        table["caveats"].append("Spot dùng giá giữa Vietcombank vì chưa có tỷ giá liên ngân hàng." if sk == "usdvnd_vcb_mid"
+                                else "Spot lấy từ nguồn thay thế vì chưa có tỷ giá liên ngân hàng.")
     if vk != "interbank_vnd_1m_rate":
         table["caveats"].append("Lãi suất VND dùng kỳ hạn qua đêm thay cho kỳ hạn 1 tháng, chỉ mang tính tham khảo.")
     if uk != "dtb4wk":
