@@ -7,14 +7,25 @@ jobs:
       - name: probe
         run: |
           UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
-          curl -sS -L -m 40 -A "$UA" -c /tmp/cj -b /tmp/cj -w "\nHTTP=%{http_code} URL=%{url_effective} SIZE=%{size_download}\n" "https://dttktt.sbv.gov.vn/webcenter/portal/vi/menu/rm/ls/lsttlnh" -o /tmp/d.html | tail -2
+          curl -sS -L -m 40 -A "$UA" "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1" -o /tmp/tg.html
+          curl -sS -L -m 40 -A "$UA" "https://stockbiz.vn/ma-chung-khoan/USD-VND" -o /tmp/sb.html
           python3 - <<'PY'
-          import re,html
-          s=open('/tmp/d.html',encoding='utf-8',errors='ignore').read()
-          print("LEN",len(s))
-          t=re.sub(r'(?is)<(script|style)[^>]*>.*?</\1>',' ',s); t=re.sub(r'(?s)<[^>]+>','\n',t); t=html.unescape(t)
-          t=re.sub(r'\n\s*\n+','\n',re.sub(r'[ \t]+',' ',t))
-          print("TEXT",t[:3500].replace("\n"," | "))
-          for h in sorted(set(re.findall(r'href="([^"]*(?:menu/rm)[^"]*)"',s)))[:40]: print("HREF",h)
-          print("RAW", s[:800])
+          import re,html,subprocess
+          def txt(s):
+              s=re.sub(r'(?is)<(script|style)[^>]*>.*?</\1>',' ',s)
+              s=re.sub(r'(?s)<[^>]+>','\n',s); s=html.unescape(s)
+              return re.sub(r'\n\s*\n+','\n',re.sub(r'[ \t]+',' ',s))
+          s=open('/tmp/sb.html',encoding='utf-8',errors='ignore').read()
+          t=txt(s); i=t.find('USD'); print("SB",t[:1800].replace("\n"," | "))
+          g=open('/tmp/tg.html',encoding='utf-8',errors='ignore').read()
+          for h,l in re.findall(r'<a[^>]*href="([^"]+)"[^>]*>\s*([^<]*hoạt động ngân hàng trong tuần[^<]*)',g)[:2]: print("WEEKLY",h,l.strip())
+          m=re.search(r'<a[^>]*href="([^"]+)"[^>]*>\s*Thông tin về hoạt động ngân hàng trong tuần',g)
+          if m:
+              u=m.group(1); u=u if u.startswith('http') else 'https://sbv.gov.vn'+u
+              r=subprocess.run(['curl','-sS','-L','-m','40','-A','Mozilla/5.0',u],capture_output=True).stdout.decode('utf-8','ignore')
+              tt=txt(r); print("LIST",u,len(tt))
+              k=tt.find('Thông tin về hoạt động ngân hàng trong tuần',3000)
+              print(tt[k:k+2500].replace("\n"," | "))
+              for h in re.findall(r'href="([^"]+)"',r):
+                  if re.search(r'(thong-tin|hoat-dong-ngan-hang|tuan|/w/)',h): print("H",h)
           PY
