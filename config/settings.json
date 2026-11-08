@@ -45,7 +45,8 @@
     "macro_daily": 120,
     "macro_monthly": 2400,
     "manual": 168,
-    "derivatives_daily": 48
+    "derivatives_daily": 48,
+    "vn_daily": 120
   },
   "cross_source_tolerance_pct": 1.0,
   "risk_thresholds": {
@@ -99,17 +100,13 @@
   "forward": {
     "tenor_days": 30,
     "spot_priority": [
-      "usdvnd_interbank",
-      "usdvnd_vcb_mid",
-      "usdvnd_market"
+      "usdvnd_interbank"
     ],
     "vnd_rate_priority": [
-      "interbank_vnd_1m_rate",
-      "interbank_overnight_rate"
+      "interbank_vnd_1m_rate"
     ],
     "usd_rate_priority": [
-      "dtb4wk",
-      "sofr"
+      "interbank_usd_1m_rate"
     ]
   },
   "volatility": {

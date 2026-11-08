@@ -24,14 +24,14 @@ def build(snap: dict, settings: dict) -> dict:
     """Trả {metrics, table}. Thiếu đầu vào nào thì không tính, ghi rõ lý do."""
     cfg = settings.get("forward", {})
     days = int(cfg.get("tenor_days", 30))
-    spot_keys = cfg.get("spot_priority", ["usdvnd_interbank", "usdvnd_vcb_mid", "usdvnd_market"])
-    vnd_keys = cfg.get("vnd_rate_priority", ["interbank_vnd_1m_rate", "interbank_overnight_rate"])
-    usd_keys = cfg.get("usd_rate_priority", ["dtb4wk", "sofr"])
+    spot_keys = cfg.get("spot_priority", ["usdvnd_interbank"])
+    vnd_keys = cfg.get("vnd_rate_priority", ["interbank_vnd_1m_rate"])
+    usd_keys = cfg.get("usd_rate_priority", ["interbank_usd_1m_rate"])
 
     def pick(keys):
         for k in keys:
             v, m = _val(snap, k)
-            if v is not None and m.get("quality") in ("ok", "manual", "warning", "stale"):
+            if v is not None and m.get("quality") in ("ok", "manual"):
                 return k, v, m
         return None, None, None
 
@@ -51,16 +51,20 @@ def build(snap: dict, settings: dict) -> dict:
     f = implied(spot, rv, ru, days)
     table.update(implied=round(f, 2), points=round(f - spot, 2))
     if sk != "usdvnd_interbank":
-        table["caveats"].append("Spot dùng giá giữa Vietcombank vì chưa có tỷ giá liên ngân hàng." if sk == "usdvnd_vcb_mid"
-                                else "Spot lấy từ nguồn thay thế vì chưa có tỷ giá liên ngân hàng.")
+        table["caveats"].append("Spot không phải giá liên ngân hàng.")
     if vk != "interbank_vnd_1m_rate":
-        table["caveats"].append("Lãi suất VND dùng kỳ hạn qua đêm thay cho kỳ hạn 1 tháng, chỉ mang tính tham khảo.")
-    if uk != "dtb4wk":
-        table["caveats"].append("Lãi suất USD dùng SOFR qua đêm thay cho kỳ hạn 1 tháng.")
+        table["caveats"].append("Lãi suất VND không phải kỳ hạn 1 tháng.")
+    if uk != "interbank_usd_1m_rate":
+        table["caveats"].append("Lãi suất USD không phải kỳ hạn 1 tháng liên ngân hàng trong nước.")
+    table["inputs"] = [{"key": k, "label": m.get("label"), "value": v, "period": m.get("period"), "source": m.get("source")}
+                       for k, v, m in ((sk, spot, sm), (vk, rv, vm), (uk, ru, um))]
+    dates = sorted({m.get("period") for m in (sm, vm, um) if m.get("period")})
+    if len(dates) > 1:
+        table["caveats"].append("Các đầu vào thuộc các ngày khác nhau: " + ", ".join(dates) + ".")
     ts = max((m.get("timestamp") or "") for m in (sm, vm, um)) or None
     metrics["usdvnd_fwd_1m_implied"] = metric(
         "USD/VND kỳ hạn 1 tháng (tính theo CIP)", round(f, 2), "VND", "Tính từ spot và lãi suất", ts,
-        kind="reference", note="Giá lý thuyết theo ngang giá lãi suất, không phải giá yết của ngân hàng. "
+        kind="reference", note="Giá lý thuyết theo chênh lệch lãi suất 1 tháng, không phải giá ngân hàng yết. "
         + " ".join(table["caveats"]))
     metrics["usdvnd_fwd_1m_points"] = metric(
         "Điểm swap 1 tháng (tính)", round(f - spot, 2), "VND", "Tính từ spot và lãi suất", ts, kind="reference",

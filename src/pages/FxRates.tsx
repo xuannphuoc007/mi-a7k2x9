@@ -3,8 +3,9 @@ import { useState } from 'react'
 import FxLadder from '../components/FxLadder'
 import { Card, EmptyState, PageHeader, Segmented } from '../components/ui'
 import { useData } from '../hooks/useData'
-import type { FxGap, Metric, Snapshot } from '../types/snapshot'
+import type { FxGap } from '../types/snapshot'
 import { fmtNum, fmtPct, fmtTime } from '../utils/format'
+import { snapshotRows } from '../utils/snapshot'
 
 function Gap({ label, g }: { label: string; g?: FxGap | null }) {
   if (!g) return null
@@ -17,47 +18,6 @@ function Gap({ label, g }: { label: string; g?: FxGap | null }) {
   )
 }
 
-interface BoardRow { name: string; ref: string; note?: string; text: string; unit: string; when: string }
-
-const has = (m?: Metric): m is Metric => !!m && m.value != null
-
-function boardRows(snap: Snapshot): BoardRow[] {
-  const m = snap.metrics
-  const when = (x: Metric) => (x.quality === 'manual' && x.period ? `${x.period} (nhập tay)` : x.period ?? fmtTime(x.timestamp))
-  const out: BoardRow[] = []
-  if (has(m.usdvnd_free_buy) && has(m.usdvnd_free_sell)) {
-    out.push({ name: 'USD thị trường tự do (chợ đen)', ref: 'Thị trường tự do trong nước, tiền mặt. Số do các trang tygiausd.org, tygia.vn công bố. Mua vào / bán ra.',
-      text: `${fmtNum(m.usdvnd_free_buy.value, 0)} / ${fmtNum(m.usdvnd_free_sell.value, 0)}`, unit: 'đồng/USD', when: when(m.usdvnd_free_sell) })
-  }
-  if (has(m.usdvnd_interbank)) {
-    out.push({ name: 'USD giao dịch giữa các ngân hàng', ref: 'Thị trường liên ngân hàng trong nước, tỷ giá bình quân.',
-      text: fmtNum(m.usdvnd_interbank.value, 0), unit: 'đồng/USD', when: when(m.usdvnd_interbank) })
-  }
-  if (has(m.sbv_central_rate)) {
-    out.push({ name: 'Tỷ giá tham chiếu NHNN', ref: 'Tỷ giá trung tâm NHNN công bố mỗi ngày làm việc, không phải giá giao dịch.',
-      note: `Nguồn: ${m.sbv_central_rate.source}.`, text: fmtNum(m.sbv_central_rate.value, 0), unit: 'đồng/USD', when: when(m.sbv_central_rate) })
-  }
-  const fwd = has(m.usdvnd_fwd_1m_quote) ? m.usdvnd_fwd_1m_quote : has(m.usdvnd_fwd_1m_implied) ? m.usdvnd_fwd_1m_implied : null
-  if (fwd) {
-    const quoted = fwd === m.usdvnd_fwd_1m_quote
-    out.push({ name: 'USD/VND kỳ hạn 1 tháng', ref: quoted ? 'Giá forward do ngân hàng hoặc nhà cung cấp dữ liệu yết, nhập tay.'
-      : 'Giá tính theo ngang giá lãi suất (CIP) từ spot và lãi suất hai đồng tiền, không phải giá ngân hàng yết.',
-      text: fmtNum(fwd.value, 0), unit: 'đồng/USD', when: when(fwd) })
-  }
-  if (has(m.interbank_overnight_rate)) {
-    out.push({ name: 'Lãi suất vay VND qua đêm', ref: 'Thị trường liên ngân hàng VND trong nước, lãi suất bình quân kỳ hạn qua đêm.',
-      text: fmtNum(m.interbank_overnight_rate.value, 2), unit: '%/năm', when: when(m.interbank_overnight_rate) })
-  }
-  if (has(m.interbank_usd_overnight_rate)) {
-    out.push({ name: 'Lãi suất vay USD qua đêm', ref: 'Thị trường liên ngân hàng USD trong nước, lãi suất bình quân kỳ hạn qua đêm.',
-      text: fmtNum(m.interbank_usd_overnight_rate.value, 2), unit: '%/năm', when: when(m.interbank_usd_overnight_rate) })
-  } else if (has(m.sofr)) {
-    out.push({ name: 'Lãi suất vay USD qua đêm', ref: 'SOFR: thị trường repo trái phiếu kho bạc Mỹ, lãi suất USD qua đêm tham chiếu quốc tế. Không phải lãi suất liên ngân hàng trong nước Việt Nam.',
-      text: fmtNum(m.sofr.value, 2), unit: '%/năm', when: when(m.sofr) })
-  }
-  return out
-}
-
 const best = (cond: boolean) => clsx(cond && 'font-semibold text-up')
 
 export default function FxRates() {
@@ -66,7 +26,8 @@ export default function FxRates() {
   const sizes = fx?.trade_sizes_vnd ?? []
   const [picked, setPicked] = useState<string | null>(null)
   if (!snap) return null
-  const board = boardRows(snap)
+  const board = snapshotRows(snap)
+  const fw = snap.tables.forward
   if (!fx) return <EmptyState title="Ngày này chưa có bảng tỷ giá">Hệ thống bắt đầu lưu bảng này từ ngày 05/11/2026.</EmptyState>
 
   const size = Number(picked ?? fx.reference_size_vnd ?? sizes[0])
@@ -92,25 +53,37 @@ export default function FxRates() {
         <Gap label="USDT so với chợ đen" g={fx.gaps.usdt_vs_free} />
       </div>
 
-      {board.length > 0 && (
-        <Card title="Tỷ giá và lãi suất tham chiếu" subtitle="Mỗi dòng ghi rõ thị trường tham chiếu. Chỉ số chưa có dữ liệu thì không hiển thị.">
-          <div className="overflow-x-auto">
-            <table className="table-news">
-              <thead><tr><th>Chỉ số</th><th>Giá trị</th><th>Thị trường tham chiếu</th><th className="hidden sm:table-cell">Cập nhật</th></tr></thead>
-              <tbody>
-                {board.map((r) => (
-                  <tr key={r.name}>
-                    <td className="font-semibold !whitespace-normal min-w-[150px]">{r.name}</td>
-                    <td className="num whitespace-nowrap">{r.text} <span className="text-[13px] text-muted">{r.unit}</span></td>
-                    <td className="!whitespace-normal !text-left text-[13.5px] text-muted min-w-[240px] max-w-md pl-4 !text-left leading-snug">{r.ref}{r.note ? ` ${r.note}` : ''}</td>
-                    <td className="hidden sm:table-cell text-muted text-[13px]">{r.when}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      )}
+      <Card title="Tỷ giá và lãi suất tham chiếu" subtitle="Cùng 7 số với ảnh Snapshot. Mỗi dòng ghi nguồn và ngày của số liệu; số nào chưa có thì ghi rõ, không thay bằng số khác.">
+        <div className="overflow-x-auto">
+          <table className="table-news">
+            <thead><tr><th>Chỉ số</th><th>Giá trị</th><th className="!text-left pl-4">Nguồn, thời điểm</th></tr></thead>
+            <tbody>
+              {board.map((r) => (
+                <tr key={r.label}>
+                  <td className="font-semibold">{r.label}</td>
+                  <td className="whitespace-nowrap">{r.value ?? <span className="text-muted">Chưa có dữ liệu</span>} <span className="text-[13px] text-muted">{r.value ? r.unit : ''}</span></td>
+                  <td className={clsx('!whitespace-normal !text-left text-[13.5px] min-w-[260px] max-w-md pl-4 leading-snug', r.stale ? 'text-warn' : 'text-muted')}>
+                    {r.detail}{r.stale ? ' · số liệu cũ' : ''}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {fw?.implied != null && (
+          <p className="text-[13.5px] text-muted mt-3 max-w-3xl">
+            Kỳ hạn 1 tháng = spot × (1 + lãi suất VND 1 tháng × 30/365) ÷ (1 + lãi suất USD 1 tháng × 30/360)
+            = <span className="num">{fmtNum(fw.spot, 0)} × (1 + {fmtNum(fw.r_vnd, 2)}% × 30/365) ÷ (1 + {fmtNum(fw.r_usd, 2)}% × 30/360)
+            = {fmtNum(fw.implied, 2)}</span>, chênh <span className="num">{fw.points! > 0 ? '+' : ''}{fmtNum(fw.points, 2)}</span> đồng so với spot.
+            {fw.caveats.length > 0 && <> {fw.caveats.join(' ')}</>}
+          </p>
+        )}
+        {snap.tables.vira?.url && (
+          <p className="text-[13.5px] text-muted mt-1">
+            Liên ngân hàng và lãi suất USD lấy từ <a className="underline" href={snap.tables.vira.url} target="_blank" rel="noreferrer">bản tin VIRA ngày {snap.tables.vira.published.split('-').reverse().join('/')}</a>.
+          </p>
+        )}
+      </Card>
 
       {fx.banks.length > 0 && (
         <Card title="Ngân hàng" subtitle="Tỷ giá niêm yết của từng ngân hàng, đồng trên 1 USD.">

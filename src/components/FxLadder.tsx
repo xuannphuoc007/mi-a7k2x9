@@ -26,9 +26,9 @@ function rows(snap: Snapshot): Row[] {
       bidCh: m.usdtvnd_p2p_bid?.change_24h, askCh: m.usdtvnd_p2p_ask?.change_24h, color: 'bg-warn' },
     { key: 'sbv', name: 'NHNN', hint: m.sbv_central_rate?.value != null ? `Mua/bán của NHNN, trung tâm ${fmtNum(m.sbv_central_rate.value, 0)}` : 'Giá mua/bán của NHNN',
       bid: val(m.sbv_buy_rate), ask: val(m.sbv_sell_rate), color: 'bg-muted' },
-    { key: 'interbank', name: 'Liên ngân hàng', hint: 'Một giá bình quân, nhập tay', bid: val(m.usdvnd_interbank), ask: null,
+    { key: 'interbank', name: 'Liên ngân hàng', hint: m.usdvnd_interbank?.period ? `Giá chốt phiên ${m.usdvnd_interbank.period.slice(8, 10)}/${m.usdvnd_interbank.period.slice(5, 7)}, một giá (VIRA)` : 'Giá chốt phiên, một giá', bid: val(m.usdvnd_interbank), ask: null,
       bidCh: m.usdvnd_interbank?.change_24h, color: 'bg-muted' },
-    { key: 'fwd', name: 'Kỳ hạn 1 tháng', hint: m.usdvnd_fwd_1m_quote?.value != null ? 'Giá yết nhập tay' : 'Tính theo CIP, không phải giá yết',
+    { key: 'fwd', name: 'Kỳ hạn 1 tháng', hint: m.usdvnd_fwd_1m_quote?.value != null ? 'Giá yết nhập tay' : 'Tính theo chênh lệch lãi suất 1 tháng, không phải giá ngân hàng yết',
       bid: val(m.usdvnd_fwd_1m_quote) ?? val(m.usdvnd_fwd_1m_implied), ask: null, color: 'bg-muted' },
   ]
   return out.filter((r) => r.bid != null || r.ask != null)

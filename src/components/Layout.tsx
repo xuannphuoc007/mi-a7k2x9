@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useData } from '../hooks/useData'
 import { useTheme } from '../hooks/useTheme'
+import SnapshotButton from './SnapshotButton'
 import { fmtDateLong, fmtTime, toCsv } from '../utils/format'
 
 const NAV = [
@@ -76,7 +77,8 @@ export default function Layout({ children }: { children: ReactNode }) {
                 {snap?.generated_at && <> · cập nhật {fmtTime(snap.generated_at, false)}</>}
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center gap-1">
+              <SnapshotButton />
               <DateNav />
               <div className="flex items-center no-print">
                 <button onClick={() => exportCsv(snap)} title="Tải số liệu (CSV)" aria-label="Tải số liệu" className={iconBtn}><Download className="h-4 w-4" /></button>

@@ -2,12 +2,18 @@ name: Deploy GitHub Pages
 
 # Chạy khi có thay đổi trên nhánh main (code, cấu hình, nhập tay) hoặc được gọi từ
 # Daily data update. Commit do bot tạo bằng GITHUB_TOKEN không tự kích hoạt workflow này,
-# nên Daily data update gọi trực tiếp qua workflow_call.
+# nên Daily data update gọi trực tiếp qua workflow_call. Lần cập nhật trong ngày không lưu
+# vào repo mà truyền dữ liệu qua artifact `data_artifact`.
 on:
   push:
     branches: [main]
   workflow_dispatch:
   workflow_call:
+    inputs:
+      data_artifact:
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -26,6 +32,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main # lấy cả commit dữ liệu vừa đẩy lên
+      - name: Lấy dữ liệu mới nhất của lần cập nhật trong ngày
+        if: inputs.data_artifact != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.data_artifact }}
+          path: public/data
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

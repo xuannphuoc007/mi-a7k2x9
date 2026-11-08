@@ -181,6 +181,24 @@ STOCKBIZ_ON = ('<html><dl><div><dt>Số mới nhất · 04/11/2026</dt><dd>5,02%
                '<div><dt>Lần trước · 03/11/2026</dt><dd>3,81%</dd></div></dl></html>')
 
 
+SBV_RATES = """<html><body><h3>Lãi suất thị trường liên ngân hàng</h3><p>Ngày áp dụng: <b>05/11/2026</b></p>
+<table><tr><th>Thời hạn</th><th>Lãi suất BQ liên Ngân hàng (% năm)</th><th>Doanh số (Tỷ đồng)</th></tr>
+<tr><td>Qua đêm</td><td> 4,51 </td><td> 806.145,0 </td></tr><tr><td>1 Tuần</td><td> 5 </td><td> 6.650,0 </td></tr>
+<tr><td>1 Tháng</td><td> 5,27 </td><td> 7.814,0 </td></tr><tr><td>9 Tháng</td><td> 7,11 </td><td> (*) </td><td>100,0</td></tr></table>
+<p>(*) Tham chiếu doanh số và lãi suất ngày 28/10/2026</p></body></html>"""
+
+VIRA_LIST = """<a href="/tin/Ban-tin-Kinh-te-Tai-chinh-ngay/Ban-tin-Kinh-te-Tai-chinh-ngay-04-11-2026-.html">x</a>
+<a href="/tin/Ban-tin-Kinh-te-Tai-chinh-ngay/Ban-tin-Kinh-te-Tai-chinh-ngay-06-11-2026-.html">y</a>"""
+
+# Trích nguyên văn bản tin ngày 06/11/2026
+VIRA_BULLETIN = ("<p>Thị trường ngoại tệ: Phiên 05/11, NHNN niêm yết tỷ giá trung tâm ở mức 25.623 VND/USD, giảm 04 đồng so với "
+                 "phiên trước đó. Trên thị trường LNH, tỷ giá chốt phiên với mức 25.720 VND/USD, giảm mạnh 80 đồng so với phiên 04/11.</p>"
+                 "<p>Thị trường tiền tệ LNH: Ngày 05/11, lãi suất bình quân LNH VND giảm 0,08 – 0,50 đpt ở các kỳ hạn ON và 1M trong "
+                 "khi đi ngang ở kỳ hạn 1W và tăng 0,05 đpt ở kỳ hạn 2W so với phiên trước đó, giao dịch tại: ON 4,50%; 1W 5,00%; "
+                 "2W 5,05% và 1M 5,40%. Lãi suất bình quân LNH USD giữ nguyên ở kỳ hạn ON trong khi tăng 0,01 – 0,02 đpt ở các kỳ "
+                 "hạn còn lại; giao dịch tại: ON 3,85%; 1W 3,91%; 2W 3,92%, 1M 4,04. Lợi suất TPCP trên thị trường thứ cấp...</p>")
+
+
 def yahoo_json():
     t0 = int(dt.datetime(2025, 11, 6, tzinfo=dt.timezone.utc).timestamp())
     stamps = [t0 + 86400 * i for i in range(365)]
@@ -194,8 +212,12 @@ def router(method, url, params=None, body=None, as_text=False, as_bytes=False):
     if as_bytes:
         from email.utils import format_datetime
         return RSS.format(now=format_datetime(dt.datetime.now(dt.timezone.utc))).encode()
+    if "sbv.gov.vn" in url and ("l%C3%A3i" in url or "lãi" in url):
+        return SBV_RATES
     if "sbv.gov.vn" in url:
         return SBV_PAGE
+    if "vira.org.vn" in url:
+        return VIRA_LIST if url.endswith("Ban-tin-Kinh-te-Tai-chinh-ngay.html") else VIRA_BULLETIN
     if "stockbiz" in url:
         return STOCKBIZ_ON
     if "allratestoday" in url:

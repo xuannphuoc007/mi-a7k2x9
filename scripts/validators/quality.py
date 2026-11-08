@@ -18,7 +18,7 @@ RANGES = {  # key: (min, max)
     "usdvnd_fwd_1m_quote": (15000, 45000), "usdvnd_fwd_1m_implied": (15000, 45000),
     "sbv_buy_rate": (15000, 40000), "sbv_sell_rate": (15000, 40000),
     "interbank_overnight_rate": (0, 50), "interbank_usd_overnight_rate": (-1, 30),
-    "interbank_vnd_1m_rate": (0, 50), "sofr": (-1, 25), "dtb4wk": (-1, 25),
+    "interbank_vnd_1m_rate": (0, 50), "interbank_usd_1m_rate": (-1, 30), "sofr": (-1, 25), "dtb4wk": (-1, 25),
     "dgs2": (-2, 25), "dgs10": (-2, 25), "dff": (-1, 25), "unrate": (0, 40),
 }
 

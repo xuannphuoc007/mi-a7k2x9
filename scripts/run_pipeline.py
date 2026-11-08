@@ -19,7 +19,7 @@ from pathlib import Path
 
 from .analyzers import analytics as an
 from .analyzers import digest, fx_forward, news_signal, tone
-from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx, vn_rates
+from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vira, vn_fx, vn_rates
 from .common import VN_TZ, env, iso_vn, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
 
@@ -48,8 +48,9 @@ SOURCES = [
      "https://tygiausd.org", None),
     ("sbv_rate", "NHNN — tỷ giá trung tâm, giá mua/bán", vn_rates.collect_sbv, "fx_vn",
      "https://sbv.gov.vn/vi/tỷ-giá", None),
-    ("interbank_on", "NHNN — lãi suất liên ngân hàng qua đêm VND", vn_rates.collect_interbank_on, "fx_vn",
-     "https://stockbiz.vn/vi-mo/du-lieu/lai-suat-lien-ngan-hang", None),
+    ("interbank_on", "NHNN — lãi suất liên ngân hàng VND (qua đêm, 1 tháng)", vn_rates.collect_interbank_on, "vn_daily",
+     "https://sbv.gov.vn/vi/lãi-suất1", None),
+    ("vira", "VIRA — USD/VND liên ngân hàng, lãi suất liên ngân hàng USD", vira.collect, "vn_daily", vira.LIST_URL, None),
     ("market_fx", "Yahoo Finance — USD/VND thị trường quốc tế", vn_rates.collect_market_fx, "fx_vn",
      "https://finance.yahoo.com/quote/USDVND=X", None),
     ("news", "Tin tức — CNBC, BBC, Fed, CoinDesk, VnExpress, CafeF…", news.collect, "news", "RSS", None),
@@ -118,9 +119,10 @@ def run(out: Path, force: bool = False) -> int:
     trigger = env("GITHUB_EVENT_NAME") or "local"
 
     prev_latest = _load(out / "latest.json") or {}
-    if trigger == "schedule" and not force and prev_latest.get("date") == today.isoformat() \
+    # Chỉ lần dự phòng buổi sáng mới tự bỏ qua, khi lần chính đã chạy xong trong ngày
+    if env("MI_SKIP_IF_DONE") and not force and prev_latest.get("date") == today.isoformat() \
             and prev_latest.get("run", {}).get("trigger") == "schedule":
-        log.info("Đã có snapshot lịch trình cho %s — bỏ qua lần chạy lặp.", today)
+        log.info("Đã có snapshot lịch trình cho %s — bỏ qua lần chạy dự phòng.", today)
         return 0
 
     ctx = {"settings": settings, "config_dir": ROOT / "config", "today": today}
@@ -195,7 +197,9 @@ def run(out: Path, force: bool = False) -> int:
     # Sau bước kiểm tra chất lượng, để số liệu cũ không bị dùng làm phản ứng trong ngày
     news_items = snap["tables"].get("news") or []
     news_signal.annotate(snap, tone.score_titles([n["title"] for n in news_items if n.get("lang") == "en"]))
-    scheduled = dt.datetime.combine(today, dt.time(7, 10), VN_TZ) if trigger == "schedule" else None
+    sched = env("MI_SCHEDULED_FOR")  # "HH:MM" giờ Việt Nam của lịch đã đặt, nếu có
+    scheduled = (dt.datetime.combine(today, dt.time.fromisoformat(sched), VN_TZ)
+                 if trigger == "schedule" and sched else None)
     snap["generated_at"] = finished.isoformat()
     snap["run"] = {
         "trigger": trigger, "started_at": started.isoformat(), "finished_at": finished.isoformat(),

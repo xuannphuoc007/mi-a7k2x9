@@ -20,6 +20,9 @@ SBV_PAGE = "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1"
 SRC_SBV_OFFICIAL = "NHNN (sbv.gov.vn), thông báo tỷ giá trung tâm"
 STOCKBIZ_ON = "https://stockbiz.vn/vi-mo/du-lieu/lai-suat-lien-ngan-hang"
 SRC_ON = "NHNN, lãi suất liên ngân hàng qua đêm (qua stockbiz.vn, FireAnt)"
+SBV_RATES_PAGE = "https://sbv.gov.vn/vi/l%C3%A3i-su%E1%BA%A5t1"
+SRC_SBV_RATES = "NHNN (sbv.gov.vn), lãi suất thị trường liên ngân hàng"
+TENORS = {"Qua đêm": "ON", "1 Tuần": "1W", "2 Tuần": "2W", "1 Tháng": "1M", "3 Tháng": "3M", "6 Tháng": "6M", "9 Tháng": "9M"}
 
 SBV_URL = "https://allratestoday.com/api/open/central-bank/sbv"
 SRC_SBV = "NHNN, tỷ giá trung tâm (qua allratestoday.com, bên thứ ba)"
@@ -84,11 +87,56 @@ def parse_stockbiz_on(html_text: str) -> tuple[float, str]:
     return _vn_num(m.group(2)), _vn_date(m.group(1))
 
 
+def parse_sbv_interbank(html_text: str) -> dict:
+    """Bảng "Lãi suất thị trường liên ngân hàng" trên sbv.gov.vn: {date, rates: {ON, 1W, ..., 1M}}.
+
+    Dòng có dấu (*) là số tham chiếu của một ngày cũ hơn (NHNN ghi chú bên dưới bảng): bỏ, không dùng.
+    """
+    t = _text(html_text)
+    i = t.find("Lãi suất thị trường liên ngân hàng")
+    d = re.search(r"Ngày áp dụng:\s*(\d{2}/\d{2}/\d{4})", t[i:]) if i >= 0 else None
+    if not d:
+        raise RuntimeError("sbv.gov.vn: không thấy bảng lãi suất liên ngân hàng (giao diện có thể đã đổi)")
+    body = t[i + d.end(): i + d.end() + 1500]
+    rates = {}
+    for name, tenor in TENORS.items():
+        m = re.search(rf"{name}\s+([\d]+(?:,\d+)?)\s*(\(\*\))?", body)
+        if m and not m.group(2):
+            rates[tenor] = _vn_num(m.group(1))
+    if "ON" not in rates:
+        raise RuntimeError("sbv.gov.vn: bảng lãi suất liên ngân hàng không có kỳ hạn qua đêm")
+    return {"date": _vn_date(d.group(1)), "rates": rates}
+
+
 def collect_interbank_on(ctx) -> dict:
-    val, day = parse_stockbiz_on(http_get(STOCKBIZ_ON, as_text=True, headers=BROWSER_UA))
-    return {"metrics": {"interbank_overnight_rate": metric(
-        "Lãi suất liên ngân hàng qua đêm VND", val, "%/năm", SRC_ON, date_to_iso(day), kind="reference", period=day,
-        note="Lãi suất bình quân liên ngân hàng VND kỳ hạn qua đêm do NHNN công bố")}}
+    """Lãi suất bình quân liên ngân hàng VND: qua đêm và 1 tháng, theo ngày áp dụng của NHNN."""
+    warnings = []
+    try:
+        p = parse_sbv_interbank(http_get(SBV_RATES_PAGE, as_text=True, headers=BROWSER_UA))
+        day, src = p["date"], SRC_SBV_RATES
+        rates = p["rates"]
+    except Exception as e:  # noqa: BLE001
+        warnings.append(f"sbv.gov.vn: {e}")
+        val, day = parse_stockbiz_on(http_get(STOCKBIZ_ON, as_text=True, headers=BROWSER_UA))
+        rates, src = {"ON": val}, SRC_ON
+    else:
+        # Đối chiếu với Stockbiz (cùng số liệu NHNN qua FireAnt) khi cùng ngày
+        try:
+            val, sday = parse_stockbiz_on(http_get(STOCKBIZ_ON, as_text=True, headers=BROWSER_UA))
+            if sday == day and abs(val - rates["ON"]) > 0.005:
+                warnings.append(f"Lãi suất qua đêm ngày {day}: NHNN {rates['ON']}%, Stockbiz {val}%")
+        except Exception:  # noqa: BLE001
+            pass
+    m = {"interbank_overnight_rate": metric(
+        "Lãi suất liên ngân hàng qua đêm VND", rates["ON"], "%/năm", src, date_to_iso(day), kind="reference", period=day,
+        note="Lãi suất bình quân liên ngân hàng VND kỳ hạn qua đêm do NHNN công bố")}
+    if "1M" in rates:
+        m["interbank_vnd_1m_rate"] = metric(
+            "Lãi suất liên ngân hàng VND kỳ hạn 1 tháng", rates["1M"], "%/năm", src, date_to_iso(day), kind="reference",
+            period=day, note="Lãi suất bình quân liên ngân hàng VND kỳ hạn 1 tháng do NHNN công bố")
+    for k in m:
+        m[k]["category"] = "vn_daily"
+    return {"metrics": m, "warnings": warnings}
 
 
 def collect_sbv(ctx) -> dict:

@@ -1,12 +1,16 @@
 name: Daily data update
 
-# 00:10 UTC = 07:10 sáng Việt Nam. GitHub có thể chạy trễ 5–30 phút nên đặt sớm
-# để dữ liệu sẵn sàng quanh 07:30. Lịch thứ hai (00:40 UTC) là lần dự phòng: nếu lần
-# đầu đã thành công, pipeline tự bỏ qua (không tạo bản trùng).
+# Giờ Việt Nam = UTC + 7. GitHub có thể chạy trễ 5–30 phút so với lịch.
+#   00:10 UTC (07:10)  bản sáng, lưu vào repo
+#   00:40 UTC (07:40)  dự phòng cho bản sáng: tự bỏ qua nếu bản sáng đã chạy
+#   */30 01-09 UTC     08:00–16:30 mỗi 30 phút: chỉ cập nhật website, KHÔNG lưu vào repo
+#   10:00 UTC (17:00)  bản cuối ngày, lưu vào repo (là bản lưu của ngày đó khi chọn ngày cũ)
 on:
   schedule:
     - cron: "10 0 * * *"
     - cron: "40 0 * * *"
+    - cron: "*/30 1-9 * * *"
+    - cron: "0 10 * * *"
   workflow_dispatch:
     inputs:
       force:
@@ -29,7 +33,20 @@ jobs:
       contents: write
     outputs:
       changed: ${{ steps.commit.outputs.changed }}
+      data_artifact: ${{ steps.commit.outputs.data_artifact }}
     steps:
+      - name: Xác định loại lần chạy
+        id: mode
+        run: |
+          case "${{ github.event.schedule }}" in
+            "*/30 1-9 * * *") echo "save=false" >> "$GITHUB_OUTPUT" ;;
+            *)                echo "save=true"  >> "$GITHUB_OUTPUT" ;;
+          esac
+          case "${{ github.event.schedule }}" in
+            "10 0 * * *") echo "scheduled=07:10" >> "$GITHUB_OUTPUT" ;;
+            "40 0 * * *") echo "scheduled=07:40" >> "$GITHUB_OUTPUT"; echo "skip_if_done=1" >> "$GITHUB_OUTPUT" ;;
+            "0 10 * * *") echo "scheduled=17:00" >> "$GITHUB_OUTPUT" ;;
+          esac
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -51,12 +68,26 @@ jobs:
         env:
           COINGECKO_DEMO_KEY: ${{ secrets.COINGECKO_DEMO_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          MI_SCHEDULED_FOR: ${{ steps.mode.outputs.scheduled }}
+          MI_SKIP_IF_DONE: ${{ steps.mode.outputs.skip_if_done }}
         run: python -m scripts.run_pipeline ${{ inputs.force && '--force' || '' }}
       - name: Kiểm tra dữ liệu
         run: python -m scripts.validators.check_data public/data
+      - name: Gói dữ liệu cho lần cập nhật trong ngày
+        if: steps.mode.outputs.save == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-data
+          path: public/data
+          retention-days: 1
       - name: Commit dữ liệu
         id: commit
         run: |
+          if [ "${{ steps.mode.outputs.save }}" = "false" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "data_artifact=live-data" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git config user.name "market-intel-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/data
@@ -74,6 +105,8 @@ jobs:
     needs: collect
     if: needs.collect.outputs.changed == 'true'
     uses: ./.github/workflows/deploy.yml
+    with:
+      data_artifact: ${{ needs.collect.outputs.data_artifact }}
     permissions:
       contents: read
       pages: write

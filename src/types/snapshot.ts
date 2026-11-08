@@ -196,6 +196,7 @@ export interface ForwardTable {
   quote_vs_implied: number | null
   missing: string[]
   caveats: string[]
+  inputs?: { key: string; label: string; value: number; period?: string | null; source?: string }[]
 }
 
 export interface NewsItem {
@@ -254,6 +255,7 @@ export interface Snapshot {
     forward?: ForwardTable
     news?: NewsItem[]
     digest?: Digest
+    vira?: { url: string; published: string; fx_session: string | null; rates_session: string | null }
   }
   regime?: Regime
   correlation?: Correlation
