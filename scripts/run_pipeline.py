@@ -20,7 +20,7 @@ from pathlib import Path
 from .analyzers import analytics as an
 from .analyzers import digest, fx_forward, news_signal, tone
 from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vira, vn_fx, vn_rates
-from .common import VN_TZ, env, iso_vn, now_vn
+from .common import VN_TZ, date_to_iso, env, iso_vn, metric, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -112,6 +112,45 @@ def _accept(old: dict | None, new: dict) -> bool:
     return True
 
 
+# Nguồn nào lần này không trả số thì dùng số gần nhất đã có (giữ nguyên ngày của số đó)
+CARRY = ("usdvnd_free_buy", "usdvnd_free_sell", "usdvnd_interbank", "usdtvnd_p2p_bid", "usdtvnd_p2p_ask",
+         "usdtvnd_p2p_mid", "sbv_central_rate", "sbv_buy_rate", "sbv_sell_rate", "interbank_overnight_rate",
+         "interbank_vnd_1m_rate", "interbank_usd_overnight_rate", "interbank_usd_1m_rate",
+         "usdvnd_vcb_buy_transfer", "usdvnd_vcb_buy_cash", "usdvnd_vcb_sell", "usdvnd_vcb_mid")
+
+
+def vnd_rates_from_vira(snap: dict) -> None:
+    """NHNN không trả lãi suất VND thì dùng số VIRA của cùng bản tin (VIRA trích số liệu NHNN)."""
+    v = snap.get("tables", {}).get("vira") or {}
+    rates, day = v.get("vnd_rates") or {}, v.get("rates_session")
+    for key, tenor, label in (("interbank_overnight_rate", "ON", "qua đêm"), ("interbank_vnd_1m_rate", "1M", "kỳ hạn 1 tháng")):
+        if (snap["metrics"].get(key) or {}).get("value") is None and rates.get(tenor) is not None and day:
+            snap["metrics"][key] = {**metric(f"Lãi suất liên ngân hàng VND {label}", rates[tenor], "%/năm", vira.SRC,
+                                             date_to_iso(day), kind="reference", period=day,
+                                             note="Lãi suất bình quân liên ngân hàng VND theo bản tin VIRA"),
+                                    "category": "vn_daily"}
+
+
+def carry_forward(snap: dict, older: list[dict]) -> list[str]:
+    carried = []
+    for key in CARRY:
+        if (snap["metrics"].get(key) or {}).get("value") is not None:
+            continue
+        for old in older:
+            m = (old.get("metrics") or {}).get(key)
+            if m and m.get("value") is not None:
+                snap["metrics"][key] = {**m, "quality": "manual" if m.get("quality") == "manual" else "ok", "carried": True}
+                carried.append(key)
+                break
+    for table in ("vira", "free_market"):
+        if not snap["tables"].get(table):
+            for old in older:
+                if (old.get("tables") or {}).get(table):
+                    snap["tables"][table] = old["tables"][table]
+                    break
+    return carried
+
+
 def run(out: Path, force: bool = False) -> int:
     started = now_vn()
     today = started.date()
@@ -165,6 +204,13 @@ def run(out: Path, force: bool = False) -> int:
     if ok_count == 0:
         log.error("Tất cả nguồn đều lỗi — không ghi snapshot.")
         return 2
+
+    # --- số dự phòng: VND từ VIRA, rồi số gần nhất cho chỉ số nào lần này không có
+    vnd_rates_from_vira(snap)
+    older = [prev_latest] + [s for _, s in sorted(load_history(out, today, days=10).items())]
+    carried = carry_forward(snap, [o for o in older if o])
+    if carried:
+        log.info("Dùng số gần nhất cho: %s", ", ".join(carried))
 
     # --- chuẩn hoá & kiểm tra
     clean_series(snap)

@@ -28,12 +28,16 @@ def text(page: str) -> str:
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"(?s)<[^>]+>", " ", page)))
 
 
-def latest_link(list_page: str) -> tuple[str, dt.date]:
+def links(list_page: str) -> list[tuple[str, dt.date]]:
+    """Các bản tin trong trang danh sách, mới nhất trước."""
     found = {(dt.date(int(y), int(m), int(d)), path) for path, d, m, y in _LINK.findall(list_page)}
     if not found:
         raise RuntimeError("VIRA: không thấy bản tin nào trong trang danh sách (giao diện có thể đã đổi)")
-    day, path = max(found)
-    return BASE + path, day
+    return [(BASE + path, day) for day, path in sorted(found, reverse=True)]
+
+
+def latest_link(list_page: str) -> tuple[str, dt.date]:
+    return links(list_page)[0]
 
 
 def _rate(s: str) -> float:
@@ -70,9 +74,30 @@ def parse(page: str, published: dt.date) -> dict:
     return out
 
 
+MAX_BULLETINS = 5
+
+
 def collect(ctx) -> dict:
-    url, published = latest_link(http_get(LIST_URL, as_text=True, headers={"Accept": "text/html"}))
-    p = parse(http_get(url, as_text=True, headers={"Accept": "text/html"}), published)
+    """Mỗi nhóm số lấy từ bản tin mới nhất có nhóm số đó, xét tối đa 5 bản gần nhất."""
+    p: dict = {}
+    url = published = None
+    errors = []
+    for link, day in links(http_get(LIST_URL, as_text=True, headers={"Accept": "text/html"}))[:MAX_BULLETINS]:
+        try:
+            got = parse(http_get(link, as_text=True, headers={"Accept": "text/html"}), day)
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"{day:%d/%m}: {e}")
+            continue
+        if url is None:
+            url, published = link, day
+        if "interbank_close" not in p and "interbank_close" in got:
+            p.update({k: got[k] for k in ("interbank_close", "central", "fx_session")})
+        if "usd_rates" not in p and "usd_rates" in got:
+            p.update({k: got[k] for k in ("usd_rates", "vnd_rates", "rates_session") if k in got})
+        if "interbank_close" in p and "usd_rates" in p:
+            break
+    if url is None:
+        raise RuntimeError("VIRA: " + "; ".join(errors[:3]))
     metrics, warnings = {}, []
     if "interbank_close" in p:
         day = p["fx_session"].isoformat()

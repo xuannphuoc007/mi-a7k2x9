@@ -105,3 +105,48 @@ def test_vira_parser_on_real_bulletin_text():
     assert vira._day("31", "12", dt.date(2027, 1, 2)) == dt.date(2026, 12, 31)
     with pytest.raises(RuntimeError):
         vira.parse("<p>bản tin không có số</p>", day)
+
+
+def test_missing_source_keeps_latest_value(tmp_path, fake_http, monkeypatch):
+    import json
+    from scripts.collectors import vira as vira_mod
+    assert run_pipeline.run(tmp_path, force=True) == 0
+    # Lần sau VIRA và trang lãi suất NHNN đều lỗi: vẫn hiện số gần nhất, giữ nguyên ngày phiên
+    monkeypatch.setattr(vira_mod, "http_get", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("down")))
+    monkeypatch.setattr(vn_rates, "http_get", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("down")))
+    assert run_pipeline.run(tmp_path, force=True) == 0
+    m = json.loads((tmp_path / "latest.json").read_text(encoding="utf-8"))["metrics"]
+    assert m["usdvnd_interbank"]["value"] == 25720 and m["usdvnd_interbank"]["period"] == "2026-11-05"
+    assert m["usdvnd_interbank"]["carried"] is True
+    assert m["interbank_usd_overnight_rate"]["value"] == 3.85 and m["interbank_overnight_rate"]["value"] == 4.51
+
+
+def test_vnd_rates_fall_back_to_vira(tmp_path, fake_http, monkeypatch):
+    import json
+    real = vn_rates.http_get
+    def no_sbv_rates(url, *a, **k):
+        if "sbv.gov.vn" in url and "l%C3%A3i" in url or "stockbiz" in url:
+            raise RuntimeError("down")
+        return real(url, *a, **k)
+    monkeypatch.setattr(vn_rates, "http_get", no_sbv_rates)
+    assert run_pipeline.run(tmp_path, force=True) == 0
+    m = json.loads((tmp_path / "latest.json").read_text(encoding="utf-8"))["metrics"]
+    # Số VIRA phiên 05/11: VND qua đêm 4,50%, 1 tháng 5,40%
+    assert m["interbank_overnight_rate"]["value"] == 4.50 and m["interbank_vnd_1m_rate"]["value"] == 5.40
+    assert "VIRA" in m["interbank_overnight_rate"]["source"]
+
+
+def test_vira_takes_each_figure_from_newest_bulletin_that_has_it(monkeypatch):
+    from scripts.collectors import vira as vira_mod
+    pages = {"list": fake_api.VIRA_LIST.replace("06-11-2026", "07-11-2026") + fake_api.VIRA_LIST,
+             "07-11": "<p>Bản tin ngày này chỉ có tin vĩ mô, không có số liên ngân hàng.</p>"}
+    def get(url, *a, **k):
+        if url.endswith("Ban-tin-Kinh-te-Tai-chinh-ngay.html"):
+            return pages["list"]
+        if "07-11-2026" in url:
+            return pages["07-11"]
+        return fake_api.VIRA_BULLETIN
+    monkeypatch.setattr(vira_mod, "http_get", get)
+    r = vira_mod.collect({})
+    assert r["metrics"]["usdvnd_interbank"]["value"] == 25720
+    assert r["metrics"]["interbank_usd_overnight_rate"]["period"] == "2026-11-05"

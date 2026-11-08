@@ -53,7 +53,7 @@ export default function FxRates() {
         <Gap label="USDT so với chợ đen" g={fx.gaps.usdt_vs_free} />
       </div>
 
-      <Card title="Tỷ giá và lãi suất tham chiếu" subtitle="Cùng 7 số với ảnh Snapshot. Mỗi dòng ghi nguồn và ngày của số liệu; số nào chưa có thì ghi rõ, không thay bằng số khác.">
+      <Card title="Tỷ giá và lãi suất tham chiếu" subtitle="Cùng các số với ảnh Snapshot. Mỗi dòng ghi nguồn và ngày của số liệu; nguồn nào chưa cập nhật thì dùng số gần nhất.">
         <div className="overflow-x-auto">
           <table className="table-news">
             <thead><tr><th>Chỉ số</th><th>Giá trị</th><th className="!text-left pl-4">Nguồn, thời điểm</th></tr></thead>
@@ -61,7 +61,7 @@ export default function FxRates() {
               {board.map((r) => (
                 <tr key={r.label}>
                   <td className="font-semibold">{r.label}</td>
-                  <td className="whitespace-nowrap">{r.value ?? <span className="text-muted">Chưa có dữ liệu</span>} <span className="text-[13px] text-muted">{r.value ? r.unit : ''}</span></td>
+                  <td className="whitespace-nowrap">{r.value} <span className="text-[13px] text-muted">{r.unit}</span></td>
                   <td className={clsx('!whitespace-normal !text-left text-[13.5px] min-w-[260px] max-w-md pl-4 leading-snug', r.stale ? 'text-warn' : 'text-muted')}>
                     {r.detail}{r.stale ? ' · số liệu cũ' : ''}
                   </td>

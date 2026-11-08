@@ -18,36 +18,38 @@ const hm = (iso?: string | null) =>
 
 const pct = (v: number | null) => fmtNum(v, 2)
 
-/** Đúng 7 dòng người dùng yêu cầu, theo thứ tự cố định. Thiếu số thì ghi rõ, không thay bằng số khác. */
+/** 7 dòng theo thứ tự cố định. Mỗi số kèm nguồn và ngày của chính số đó (có thể là số gần nhất). */
 export function snapshotRows(s: Snapshot): SnapRow[] {
   const m = s.metrics
   const stale = (...xs: (Metric | undefined)[]) => xs.some((x) => x?.quality === 'stale')
+  const src = (x: Metric) => (x.quality === 'manual' ? 'nhập tay' : x.source.startsWith('VIRA') ? 'VIRA' : x.source.startsWith('NHNN') ? 'NHNN' : x.source)
   const rows: SnapRow[] = []
 
   const fb = m.usdvnd_free_buy, fs = m.usdvnd_free_sell
-  rows.push(has(fb) && has(fs)
-    ? { label: 'USD/VND chợ đen', value: `${fmtNum(fb.value, 0)} / ${fmtNum(fs.value, 0)}`, unit: 'mua / bán',
-        detail: `${fs.source} · lấy lúc ${hm(fs.timestamp)} ${dm(fs.timestamp)}`, stale: stale(fb, fs) }
-    : { label: 'USD/VND chợ đen', value: null, unit: '', detail: 'Nguồn chưa trả số' })
+  if (has(fb) && has(fs)) {
+    rows.push({ label: 'USD/VND chợ đen', value: `${fmtNum(fb.value, 0)} / ${fmtNum(fs.value, 0)}`, unit: 'mua / bán',
+      detail: `${fs.source} · lấy lúc ${hm(fs.timestamp)} ${dm(fs.timestamp)}`, stale: stale(fb, fs) })
+  }
 
   const ib = m.usdvnd_interbank
-  rows.push(has(ib)
-    ? { label: 'USD/VND liên ngân hàng', value: fmtNum(ib.value, 0), unit: 'đồng/USD',
-        detail: `Giá chốt phiên ${dm(ib.period)} · ${ib.quality === 'manual' ? 'nhập tay' : 'VIRA (MSB Research)'}`, stale: stale(ib) }
-    : { label: 'USD/VND liên ngân hàng', value: null, unit: '', detail: 'Chưa có bản tin VIRA' })
+  if (has(ib)) {
+    rows.push({ label: 'USD/VND liên ngân hàng', value: fmtNum(ib.value, 0), unit: 'đồng/USD',
+      detail: `Giá chốt phiên ${dm(ib.period)} · ${ib.quality === 'manual' ? 'nhập tay' : 'VIRA (MSB Research)'}`, stale: stale(ib) })
+  }
 
   const ub = m.usdtvnd_p2p_bid, ua = m.usdtvnd_p2p_ask
   const ref = s.tables.fx?.reference_size_vnd
-  rows.push(has(ub) && has(ua)
-    ? { label: 'USDT/VND', value: `${fmtNum(ub.value, 0)} / ${fmtNum(ua.value, 0)}`, unit: 'mua / bán',
-        detail: `Trung vị Binance, OKX, Bybit, Bitget${ref ? `, lệnh ${ref / 1e6} triệu` : ''} · lấy lúc ${hm(ua.timestamp)} ${dm(ua.timestamp)}`,
-        stale: stale(ub, ua) }
-    : { label: 'USDT/VND', value: null, unit: '', detail: 'Các sàn P2P chưa trả số' })
+  if (has(ub) && has(ua)) {
+    rows.push({ label: 'USDT/VND', value: `${fmtNum(ub.value, 0)} / ${fmtNum(ua.value, 0)}`, unit: 'mua / bán',
+      detail: `Trung vị Binance, OKX, Bybit, Bitget${ref ? `, lệnh ${ref / 1e6} triệu` : ''} · lấy lúc ${hm(ua.timestamp)} ${dm(ua.timestamp)}`,
+      stale: stale(ub, ua) })
+  }
 
   const c = m.sbv_central_rate
-  rows.push(has(c)
-    ? { label: 'Tỷ giá trung tâm NHNN', value: fmtNum(c.value, 0), unit: 'đồng/USD', detail: `Áp dụng ngày ${dm(c.period)} · sbv.gov.vn`, stale: stale(c) }
-    : { label: 'Tỷ giá trung tâm NHNN', value: null, unit: '', detail: 'Chưa lấy được từ sbv.gov.vn' })
+  if (has(c)) {
+    rows.push({ label: 'Tỷ giá trung tâm NHNN', value: fmtNum(c.value, 0), unit: 'đồng/USD',
+      detail: `Áp dụng ngày ${dm(c.period)} · sbv.gov.vn`, stale: stale(c) })
+  }
 
   const q = m.usdvnd_fwd_1m_quote, f = m.usdvnd_fwd_1m_implied, fw = s.tables.forward
   if (has(q)) {
@@ -55,21 +57,19 @@ export function snapshotRows(s: Snapshot): SnapRow[] {
   } else if (has(f) && fw?.spot != null && fw.r_vnd != null && fw.r_usd != null) {
     rows.push({ label: 'USD/VND kỳ hạn 1 tháng', value: fmtNum(f.value, 0), unit: 'đồng/USD',
       detail: `Tính theo chênh lệch lãi suất từ spot LNH ${fmtNum(fw.spot, 0)}, VND 1T ${pct(fw.r_vnd)}%, USD 1T ${pct(fw.r_usd)}%. Không phải giá ngân hàng yết` })
-  } else {
-    rows.push({ label: 'USD/VND kỳ hạn 1 tháng', value: null, unit: '',
-      detail: `Chưa tính được${fw?.missing?.length ? `: thiếu ${fw.missing.join(', ')}` : ''}` })
   }
 
   const on = m.interbank_overnight_rate
-  rows.push(has(on)
-    ? { label: 'Lãi suất qua đêm VND', value: pct(on.value), unit: '%/năm', detail: `Bình quân liên ngân hàng ngày ${dm(on.period)} · NHNN`, stale: stale(on) }
-    : { label: 'Lãi suất qua đêm VND', value: null, unit: '', detail: 'Chưa lấy được từ NHNN' })
+  if (has(on)) {
+    rows.push({ label: 'Lãi suất qua đêm VND', value: pct(on.value), unit: '%/năm',
+      detail: `Bình quân liên ngân hàng ngày ${dm(on.period)} · ${src(on)}`, stale: stale(on) })
+  }
 
   const uo = m.interbank_usd_overnight_rate
-  rows.push(has(uo)
-    ? { label: 'Lãi suất qua đêm USD', value: pct(uo.value), unit: '%/năm',
-        detail: `Bình quân liên ngân hàng phiên ${dm(uo.period)} · ${uo.quality === 'manual' ? 'nhập tay' : 'VIRA'}`, stale: stale(uo) }
-    : { label: 'Lãi suất qua đêm USD', value: null, unit: '', detail: 'Chưa có bản tin VIRA' })
+  if (has(uo)) {
+    rows.push({ label: 'Lãi suất qua đêm USD', value: pct(uo.value), unit: '%/năm',
+      detail: `Bình quân liên ngân hàng phiên ${dm(uo.period)} · ${src(uo)}`, stale: stale(uo) })
+  }
 
   return rows
 }
@@ -132,17 +132,11 @@ export async function renderSnapshot(s: Snapshot, takenAt: Date, site: string): 
     ctx.font = sans(600, 25)
     ctx.fillText(r.label, PAD, y + 50)
     ctx.textAlign = 'right'
-    if (r.value) {
-      ctx.font = sans(600, 38)
-      ctx.fillText(r.value, W - PAD, y + 56)
-      ctx.font = sans(400, 19)
-      ctx.fillStyle = C.muted
-      ctx.fillText(r.unit, W - PAD, y + 86)
-    } else {
-      ctx.font = sans(500, 26)
-      ctx.fillStyle = C.muted
-      ctx.fillText('Chưa có dữ liệu', W - PAD, y + 54)
-    }
+    ctx.font = sans(600, 38)
+    ctx.fillText(r.value ?? '', W - PAD, y + 56)
+    ctx.font = sans(400, 19)
+    ctx.fillStyle = C.muted
+    ctx.fillText(r.unit, W - PAD, y + 86)
     ctx.textAlign = 'left'
     ctx.font = sans(400, 19)
     ctx.fillStyle = r.stale ? C.warn : C.muted
