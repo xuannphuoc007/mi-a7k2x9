@@ -46,7 +46,7 @@ def test_full_pipeline_writes_valid_snapshot(tmp_path, fake_http):
     assert len(fx["free"]) == 2 and len(fx["platforms"]) == 4
     assert fx["gaps"]["free_vs_bank"]["vnd"] == 26760 - 26380
     # Chỉ số không có nguồn thì không còn xuất hiện
-    assert "dxy" not in m and "btc_liquidations" not in m
+    assert "dxy" in m and "btc_liquidations" not in m
     # Tin: giữ tin lớn còn mới, bỏ tin ngoài chủ đề và tin cũ
     titles = [n["title"] for n in snap["tables"]["news"]]
     assert titles == ["Fed rate cut sends stocks surging"]

@@ -18,7 +18,7 @@ const hm = (iso?: string | null) =>
 
 const pct = (v: number | null) => fmtNum(v, 2)
 
-/** 7 dòng theo thứ tự cố định. Mỗi số kèm nguồn và ngày của chính số đó (có thể là số gần nhất). */
+/** Các dòng theo thứ tự cố định. Mỗi số kèm nguồn và ngày của chính số đó (có thể là số gần nhất). */
 export function snapshotRows(s: Snapshot): SnapRow[] {
   const m = s.metrics
   const stale = (...xs: (Metric | undefined)[]) => xs.some((x) => x?.quality === 'stale')
@@ -71,6 +71,33 @@ export function snapshotRows(s: Snapshot): SnapRow[] {
       detail: `Bình quân liên ngân hàng phiên ${dm(uo.period)} · ${src(uo)}`, stale: stale(uo) })
   }
 
+  const fred = (x: Metric) => `FRED · ngày ${dm(x.period ?? x.timestamp)}`
+
+  const dxy = m.dxy, broad = m.dtwexbgs
+  if (has(dxy)) {
+    rows.push({ label: 'DXY', value: fmtNum(dxy.value, 2), unit: 'điểm',
+      detail: `Chỉ số đô la ICE · Yahoo Finance · lấy lúc ${hm(dxy.timestamp)} ${dm(dxy.timestamp)}`, stale: stale(dxy) })
+  } else if (has(broad)) {
+    rows.push({ label: 'Chỉ số USD rộng', value: fmtNum(broad.value, 2), unit: 'điểm',
+      detail: `Thay thế DXY (chưa có nguồn DXY) · ${fred(broad)}`, stale: stale(broad) })
+  }
+
+  const sofr = m.sofr
+  if (has(sofr)) {
+    rows.push({ label: 'SOFR', value: pct(sofr.value), unit: '%/năm', detail: `Lãi suất qua đêm USD có bảo đảm · ${fred(sofr)}`, stale: stale(sofr) })
+  }
+
+  const y2 = m.dgs2, y10 = m.dgs10
+  if (has(y2)) rows.push({ label: 'Lợi suất Mỹ 2 năm', value: pct(y2.value), unit: '%/năm', detail: `Trái phiếu kho bạc Mỹ · ${fred(y2)}`, stale: stale(y2) })
+  if (has(y10)) rows.push({ label: 'Lợi suất Mỹ 10 năm', value: pct(y10.value), unit: '%/năm', detail: `Trái phiếu kho bạc Mỹ · ${fred(y10)}`, stale: stale(y10) })
+
+  const sp = m.t10y2y
+  const spBp = has(sp) ? sp.value! * 100 : has(y2) && has(y10) ? (y10.value! - y2.value!) * 100 : null
+  if (spBp != null) {
+    rows.push({ label: 'Chênh lệch 10 năm − 2 năm', value: `${spBp > 0 ? '+' : ''}${fmtNum(spBp, 0)}`, unit: 'điểm cơ bản',
+      detail: spBp < 0 ? 'Đường cong đảo ngược (âm) · FRED' : 'Đường cong dốc lên (dương) · FRED', stale: stale(sp, y2, y10) })
+  }
+
   return rows
 }
 
@@ -118,7 +145,7 @@ export async function renderSnapshot(s: Snapshot, takenAt: Date, site: string): 
 
   ctx.fillStyle = C.fg
   ctx.font = serif(46)
-  ctx.fillText('Tỷ giá & lãi suất USD/VND', PAD, 104)
+  ctx.fillText('Tỷ giá, lãi suất & đô la Mỹ', PAD, 104)
   ctx.font = sans(400, 22)
   ctx.fillStyle = C.muted
   ctx.fillText(`Chụp lúc ${hm(takenAt.toISOString())}, ${day}`, PAD, 146)

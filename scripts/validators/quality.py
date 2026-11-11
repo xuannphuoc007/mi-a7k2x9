@@ -19,7 +19,7 @@ RANGES = {  # key: (min, max)
     "sbv_buy_rate": (15000, 40000), "sbv_sell_rate": (15000, 40000),
     "interbank_overnight_rate": (0, 50), "interbank_usd_overnight_rate": (-1, 30),
     "interbank_vnd_1m_rate": (0, 50), "interbank_usd_1m_rate": (-1, 30), "sofr": (-1, 25), "dtb4wk": (-1, 25),
-    "dgs2": (-2, 25), "dgs10": (-2, 25), "dff": (-1, 25), "unrate": (0, 40),
+    "dxy": (50, 200), "dgs2": (-2, 25), "dgs10": (-2, 25), "dff": (-1, 25), "unrate": (0, 40),
 }
 
 

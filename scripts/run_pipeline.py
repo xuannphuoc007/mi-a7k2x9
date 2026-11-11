@@ -53,6 +53,8 @@ SOURCES = [
     ("vira", "VIRA — USD/VND liên ngân hàng, lãi suất liên ngân hàng USD", vira.collect, "vn_daily", vira.LIST_URL, None),
     ("market_fx", "Yahoo Finance — USD/VND thị trường quốc tế", vn_rates.collect_market_fx, "fx_vn",
      "https://finance.yahoo.com/quote/USDVND=X", None),
+    ("dxy", "Yahoo Finance — DXY (chỉ số đô la ICE)", vn_rates.collect_dxy, "macro",
+     "https://finance.yahoo.com/quote/DX-Y.NYB", None),
     ("news", "Tin tức — CNBC, BBC, Fed, CoinDesk, VnExpress, CafeF…", news.collect, "news", "RSS", None),
     ("manual", "Nhập tay — NHNN, liên ngân hàng, tồn kho nội bộ", vn_fx.collect_manual, "manual",
      "config/manual_inputs.json", None),

@@ -199,6 +199,15 @@ VIRA_BULLETIN = ("<p>Thị trường ngoại tệ: Phiên 05/11, NHNN niêm yế
                  "hạn còn lại; giao dịch tại: ON 3,85%; 1W 3,91%; 2W 3,92%, 1M 4,04. Lợi suất TPCP trên thị trường thứ cấp...</p>")
 
 
+def yahoo_dxy_json():
+    t0 = int(dt.datetime(2025, 11, 6, tzinfo=dt.timezone.utc).timestamp())
+    stamps = [t0 + 86400 * i for i in range(365)]
+    closes = [98 + 0.01 * i + math.sin(i / 7) for i in range(365)]
+    return {"chart": {"result": [{"meta": {"regularMarketPrice": closes[-1], "regularMarketTime": stamps[-1]},
+                                  "timestamp": stamps, "indicators": {"quote": [{"close": closes}]}}],
+                      "error": None}}
+
+
 def yahoo_json():
     t0 = int(dt.datetime(2025, 11, 6, tzinfo=dt.timezone.utc).timestamp())
     stamps = [t0 + 86400 * i for i in range(365)]
@@ -223,7 +232,7 @@ def router(method, url, params=None, body=None, as_text=False, as_bytes=False):
     if "allratestoday" in url:
         return sbv_json()
     if "finance.yahoo" in url:
-        return yahoo_json()
+        return yahoo_dxy_json() if "DX-Y" in url else yahoo_json()
     if "bidv" in url:
         return BIDV
     if "techcombank" in url:

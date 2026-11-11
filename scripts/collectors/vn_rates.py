@@ -183,7 +183,7 @@ def parse_yahoo(j: dict) -> tuple[float, int, list[list[float]]]:
     if price is None and pts:
         price, when = pts[-1][1], pts[-1][0]
     if price is None or when is None:
-        raise RuntimeError("Yahoo không có giá USD/VND")
+        raise RuntimeError("Yahoo không có giá")
     return price, int(when), pts
 
 
@@ -196,4 +196,21 @@ def collect_market_fx(ctx) -> dict:
         note="Giá tham chiếu quốc tế từ Yahoo Finance, có thể lệch so với giá liên ngân hàng trong nước")}
     series = {"usdvnd_market": {"label": "USD/VND thị trường quốc tế", "unit": "VND", "source": SRC_YAHOO,
                                 "points": pts}}
+    return {"metrics": m, "series": series}
+
+
+DXY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB"
+SRC_DXY = "Yahoo Finance DX-Y.NYB (ICE US Dollar Index)"
+
+
+def collect_dxy(ctx) -> dict:
+    """DXY thật (ICE) từ Yahoo Finance; FRED chỉ có Broad USD Index nên dùng nguồn này cho DXY."""
+    j = http_get(DXY_URL, params={"range": "1y", "interval": "1d"}, headers=BROWSER_UA)
+    price, when, pts = parse_yahoo(j)
+    prev = pts[-2][1] if len(pts) >= 2 and abs(pts[-1][1] - price) < 1e-9 else (pts[-1][1] if pts else None)
+    ch = (price / prev - 1) * 100 if prev else None
+    m = {"dxy": metric("DXY (chỉ số đô la ICE)", price, "điểm", SRC_DXY, s_to_iso(when), kind="mid",
+                       change_24h=ch,
+                       note="Giá tham chiếu từ Yahoo Finance, không phải dữ liệu real-time chính thức của ICE")}
+    series = {"dxy": {"label": "DXY", "unit": "điểm", "source": SRC_DXY, "points": pts}}
     return {"metrics": m, "series": series}

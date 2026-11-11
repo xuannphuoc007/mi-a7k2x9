@@ -51,6 +51,7 @@ export default function Macro() {
           <MetricCard m={m.dgs2} label="Lợi suất Mỹ 2 năm" />
           <MetricCard m={m.dgs10} label="Lợi suất Mỹ 10 năm" />
           <MetricCard m={m.t10y2y} label="Chênh 10 năm so với 2 năm" />
+          <MetricCard m={m.dxy} label="DXY (ICE)" />
           <MetricCard m={m.dtwexbgs} label="Chỉ số USD rộng (FRED)" />
           <MetricCard m={m.sofr} label="SOFR, lãi suất qua đêm USD" />
           <MetricCard m={m.dtb4wk} label="Tín phiếu Mỹ 4 tuần" />
@@ -75,6 +76,8 @@ export default function Macro() {
             <LazySeries lines={[{ key: 'spread', label: s.t10y2y.label, points: lastDays(s.t10y2y.points, 365) }]} unit="%" zero />
           </Card>
         )}
+        {s.dxy && <Card title="DXY"><LazySeries lines={[{ key: 'dxy', label: 'DXY', points: lastDays(s.dxy.points, 365) }]} unit="" /></Card>}
+        {s.sofr && <Card title="SOFR"><LazySeries lines={[{ key: 'sofr', label: s.sofr.label, points: lastDays(s.sofr.points, 365) }]} unit="%" /></Card>}
         {core.length > 0 && <Card title="Lạm phát lõi so với cùng kỳ"><LazySeries lines={core} unit="%" /></Card>}
       </div>
 

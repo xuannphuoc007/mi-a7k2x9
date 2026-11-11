@@ -5,7 +5,7 @@ import { renderSnapshot } from '../utils/snapshot'
 
 /**
  * Bấm là tải lại dữ liệu mới nhất trên máy chủ (không dùng bản đang mở trên trang, có thể là ngày cũ),
- * rồi vẽ ảnh gồm 7 chỉ số tỷ giá và lãi suất.
+ * rồi vẽ ảnh gồm các chỉ số tỷ giá, lãi suất, DXY, SOFR và lợi suất Mỹ.
  */
 export default function SnapshotButton() {
   const [busy, setBusy] = useState(false)
