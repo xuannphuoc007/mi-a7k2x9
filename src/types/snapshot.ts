@@ -255,9 +255,12 @@ export interface Snapshot {
     forward?: ForwardTable
     news?: NewsItem[]
     intraday?: {
-      date: string; open: number; band_pct: number; lo: number; hi: number; last: number; dev_pct: number
-      high: number; low: number; range_pct: number; outside_count: number; n_points: number
-      points: [number, number][]; source: string
+      band_pct: number; since: string; source: string
+      days: {
+        date: string; open: number; lo: number; hi: number; last: number; dev_pct: number
+        high: number; low: number; range_pct: number; outside_count: number; n_points: number
+        points: [number, number][]
+      }[]
     }
     digest?: Digest
     vira?: { url: string; published: string; fx_session: string | null; rates_session: string | null }

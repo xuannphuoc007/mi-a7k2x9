@@ -259,7 +259,7 @@ def collect_dxy(ctx) -> dict:
 
 
 def collect_intraday(ctx) -> dict:
-    """Nến 5 phút USD/VND trong ngày (Yahoo) để vẽ đường giá trong ngày."""
-    j = http_get(YAHOO_URL, params={"range": "1d", "interval": "5m"}, headers=BROWSER_UA)
+    """Nến 5 phút USD/VND 1 tháng gần nhất (Yahoo) để vẽ đường giá từng ngày."""
+    j = http_get(YAHOO_URL, params={"range": "1mo", "interval": "5m"}, headers=BROWSER_UA)
     _, _, pts = parse_yahoo(j)
     return {"tables": {"intraday_raw": {"points": pts}}}
