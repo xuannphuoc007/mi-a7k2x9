@@ -231,6 +231,10 @@ def router(method, url, params=None, body=None, as_text=False, as_bytes=False):
         return STOCKBIZ_ON
     if "allratestoday" in url:
         return sbv_json()
+    if "scanner.tradingview.com" in url:
+        tk = ((body or {}).get("symbols") or {}).get("tickers", [""])[0]
+        v = {"FX_IDC:USDVND": 25610.0, "TVC:DXY": 102.5}.get(tk)
+        return {"totalCount": 1 if v else 0, "data": [{"s": tk, "d": [v]}] if v else []}
     if "finance.yahoo" in url:
         return yahoo_dxy_json() if "DX-Y" in url else yahoo_json()
     if "bidv" in url:

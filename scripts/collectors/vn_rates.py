@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 
-from ..common import date_to_iso, http_get, metric, s_to_iso, to_float
+from ..common import date_to_iso, http_get, http_post, iso_vn, metric, now_vn, s_to_iso, to_float
 
 SBV_PAGE = "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1"
 SRC_SBV_OFFICIAL = "NHNN (sbv.gov.vn), thông báo tỷ giá trung tâm"
@@ -187,14 +187,57 @@ def parse_yahoo(j: dict) -> tuple[float, int, list[list[float]]]:
     return price, int(when), pts
 
 
+TV_URL = "https://scanner.tradingview.com/global/scan"
+SRC_TV = "TradingView"
+
+
+def tv_quote(ticker: str) -> float | None:
+    """Giá hiện tại từ endpoint scanner của TradingView (không chính thức, có thể đổi hoặc bị chặn).
+    Lỗi thì trả None để dùng Yahoo."""
+    try:
+        j = http_post(TV_URL, {"symbols": {"tickers": [ticker]}, "columns": ["close"]},
+                      headers=BROWSER_UA)
+        rows = j.get("data") or []
+        return to_float(rows[0]["d"][0]) if rows else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _yahoo_or_none(url: str):
+    try:
+        return parse_yahoo(http_get(url, params={"range": "1y", "interval": "1d"}, headers=BROWSER_UA))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _quote_with_history(url: str, tv_ticker: str, lo: float, hi: float):
+    """Giá hiện tại ưu tiên TradingView, lịch sử và dự phòng từ Yahoo. Trả (giá, thời điểm iso, điểm, nguồn)."""
+    yh = _yahoo_or_none(url)
+    pts = yh[2] if yh else []
+    tv = tv_quote(tv_ticker)
+    if tv is not None and lo <= tv <= hi:
+        return tv, iso_vn(now_vn()), pts, SRC_TV
+    if yh:
+        return yh[0], s_to_iso(yh[1]), pts, None
+    raise RuntimeError("TradingView và Yahoo đều không trả giá")
+
+
+def _change(price: float, pts: list) -> float | None:
+    if not pts:
+        return None
+    prev = pts[-2][1] if len(pts) >= 2 and abs(pts[-1][1] - price) / price < 1e-4 else pts[-1][1]
+    return (price / prev - 1) * 100 if prev else None
+
+
 def collect_market_fx(ctx) -> dict:
-    j = http_get(YAHOO_URL, params={"range": "1y", "interval": "1d"}, headers=BROWSER_UA)
-    price, when, pts = parse_yahoo(j)
-    ts = s_to_iso(when)
+    price, ts, pts, tv = _quote_with_history(YAHOO_URL, "FX_IDC:USDVND", 15000, 40000)
+    src = f"{SRC_TV} FX_IDC:USDVND" if tv else SRC_YAHOO
     m = {"usdvnd_market": metric(
-        "USD/VND thị trường quốc tế", price, "VND", SRC_YAHOO, ts, kind="mid",
-        note="Giá tham chiếu quốc tế từ Yahoo Finance, có thể lệch so với giá liên ngân hàng trong nước")}
-    series = {"usdvnd_market": {"label": "USD/VND thị trường quốc tế", "unit": "VND", "source": SRC_YAHOO,
+        "USD/VND thị trường quốc tế", price, "VND", src, ts, kind="mid",
+        change_24h=_change(price, pts),
+        note="Giá tham chiếu quốc tế (không phải giá ngân hàng), có thể lệch so với giá liên ngân hàng trong nước"
+             + (". Giá hiện tại từ TradingView, lịch sử từ Yahoo Finance" if tv else ""))}
+    series = {"usdvnd_market": {"label": "USD/VND thị trường quốc tế", "unit": "VND", "source": src,
                                 "points": pts}}
     return {"metrics": m, "series": series}
 
@@ -204,13 +247,12 @@ SRC_DXY = "Yahoo Finance DX-Y.NYB (ICE US Dollar Index)"
 
 
 def collect_dxy(ctx) -> dict:
-    """DXY thật (ICE) từ Yahoo Finance; FRED chỉ có Broad USD Index nên dùng nguồn này cho DXY."""
-    j = http_get(DXY_URL, params={"range": "1y", "interval": "1d"}, headers=BROWSER_UA)
-    price, when, pts = parse_yahoo(j)
-    prev = pts[-2][1] if len(pts) >= 2 and abs(pts[-1][1] - price) < 1e-9 else (pts[-1][1] if pts else None)
-    ch = (price / prev - 1) * 100 if prev else None
-    m = {"dxy": metric("DXY (chỉ số đô la ICE)", price, "điểm", SRC_DXY, s_to_iso(when), kind="mid",
-                       change_24h=ch,
-                       note="Giá tham chiếu từ Yahoo Finance, không phải dữ liệu real-time chính thức của ICE")}
-    series = {"dxy": {"label": "DXY", "unit": "điểm", "source": SRC_DXY, "points": pts}}
+    """DXY: giá hiện tại từ TradingView (TVC:DXY), lịch sử và dự phòng từ Yahoo (FRED không có DXY)."""
+    price, ts, pts, tv = _quote_with_history(DXY_URL, "TVC:DXY", 50, 200)
+    src = f"{SRC_TV} TVC:DXY" if tv else SRC_DXY
+    m = {"dxy": metric("DXY (chỉ số đô la ICE)", price, "điểm", src, ts, kind="mid",
+                       change_24h=_change(price, pts),
+                       note="Giá tham chiếu, không phải dữ liệu real-time chính thức của ICE"
+                            + (". Giá hiện tại từ TradingView, lịch sử từ Yahoo Finance" if tv else ""))}
+    series = {"dxy": {"label": "DXY", "unit": "điểm", "source": src, "points": pts}}
     return {"metrics": m, "series": series}
