@@ -256,3 +256,10 @@ def collect_dxy(ctx) -> dict:
                             + (". Giá hiện tại từ TradingView, lịch sử từ Yahoo Finance" if tv else ""))}
     series = {"dxy": {"label": "DXY", "unit": "điểm", "source": src, "points": pts}}
     return {"metrics": m, "series": series}
+
+
+def collect_intraday(ctx) -> dict:
+    """Nến 5 phút USD/VND trong ngày (Yahoo) để vẽ đường giá trong ngày."""
+    j = http_get(YAHOO_URL, params={"range": "1d", "interval": "5m"}, headers=BROWSER_UA)
+    _, _, pts = parse_yahoo(j)
+    return {"tables": {"intraday_raw": {"points": pts}}}

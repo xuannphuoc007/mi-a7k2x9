@@ -6,6 +6,7 @@ export interface SeriesLine {
   label: string
   points: [number, number][]
   color?: string
+  dashed?: boolean
 }
 
 const COLORS = ['rgb(var(--accent))', 'rgb(var(--warn))', 'rgb(var(--up))', 'rgb(var(--muted))']
@@ -23,6 +24,7 @@ function merge(lines: SeriesLine[]) {
 
 const fmtAxis = (v: number) => (Math.abs(v) >= 1e4 ? compact(v) : fmtNum(v, Math.abs(v) < 1 ? 3 : 2))
 const fmtDate = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit' }).format(new Date(t * 1000))
+const fmtHour = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit' }).format(new Date(t * 1000))
 const fmtFull = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(t * 1000))
 
 function TipBox({ active, payload, label, unit, labels }: {
@@ -43,8 +45,8 @@ function TipBox({ active, payload, label, unit, labels }: {
   )
 }
 
-export default function SeriesChart({ lines, unit, height = 220, type = 'area', zero = false }: {
-  lines: SeriesLine[]; unit: string; height?: number; type?: 'area' | 'bar'; zero?: boolean
+export default function SeriesChart({ lines, unit, height = 220, type = 'area', zero = false, timeAxis = false }: {
+  lines: SeriesLine[]; unit: string; height?: number; type?: 'area' | 'bar'; zero?: boolean; timeAxis?: boolean
 }) {
   const data = merge(lines)
   const labels = Object.fromEntries(lines.map((l) => [l.key, l.label]))
@@ -80,13 +82,14 @@ export default function SeriesChart({ lines, unit, height = 220, type = 'area', 
           ))}
         </defs>
         {grid}
-        <XAxis dataKey="t" tickFormatter={fmtDate} {...axis} minTickGap={24} />
+        <XAxis dataKey="t" tickFormatter={timeAxis ? fmtHour : fmtDate} {...axis} minTickGap={24} />
         <YAxis tickFormatter={fmtAxis} {...axis} width={52} domain={['auto', 'auto']} />
         {tip}
         {zero && <ReferenceLine y={0} stroke="rgb(var(--muted))" strokeOpacity={0.5} />}
         {lines.map((l, i) => (
-          <Area key={l.key} type="monotone" dataKey={l.key} stroke={l.color ?? COLORS[i]} strokeWidth={1.6}
-            fill={`url(#g-${l.key})`} dot={false} isAnimationActive={false} connectNulls />
+          <Area key={l.key} type={timeAxis ? 'linear' : 'monotone'} dataKey={l.key} stroke={l.color ?? COLORS[i]}
+            strokeWidth={l.dashed ? 1 : 1.6} strokeDasharray={l.dashed ? '5 4' : undefined}
+            fill={l.dashed ? 'none' : `url(#g-${l.key})`} dot={false} isAnimationActive={false} connectNulls />
         ))}
       </AreaChart>
     </ResponsiveContainer>

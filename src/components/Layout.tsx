@@ -10,6 +10,7 @@ import { fmtDateLong, fmtTime, toCsv } from '../utils/format'
 const NAV = [
   { to: '/', label: 'Hôm nay' },
   { to: '/ty-gia', label: 'Tỷ giá' },
+  { to: '/trong-ngay', label: 'Trong ngày' },
   { to: '/crypto', label: 'Crypto' },
   { to: '/stablecoin', label: 'Stablecoin' },
   { to: '/macro', label: 'Vĩ mô' },
