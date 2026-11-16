@@ -53,8 +53,10 @@ function TipBox({ active, payload, label, unit, labels }: {
   )
 }
 
-export default function SeriesChart({ lines, unit, height = 220, type = 'area', zero = false, timeAxis = false, markers = [] }: {
+export default function SeriesChart({ lines, unit, height = 220, type = 'area', zero = false, timeAxis = false, markers = [], refLines = [] }: {
   lines: SeriesLine[]; unit: string; height?: number; type?: 'area' | 'bar'; zero?: boolean; timeAxis?: boolean; markers?: SeriesMarker[]
+  /** Đường ngang tham chiếu, ví dụ biên ±0,3%. */
+  refLines?: number[]
 }) {
   const data = merge(lines)
   const spanDays = data.length ? (data[data.length - 1].t - data[0].t) / 86400 : 0
@@ -73,6 +75,7 @@ export default function SeriesChart({ lines, unit, height = 220, type = 'area', 
           <YAxis tickFormatter={fmtAxis} {...axis} width={52} />
           {tip}
           <ReferenceLine y={0} stroke="rgb(var(--muted))" strokeOpacity={0.5} />
+          {refLines.map((y) => <ReferenceLine key={y} y={y} stroke="rgb(var(--warn))" strokeDasharray="5 4" strokeOpacity={0.9} ifOverflow="extendDomain" />)}
           <Bar dataKey={k} isAnimationActive={false}>
             {data.map((d, i) => <Cell key={i} fill={(d[k] ?? 0) >= 0 ? 'rgb(var(--up))' : 'rgb(var(--down))'} fillOpacity={0.75} />)}
           </Bar>
