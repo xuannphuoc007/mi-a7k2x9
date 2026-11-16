@@ -256,12 +256,30 @@ export interface Snapshot {
     news?: NewsItem[]
     intraday?: {
       band_pct: number; since: string; source: string
+      config?: {
+        min_points: number; min_changes: number; unusual_gap_min: number; stale_after_hours: number
+        assessment: { min_sessions: number; min_price_changes: number }
+      }
+      audit?: {
+        fetch_at: string; last_market_ts: number | null; latest_stored_ts: number | null; tradingview_sample_ts: number | null
+        new_market_records: number; compared_with?: string; market_open: boolean
+        status: 'new_data' | 'no_new' | 'stale_suspect' | 'market_closed' | 'source_error'; status_text: string
+        stored_market_points: number; valid_sessions: number; total_sessions: number
+        api: Record<string, {
+          interval: string; range: string; raw_bars: number; non_null: number; null: number; null_pct: number | null
+          equal_to_previous_kept: number; window_start: number | null; window_end: number | null
+          last_priced_bar: number | null; market_time: number | null
+        }>
+      }
       days: {
         date: string; open: number; lo: number; hi: number; last: number; dev_pct: number
         high: number; low: number; range_pct: number; outside_count: number; n_points: number
         meta?: {
-          interval_min: number | null; max_gap_min: number | null; coverage_pct: number
-          sources: Record<string, number>; last_point_at: number; warnings: string[]
+          interval_min: number | null; max_gap_min: number | null; price_changes: number; market_points: number
+          coverage: { '5m': { expected: number; actual: number; pct: number } | null; '1m': { expected: number; actual: number; pct: number } | null }
+          gaps: [number, number, number][]; unusual_gaps: number
+          sources: Record<string, number>; last_point_at: number; weekend: boolean
+          valid: boolean; invalid_reason: string | null; warnings: string[]
         }
         points: [number, number, string?][]
       }[]

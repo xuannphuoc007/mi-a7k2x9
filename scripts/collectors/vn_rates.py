@@ -258,15 +258,45 @@ def collect_dxy(ctx) -> dict:
     return {"metrics": m, "series": series}
 
 
+def audit_yahoo(j: dict) -> dict:
+    """Số liệu kiểm toán dữ liệu gốc của một phản hồi Yahoo: lưới thời gian, số nến có giá, số nến null."""
+    res = (j.get("chart", {}).get("result") or [None])[0]
+    if not res:
+        raise RuntimeError(f"Yahoo không trả dữ liệu: {(j.get('chart') or {}).get('error')}")
+    stamps = [int(t) for t in (res.get("timestamp") or [])]
+    closes = ((res.get("indicators") or {}).get("quote") or [{}])[0].get("close") or []
+    pts = [[t, float(c)] for t, c in zip(stamps, closes) if c is not None]
+    vals = [v for _, v in pts]
+    return {
+        "grid": stamps, "points": pts,
+        "audit": {
+            "raw_bars": len(stamps), "non_null": len(pts), "null": len(stamps) - len(pts),
+            "null_pct": round((len(stamps) - len(pts)) / len(stamps) * 100, 2) if stamps else None,
+            "equal_to_previous_kept": sum(1 for i in range(1, len(vals)) if vals[i] == vals[i - 1]),
+            "window_start": stamps[0] if stamps else None, "window_end": stamps[-1] if stamps else None,
+            "last_priced_bar": pts[-1][0] if pts else None,
+            "market_time": (res.get("meta") or {}).get("regularMarketTime"),
+        },
+    }
+
+
 def collect_intraday(ctx) -> dict:
     """USD/VND từ Yahoo: nến 1 phút (7 ngày gần nhất) và nến 5 phút (1 tháng) để vẽ và mô phỏng từng ngày.
-    Một khung lỗi thì dùng khung còn lại; cả hai lỗi thì báo lỗi nguồn."""
-    raw, errs = {}, []
+    Chỉ bỏ nến có close = null do Yahoo trả về, không lọc nến giá không đổi. Một khung lỗi thì dùng khung còn lại;
+    cả hai lỗi thì báo lỗi nguồn."""
+    raw: dict = {"grid": {}, "api": {}}
+    errs = []
     for tag, rng, itv in (("y5", "1mo", "5m"), ("y1", "7d", "1m")):
         try:
-            raw[tag] = parse_yahoo(http_get(YAHOO_URL, params={"range": rng, "interval": itv}, headers=BROWSER_UA))[2]
+            a = audit_yahoo(http_get(YAHOO_URL, params={"range": rng, "interval": itv}, headers=BROWSER_UA))
         except Exception as e:  # noqa: BLE001
             errs.append(f"{itv}: {e}")
-    if not raw:
+            continue
+        raw[tag] = a["points"]
+        raw["grid"][tag] = a["grid"]
+        raw["api"][tag] = {"interval": itv, "range": rng, **a["audit"]}
+    if "y5" not in raw and "y1" not in raw:
         raise RuntimeError("; ".join(errs))
+    times = [v["market_time"] for v in raw["api"].values() if v.get("market_time")]
+    raw["last_market_ts"] = max(times) if times else None
     return {"tables": {"intraday_raw": raw}, "warnings": errs}

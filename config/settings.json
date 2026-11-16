@@ -35,7 +35,12 @@
   "intraday": {
     "_comment": "Trang Trong ngày: biên ±band_pct (%) quanh giá mở cửa.",
     "band_pct": 0.3,
-    "since": "2026-11-05"
+    "since": "2026-11-05",
+    "min_points": 10,
+    "min_changes": 2,
+    "unusual_gap_min": 240,
+    "stale_after_hours": 4,
+    "assessment": { "min_sessions": 10, "min_price_changes": 30 }
   },
   "reference_fx": {
     "_comment": "Giá USD/VND tham chiếu dùng để tính P2P premium: vcb_sell (Vietcombank bán chuyển khoản) | vcb_mid | sbv_central",
