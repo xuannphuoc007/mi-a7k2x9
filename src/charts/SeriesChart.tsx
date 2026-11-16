@@ -49,6 +49,8 @@ export default function SeriesChart({ lines, unit, height = 220, type = 'area', 
   lines: SeriesLine[]; unit: string; height?: number; type?: 'area' | 'bar'; zero?: boolean; timeAxis?: boolean
 }) {
   const data = merge(lines)
+  const spanDays = data.length ? (data[data.length - 1].t - data[0].t) / 86400 : 0
+  const xFmt = timeAxis && spanDays <= 1.5 ? fmtHour : fmtDate
   const labels = Object.fromEntries(lines.map((l) => [l.key, l.label]))
   const axis = { stroke: 'rgb(var(--muted))', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', tickLine: false, axisLine: false }
   const grid = <CartesianGrid stroke="rgb(var(--line))" strokeOpacity={0.6} vertical={false} />
@@ -82,12 +84,12 @@ export default function SeriesChart({ lines, unit, height = 220, type = 'area', 
           ))}
         </defs>
         {grid}
-        <XAxis dataKey="t" tickFormatter={timeAxis ? fmtHour : fmtDate} {...axis} minTickGap={24} />
+        <XAxis dataKey="t" tickFormatter={xFmt} {...axis} minTickGap={24} />
         <YAxis tickFormatter={fmtAxis} {...axis} width={52} domain={['auto', 'auto']} />
         {tip}
         {zero && <ReferenceLine y={0} stroke="rgb(var(--muted))" strokeOpacity={0.5} />}
         {lines.map((l, i) => (
-          <Area key={l.key} type={timeAxis ? 'linear' : 'monotone'} dataKey={l.key} stroke={l.color ?? COLORS[i]}
+          <Area key={l.key} type={l.dashed ? 'stepAfter' : timeAxis ? 'linear' : 'monotone'} dataKey={l.key} stroke={l.color ?? COLORS[i]}
             strokeWidth={l.dashed ? 1 : 1.6} strokeDasharray={l.dashed ? '5 4' : undefined}
             fill={l.dashed ? 'none' : `url(#g-${l.key})`} dot={false} isAnimationActive={false} connectNulls />
         ))}

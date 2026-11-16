@@ -1,5 +1,4 @@
 import clsx from 'clsx'
-import { useState } from 'react'
 import { LazySeries } from '../charts/lazy'
 import { Card, EmptyState, PageHeader } from '../components/ui'
 import { useData } from '../hooks/useData'
@@ -15,68 +14,59 @@ function Stat({ label, value, sub, className }: { label: string; value: string; 
   )
 }
 
-const hm = (t: number) =>
-  new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit' }).format(new Date(t * 1000))
 const dmy = (d: string) => d.split('-').reverse().join('/')
 
 export default function Intraday() {
   const { snap } = useData()
-  const [pick, setPick] = useState<string | null>(null)
   if (!snap) return null
   const all = snap.tables.intraday
   if (!all || all.days.length === 0) {
     return (
       <div className="space-y-9">
-        <PageHeader title="USD/VND trong ngày" desc="Biến động trong ngày so với giá mở cửa." />
+        <PageHeader title="USD/VND trong ngày" desc="Biến động so với giá mở cửa từng ngày." />
         <EmptyState title="Chưa có dữ liệu trong ngày">Cần ít nhất hai điểm giá trong ngày. Lần cập nhật kế tiếp sẽ có.</EmptyState>
       </div>
     )
   }
-  const d = all.days.find((x) => x.date === pick) ?? all.days[0]
-  const flat = (v: number) => d.points.map(([t]) => [t, v] as [number, number])
-  const first = d.points[0][0]
-  const last = d.points[d.points.length - 1][0]
-  const out = d.outside_count > 0
+  const days = [...all.days].sort((a, b) => a.date.localeCompare(b.date))
+  const price = days.flatMap((d) => d.points)
+  const band = (key: 'hi' | 'lo' | 'open') => days.flatMap((d) => d.points.map(([t]) => [t, d[key]] as [number, number]))
+  const latest = days[days.length - 1]
+  const widest = days.reduce((a, b) => (b.range_pct > a.range_pct ? b : a))
+  const outDays = days.filter((d) => d.outside_count > 0)
 
   return (
     <div className="space-y-9">
       <PageHeader
         title="USD/VND trong ngày"
-        desc={`Giá so với giá mở cửa, biên ±${all.band_pct}%. Dữ liệu từ ngày ${dmy(all.since)}. Ngày ${dmy(d.date)}: ${hm(first)} đến ${hm(last)}, ${d.n_points} điểm.`}
-        right={
-          <select value={d.date} onChange={(e) => setPick(e.target.value)} aria-label="Chọn ngày"
-            className="num bg-transparent border-b border-fg/40 hover:border-fg py-1 px-1 text-[14px] outline-none cursor-pointer">
-            {all.days.map((x) => (
-              <option key={x.date} value={x.date} className="bg-panel text-fg">{dmy(x.date)}</option>
-            ))}
-          </select>
-        }
+        desc={`Giá từ ngày ${dmy(days[0].date)} đến ${dmy(latest.date)}. Biên ±${all.band_pct}% tính quanh giá mở cửa của từng ngày.`}
       />
 
-      <Card title="Đường giá và biên" subtitle="Nét đứt là biên trên, biên dưới và giá mở cửa.">
+      <Card title="Đường giá và biên" subtitle="Nét đứt là biên trên, biên dưới và giá mở cửa của từng ngày (đổi bậc khi sang ngày mới).">
         <LazySeries
           timeAxis
-          height={300}
+          height={340}
           unit="VND"
           lines={[
-            { key: 'price', label: 'USD/VND', points: d.points },
-            { key: 'hi', label: `Biên trên +${all.band_pct}%`, points: flat(d.hi), dashed: true, color: 'rgb(var(--warn))' },
-            { key: 'open', label: 'Giá mở cửa', points: flat(d.open), dashed: true, color: 'rgb(var(--muted))' },
-            { key: 'lo', label: `Biên dưới −${all.band_pct}%`, points: flat(d.lo), dashed: true, color: 'rgb(var(--warn))' },
+            { key: 'price', label: 'USD/VND', points: price },
+            { key: 'hi', label: `Biên trên +${all.band_pct}%`, points: band('hi'), dashed: true, color: 'rgb(var(--warn))' },
+            { key: 'open', label: 'Giá mở cửa của ngày', points: band('open'), dashed: true, color: 'rgb(var(--muted))' },
+            { key: 'lo', label: `Biên dưới −${all.band_pct}%`, points: band('lo'), dashed: true, color: 'rgb(var(--warn))' },
           ]}
         />
       </Card>
 
       <Card title="Biến động">
         <div className="grid gap-x-8 gap-y-5 grid-cols-2 lg:grid-cols-4">
-          <Stat label="Giá mở cửa" value={fmtNum(d.open, 0)} sub={`Biên ${fmtNum(d.lo, 0)} – ${fmtNum(d.hi, 0)}`} />
-          <Stat label="Giá cuối" value={fmtNum(d.last, 0)} sub={`${d.dev_pct >= 0 ? '+' : ''}${fmtNum(d.dev_pct, 2)}% so với mở cửa`} />
-          <Stat label="Cao nhất / thấp nhất" value={`${fmtNum(d.high, 0)} / ${fmtNum(d.low, 0)}`} sub={`Biên độ ${fmtNum(d.range_pct, 2)}%`} />
-          <Stat label="So với biên ±" value={out ? 'Vượt biên' : 'Trong biên'} className={out ? 'text-down' : 'text-up'}
-            sub={out ? `${d.outside_count} điểm ngoài biên` : 'Chưa có điểm nào ngoài biên'} />
+          <Stat label="Giá mới nhất" value={fmtNum(latest.last, 0)} sub={`${latest.dev_pct >= 0 ? '+' : ''}${fmtNum(latest.dev_pct, 2)}% so với mở cửa ${dmy(latest.date)}`} />
+          <Stat label="Từ đầu kỳ" value={`${fmtNum(days[0].open, 0)} → ${fmtNum(latest.last, 0)}`}
+            sub={`${((latest.last / days[0].open - 1) * 100 >= 0 ? '+' : '')}${fmtNum((latest.last / days[0].open - 1) * 100, 2)}%`} />
+          <Stat label="Ngày biên độ lớn nhất" value={`${fmtNum(widest.range_pct, 2)}%`} sub={dmy(widest.date)} />
+          <Stat label="Ngày vượt biên" value={`${outDays.length} / ${days.length}`} className={outDays.length ? 'text-down' : 'text-up'}
+            sub={outDays.length ? outDays.map((d) => dmy(d.date).slice(0, 5)).join(', ') : 'Chưa có ngày nào vượt biên'} />
         </div>
 
-        <h3 className="serif text-[17px] font-semibold mt-7 mb-2">Các ngày</h3>
+        <h3 className="serif text-[17px] font-semibold mt-7 mb-2">Từng ngày</h3>
         <table className="w-full max-w-3xl text-[14px]">
           <thead>
             <tr className="text-muted text-left">
@@ -86,9 +76,8 @@ export default function Intraday() {
             </tr>
           </thead>
           <tbody>
-            {all.days.map((x) => (
-              <tr key={x.date} className={clsx('border-t border-line cursor-pointer hover:bg-fg/5', x.date === d.date && 'font-semibold')}
-                onClick={() => setPick(x.date)}>
+            {[...days].reverse().map((x) => (
+              <tr key={x.date} className="border-t border-line">
                 <td className="py-1.5 num">{dmy(x.date)}</td>
                 <td className="num text-right">{fmtNum(x.open, 0)}</td>
                 <td className="num text-right">{fmtNum(x.last, 0)}</td>
