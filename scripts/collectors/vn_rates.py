@@ -259,7 +259,14 @@ def collect_dxy(ctx) -> dict:
 
 
 def collect_intraday(ctx) -> dict:
-    """Nến 5 phút USD/VND 1 tháng gần nhất (Yahoo) để vẽ đường giá từng ngày."""
-    j = http_get(YAHOO_URL, params={"range": "1mo", "interval": "5m"}, headers=BROWSER_UA)
-    _, _, pts = parse_yahoo(j)
-    return {"tables": {"intraday_raw": {"points": pts}}}
+    """USD/VND từ Yahoo: nến 1 phút (7 ngày gần nhất) và nến 5 phút (1 tháng) để vẽ và mô phỏng từng ngày.
+    Một khung lỗi thì dùng khung còn lại; cả hai lỗi thì báo lỗi nguồn."""
+    raw, errs = {}, []
+    for tag, rng, itv in (("y5", "1mo", "5m"), ("y1", "7d", "1m")):
+        try:
+            raw[tag] = parse_yahoo(http_get(YAHOO_URL, params={"range": rng, "interval": itv}, headers=BROWSER_UA))[2]
+        except Exception as e:  # noqa: BLE001
+            errs.append(f"{itv}: {e}")
+    if not raw:
+        raise RuntimeError("; ".join(errs))
+    return {"tables": {"intraday_raw": raw}, "warnings": errs}

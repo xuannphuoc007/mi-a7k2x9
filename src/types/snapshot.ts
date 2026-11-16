@@ -259,7 +259,11 @@ export interface Snapshot {
       days: {
         date: string; open: number; lo: number; hi: number; last: number; dev_pct: number
         high: number; low: number; range_pct: number; outside_count: number; n_points: number
-        points: [number, number][]
+        meta?: {
+          interval_min: number | null; max_gap_min: number | null; coverage_pct: number
+          sources: Record<string, number>; last_point_at: number; warnings: string[]
+        }
+        points: [number, number, string?][]
       }[]
     }
     digest?: Digest

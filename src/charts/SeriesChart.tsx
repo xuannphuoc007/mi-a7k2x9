@@ -1,4 +1,4 @@
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { compact, fmtNum } from '../utils/format'
 
 export interface SeriesLine {
@@ -7,6 +7,14 @@ export interface SeriesLine {
   points: [number, number][]
   color?: string
   dashed?: boolean
+  /** Đường bậc thang liền nét, không tô nền (giá báo). */
+  step?: boolean
+}
+
+export interface SeriesMarker {
+  t: number
+  v: number
+  color?: string
 }
 
 const COLORS = ['rgb(var(--accent))', 'rgb(var(--warn))', 'rgb(var(--up))', 'rgb(var(--muted))']
@@ -45,8 +53,8 @@ function TipBox({ active, payload, label, unit, labels }: {
   )
 }
 
-export default function SeriesChart({ lines, unit, height = 220, type = 'area', zero = false, timeAxis = false }: {
-  lines: SeriesLine[]; unit: string; height?: number; type?: 'area' | 'bar'; zero?: boolean; timeAxis?: boolean
+export default function SeriesChart({ lines, unit, height = 220, type = 'area', zero = false, timeAxis = false, markers = [] }: {
+  lines: SeriesLine[]; unit: string; height?: number; type?: 'area' | 'bar'; zero?: boolean; timeAxis?: boolean; markers?: SeriesMarker[]
 }) {
   const data = merge(lines)
   const spanDays = data.length ? (data[data.length - 1].t - data[0].t) / 86400 : 0
@@ -88,10 +96,13 @@ export default function SeriesChart({ lines, unit, height = 220, type = 'area', 
         <YAxis tickFormatter={fmtAxis} {...axis} width={52} domain={['auto', 'auto']} />
         {tip}
         {zero && <ReferenceLine y={0} stroke="rgb(var(--muted))" strokeOpacity={0.5} />}
+        {markers.map((m, i) => (
+          <ReferenceDot key={`m${i}`} x={m.t} y={m.v} r={3.5} fill={m.color ?? 'rgb(var(--down))'} stroke="none" ifOverflow="extendDomain" />
+        ))}
         {lines.map((l, i) => (
-          <Area key={l.key} type={l.dashed ? 'stepAfter' : timeAxis ? 'linear' : 'monotone'} dataKey={l.key} stroke={l.color ?? COLORS[i]}
+          <Area key={l.key} type={l.dashed || l.step ? 'stepAfter' : timeAxis ? 'linear' : 'monotone'} dataKey={l.key} stroke={l.color ?? COLORS[i]}
             strokeWidth={l.dashed ? 1 : 1.6} strokeDasharray={l.dashed ? '5 4' : undefined}
-            fill={l.dashed ? 'none' : `url(#g-${l.key})`} dot={false} isAnimationActive={false} connectNulls />
+            fill={l.dashed || l.step ? 'none' : `url(#g-${l.key})`} dot={false} isAnimationActive={false} connectNulls />
         ))}
       </AreaChart>
     </ResponsiveContainer>
