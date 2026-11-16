@@ -66,7 +66,10 @@ export default function IntradayPage() {
   const sorted = useMemo(() => (all ? [...all.days].sort((a, b) => a.date.localeCompare(b.date)) : []), [all])
   const validDays = useMemo(() => sorted.filter(valid), [sorted])
   // Mặc định: ngày giao dịch gần nhất có dữ liệu hợp lệ, không phải ngày cuối tuần giá đứng yên
-  const defaultPick = validDays.length ? validDays[validDays.length - 1].date : sorted.length ? sorted[sorted.length - 1].date : ALL
+  const weekdays = useMemo(() => sorted.filter((d) => !d.meta?.weekend), [sorted])
+  const defaultPick = validDays.length ? validDays[validDays.length - 1].date
+    : weekdays.length ? weekdays[weekdays.length - 1].date
+    : sorted.length ? sorted[sorted.length - 1].date : ALL
   const sel = pick ?? defaultPick
   const scope = useMemo(() => {
     if (sel === ALL) return validDays.length ? validDays : sorted
@@ -75,8 +78,10 @@ export default function IntradayPage() {
   }, [sorted, validDays, sel])
   const dyn = useMemo(() => runDynamic(scope, thr), [scope, thr])
   const sta = useMemo(() => runStatic(scope, thr), [scope, thr])
-  // So sánh ngưỡng luôn chạy trên toàn bộ phiên đủ dữ liệu, không phụ thuộc ngày đang xem
-  const evidence = validDays.length ? validDays : []
+  // So sánh ngưỡng luôn chạy trên toàn bộ phiên đủ dữ liệu, không phụ thuộc ngày đang xem.
+  // Chưa có phiên đủ dữ liệu thì chạy sơ bộ trên các ngày trong tuần và ghi rõ là sơ bộ, không dùng cuối tuần.
+  const prelim = validDays.length === 0
+  const evidence = prelim ? weekdays : validDays
   const compare = useMemo(
     () => COMPARE_BPS.map((b) => ({ b, d: runDynamic(evidence, b).summary, s: runStatic(evidence, b).summary })),
     [evidence],
@@ -123,9 +128,9 @@ export default function IntradayPage() {
   const st = audit ? (STATUS[audit.status] ?? { label: audit.status, cls: '' }) : null
 
   // --- kết luận chỉ khi đủ dữ liệu: dựa trên toàn bộ phiên hợp lệ, không phụ thuộc ngày đang xem
-  const evD = compare.find((c) => c.b === thr)?.d ?? runDynamic(evidence, thr).summary
-  const sessions = evidence.length
-  const changes = evD.marketChanges
+  const evD = (compare.find((c) => c.b === thr)?.d ?? runDynamic(evidence, thr).summary)
+  const sessions = validDays.length
+  const changes = prelim ? 0 : evD.marketChanges
   const enough = sessions >= cfg.assessment.min_sessions && changes >= cfg.assessment.min_price_changes
 
   const cov = scope.reduce(
@@ -275,7 +280,7 @@ export default function IntradayPage() {
       </Card>
 
       <Card title="Đánh giá ngưỡng"
-        subtitle={`Mô phỏng ngưỡng ±${thr} bps trên ${sessions} phiên đủ dữ liệu (trên tổng ${sorted.length} ngày có điểm giá), ${changes} lần giá thị trường đổi, tính lại mỗi khi đổi dữ liệu.`}>
+        subtitle={`Mô phỏng ngưỡng ±${thr} bps. Phiên đủ dữ liệu: ${sessions} / ${sorted.length} ngày có điểm giá. Số lần giá thị trường đổi trong các phiên đó: ${changes}. Tính lại mỗi khi đổi dữ liệu.`}>
         {enough ? (
           <p className="text-[15.5px] max-w-3xl">
             Trên {sessions} phiên đủ dữ liệu, giá thị trường đổi <b>{evD.marketChanges}</b> lần, giá báo đổi <b>{evD.requotes}</b> lần
@@ -314,7 +319,11 @@ export default function IntradayPage() {
         </p>
 
         <h3 className="serif text-[17px] font-semibold mt-7 mb-1">So sánh ngưỡng 10 / 20 / 30 bps</h3>
-        <p className="text-[13.5px] text-muted mb-2">Chạy trên {sessions} / {sorted.length} phiên đủ dữ liệu, độc lập với ngày đang xem.</p>
+        <p className={clsx('text-[13.5px] mb-2', prelim ? 'text-warn' : 'text-muted')}>
+          {prelim
+            ? `Chưa có phiên nào đủ dữ liệu (0 / ${sorted.length}). Bảng dưới là kết quả sơ bộ trên ${evidence.length} ngày trong tuần, bỏ cuối tuần, chưa dùng được để kết luận.`
+            : `Chạy trên ${validDays.length} / ${sorted.length} phiên đủ dữ liệu, độc lập với ngày đang xem.`}
+        </p>
         <div className="overflow-x-auto">
           <table className="w-full max-w-4xl text-[14px]">
             <thead>
