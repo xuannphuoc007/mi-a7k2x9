@@ -8,7 +8,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef } from "react";
 import { subscribeG } from "@/animations/scrollController";
-import { chapters } from "@/data/coins/xrp/chapters";
+import { chapters, FINALE } from "@/data/coins/xrp/chapters";
 import { useI18n } from "@/lib/i18n";
 import { useStore, range } from "@/lib/store";
 import { ui } from "@/animations/scrollController";
@@ -52,6 +52,7 @@ export default function Stage({ mobile }: { mobile: boolean }) {
   const { t } = useI18n();
   const chapter = useStore(ui, (s) => s.chapter);
   const squareRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   useEffect(() => {
     const el = squareRef.current;
     if (!el) return;
@@ -63,6 +64,8 @@ export default function Stage({ mobile }: { mobile: boolean }) {
   useEffect(
     () =>
       subscribeG((g) => {
+        // in the finale explorer the 3D coin underneath must receive drags and clicks
+        if (svgRef.current) svgRef.current.style.pointerEvents = g > FINALE + 0.8 ? "none" : "auto";
         const el = ref.current;
         if (!el) return;
         const d = darkness(g);
@@ -102,7 +105,7 @@ export default function Stage({ mobile }: { mobile: boolean }) {
       <div className="absolute inset-0" style={{ containerType: "size" }}>
       <div ref={squareRef} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: "min(100cqw, 100cqh)", height: "min(100cqw, 100cqh)" }}>
         <CoinCanvas mobile={mobile} />
-        <svg viewBox="0 0 1000 1000" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid meet" style={{ overflow: "visible" }}>
+        <svg ref={svgRef} viewBox="0 0 1000 1000" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid meet" style={{ overflow: "visible" }}>
           <Defs />
           <ProblemScene />
           <OriginScene />

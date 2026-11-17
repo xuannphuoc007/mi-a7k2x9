@@ -46,7 +46,6 @@ export default function Footer() {
             <ArrowUp size={13} /> {t.ui.backToTop}
           </button>
           <div className="serif mt-16 text-[64px] font-bold leading-none text-line md:text-[88px]">₿ 21M</div>
-          <a href="../xrp/" className="tag mt-6 inline-flex items-center gap-2 text-mute hover:text-accent">{t.ui.sister} <ExternalLink size={11} /></a>
         </div>
       </div>
     </footer>

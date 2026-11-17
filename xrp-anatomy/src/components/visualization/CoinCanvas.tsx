@@ -557,8 +557,9 @@ function useDragRotate(el: HTMLElement | null) {
     if (!el) return;
     let down = false, sx = 0, sy = 0, yaw0 = 0, pitch0 = 0;
     const onDown = (e: PointerEvent) => {
-      if (engine.g < FINALE + 0.85) return;
+      if (engine.g < FINALE + 0.8) return;
       down = true;
+      el.style.cursor = "grabbing";
       sx = e.clientX; sy = e.clientY;
       yaw0 = explorer.get().yaw; pitch0 = explorer.get().pitch;
       el.setPointerCapture(e.pointerId);
@@ -566,11 +567,14 @@ function useDragRotate(el: HTMLElement | null) {
     const onMove = (e: PointerEvent) => {
       if (!down) return;
       explorer.set({
-        yaw: yaw0 + (e.clientX - sx) * 0.008,
-        pitch: clamp(pitch0 + (e.clientY - sy) * 0.006, -0.6, 0.9),
+        yaw: yaw0 + (e.clientX - sx) * 0.01,
+        pitch: clamp(pitch0 + (e.clientY - sy) * 0.008, -1.2, 1.2),
       });
     };
-    const onUp = () => (down = false);
+    const onUp = () => {
+      down = false;
+      el.style.cursor = "grab";
+    };
     el.addEventListener("pointerdown", onDown);
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerup", onUp);
@@ -596,7 +600,7 @@ export default function CoinCanvas({ mobile }: { mobile: boolean }) {
       subscribeG((g) => {
         const l = g - COIN;
         setActive((l > -0.05 && l < 1.25) || g > FINALE - 0.16);
-        setExplore(g > FINALE + 0.85);
+        setExplore(g > FINALE + 0.8);
         // fade the canvas in as the coin chapter approaches
         if (wrapRef.current) wrapRef.current.style.opacity = String(g > FINALE - 0.5 ? smooth(range(g, FINALE - 0.14, FINALE - 0.02)) : smooth(range(l, -0.01, 0.07)));
       }),
