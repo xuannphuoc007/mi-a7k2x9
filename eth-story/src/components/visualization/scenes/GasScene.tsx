@@ -9,13 +9,18 @@ import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useClock } from "@/hooks/useTween";
 import { useI18n } from "@/lib/i18n";
-import { clamp, lerp, smooth, useStore } from "@/lib/store";
-import { gasStore } from "@/lib/simStores";
-import { baseFees, burnedEth, GAS_BLOCKS } from "@/lib/models";
+import { clamp, lerp, smooth } from "@/lib/store";
+import { BASE0, burnedEth, ETH_USD, TX_GAS, txCostEth } from "@/lib/models";
 import { C, Flame, Label } from "../svg";
 
 const IDX = chapterIndex("gas");
 const SEATS = 30;
+/** a rush hour: 12 nearly-full blocks, then 12 nearly-empty ones */
+const RUSH = 12;
+const N = RUSH * 2;
+const FULL = (i: number) => (i < RUSH ? 0.9 : 0.15);
+const FEES: number[] = [BASE0];
+for (let i = 1; i <= N; i++) FEES.push(FEES[i - 1] * (1 + (0.125 * (FULL(i - 1) - 0.5)) / 0.5));
 
 function Bus({ x, y, fill, k, target }: { x: number; y: number; fill: number; k: number; target: boolean }) {
   const filled = Math.round(fill * SEATS);
@@ -43,17 +48,16 @@ export default function GasScene() {
   const L = t.scenes.gas;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const fullness = useStore(gasStore, (s) => s.fullness);
-  const blocks = useStore(gasStore, (s) => s.blocks);
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, bus: 0, fillS: 0, ticket: 0, inter: 0, exit: 0 },
+    { vis: 0, bus: 0, fillS: 0, ticket: 0, inter: 0, blocks: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))
         .to(v, { bus: 1, duration: 0.1 }, at(-0.08))
         .to(v, { fillS: 1, duration: 0.2, ease: "none" }, at(0.04))
         .to(v, { ticket: 1, duration: 0.14 }, at(0.26))
-        .to(v, { inter: 1, duration: 0.06 }, at(0.44))
+        .to(v, { inter: 1, duration: 0.04 }, at(0.44))
+        .to(v, { blocks: N, duration: 0.44, ease: "none" }, at(0.47))
         .to(v, { exit: 1, duration: 0.08 }, at(0.92))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -65,22 +69,24 @@ export default function GasScene() {
   const nf = (n: number, d = 2) => new Intl.NumberFormat(locale, { maximumFractionDigits: d, minimumFractionDigits: d }).format(n);
 
   // story mode: a bus fills to 1/2 then to full; interactive: the panel's fullness and block count
-  const f = inter > 0.5 ? fullness : lerp(0.15, 0.9, smooth(v.fillS));
-  const fees = baseFees(inter > 0.5 ? fullness : 0.5);
-  const shown = inter > 0.5 ? clamp(blocks, 0, GAS_BLOCKS) : 0;
+  const shown = inter > 0.5 ? clamp(v.blocks, 0, N) : 0;
   const nDone = Math.floor(shown);
   const frac = shown - nDone;
+  const f = inter > 0.5 ? FULL(Math.min(nDone, N - 1)) : lerp(0.15, 0.9, smooth(v.fillS));
+  const fees = FEES;
   let burned = 0;
-  for (let i = 0; i < nDone; i++) burned += burnedEth(fees[i], fullness);
-  const base = fees[Math.min(nDone, GAS_BLOCKS)];
+  for (let i = 0; i < nDone; i++) burned += burnedEth(fees[i], FULL(i));
+  const base = fees[Math.min(nDone, N)];
+  const costUsd = txCostEth(base, 0.1, TX_GAS[0]) * ETH_USD;
+  const rush = nDone < RUSH;
 
   // chart
   const CX0 = 140;
   const CX1 = 880;
   const CY0 = 170;
   const CY1 = 390;
-  const maxB = Math.max(4.5, ...fees.slice(0, nDone + 1));
-  const bw = (CX1 - CX0) / (GAS_BLOCKS + 1);
+  const maxB = Math.max(...FEES) * 1.05;
+  const bw = (CX1 - CX0) / (N + 1);
   const yOf = (b: number) => CY1 - (b / maxB) * (CY1 - CY0);
   const busX = 500 - smooth(frac) * 620;
 
@@ -90,7 +96,7 @@ export default function GasScene() {
       <g opacity={inter}>
         <line x1={CX0} x2={CX1} y1={CY1} y2={CY1} stroke={C.line} />
         <line x1={CX0} x2={CX1} y1={yOf(1)} y2={yOf(1)} stroke={C.line} strokeDasharray="2 6" />
-        <Label x={CX0} y={CY0 - 24} size={fs(9.5)} color={C.ink}>
+        <Label x={CX0} y={CY0 - 24} size={fs(9.5)} color={C.ink} opacity={k < 1.5 ? 1 : 0}>
           {L.chart}
         </Label>
         <Label x={CX1} y={yOf(1) - 6} anchor="end" size={fs(8.5)}>
@@ -101,15 +107,21 @@ export default function GasScene() {
           const isNow = i === nDone;
           return (
             <g key={i}>
-              <rect x={CX0 + i * bw + 4} y={yOf(b)} width={bw - 8} height={h} rx={3} fill={isNow ? C.accent : b >= 1 ? C.peach : C.mint} opacity={isNow ? 1 : 0.75} />
+              <rect x={CX0 + i * bw + 2} y={yOf(b)} width={bw - 4} height={h} rx={3} fill={isNow ? C.accent : b >= 1 ? C.peach : C.mint} opacity={isNow ? 1 : 0.75} />
             </g>
           );
         })}
+        <Label x={CX0} y={k < 1.5 ? CY0 - 2 : CY0 - 78} size={fs(10)} color={rush ? C.peach : C.mint}>
+          {rush ? L.rush : L.calm}
+        </Label>
+        <Label x={CX0} y={CY0 + 6 + fs(16)} size={fs(9)} color={C.ink} upper={false} spacing="0.02em" opacity={k < 1.5 ? 1 : 0}>
+          {L.cost.replace("{usd}", costUsd < 0.01 ? "<$0.01" : `$${nf(costUsd, 3)}`)}
+        </Label>
         <text x={CX1} y={CY0 + 6} textAnchor="end" fill={C.accent} style={{ fontFamily: "var(--font-mono)", fontSize: fs(22), fontWeight: 600 }}>
           {nf(base, base < 10 ? 2 : 1)} gwei
         </text>
         <Label x={CX1} y={CY0 + 6 + fs(18)} anchor="end" size={fs(9)}>
-          {L.baseNow} · {L.block} {nDone}/{GAS_BLOCKS}
+          {L.baseNow} · {L.block} {nDone}/{N}
         </Label>
       </g>
 

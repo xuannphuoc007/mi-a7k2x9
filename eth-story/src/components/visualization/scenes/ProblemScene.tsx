@@ -7,10 +7,8 @@
 import { chapterIndex } from "@/data/coins/eth/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
-import { useTween } from "@/hooks/useTween";
 import { useI18n } from "@/lib/i18n";
-import { clamp, lerp, smooth, useStore } from "@/lib/store";
-import { problemStore } from "@/lib/simStores";
+import { clamp, lerp, smooth } from "@/lib/store";
 import { C, Chip, Label, Person } from "../svg";
 
 const IDX = chapterIndex("problem");
@@ -78,20 +76,17 @@ export default function ProblemScene() {
   const L = t.scenes.problem;
   const k = useFontK();
   const mobile = k >= 1.5;
-  const option = useStore(problemStore, (s) => s.option);
-  const fee = useStore(problemStore, (s) => s.fee);
-  const o = [useTween(option === 0 ? 1 : 0, 0.45), useTween(option === 1 ? 1 : 0, 0.45), useTween(option === 2 ? 1 : 0, 0.45), useTween(option === 3 ? 1 : 0, 0.45)];
-  const feeT = useTween(fee, 0.35);
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, people: 0, who: 0, plat: 0, flow: 0, inter: 0, exit: 0 },
+    { vis: 0, people: 0, who: 0, plat: 0, flow: 0, inter: 0, opt: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(0.04))
         .to(v, { people: 1, duration: 0.12 }, at(0.06))
         .to(v, { who: 1, duration: 0.12 }, at(0.2))
         .to(v, { plat: 1, duration: 0.1 }, at(0.4))
         .to(v, { flow: 1, duration: 0.14, ease: "none" }, at(0.44))
-        .to(v, { inter: 1, duration: 0.08 }, at(0.58))
+        .to(v, { inter: 1, duration: 0.06 }, at(0.6))
+        .to(v, { opt: 4, duration: 0.3, ease: "none" }, at(0.62))
         .to(v, { exit: 1, duration: 0.08 }, at(0.92))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -112,7 +107,10 @@ export default function ProblemScene() {
   const after = f > 0.5;
   const amtStory = after ? AMOUNT * (1 - storyFee / 100) : AMOUNT;
 
-  // interactive blends
+  // the four ways play one after another as the reader scrolls
+  const o = [0, 1, 2, 3].map((i) => (i === 3 && v.opt > 3.5 ? 1 : clamp(1 - Math.max(0, Math.abs(v.opt - (i + 0.5)) - 0.36) * 7)));
+  const option = Math.min(3, Math.floor(v.opt));
+  const feeT = PLATFORM_FEE_DEFAULT;
   const platShown = Math.max(plat * story, o[2] * inter);
   const contractShown = o[3] * inter;
   const feeNow = feeT;
@@ -188,9 +186,17 @@ export default function ProblemScene() {
         </g>
       )}
 
-      {/* interactive outcomes */}
+      {/* the four ways, one by one */}
       {inter > 0.01 && (
         <g opacity={inter}>
+          <Label x={500} y={150} anchor="middle" color={C.accent} size={fs(12)}>
+            {`${option + 1}/4 · ${L.options[option]}`}
+          </Label>
+          <g transform="translate(400,175)">
+            {[0, 1, 2, 3].map((i) => (
+              <rect key={i} x={i * 52} y={0} width={44} height={5} rx={2.5} fill={i <= option ? C.accent : C.line} />
+            ))}
+          </g>
           {/* pay first: money already with Lan, risk on Anna */}
           <g opacity={riskAnna}>
             <Chip x={LAN.x + 120} y={LAN.y - 120} text="$500" color={C.mint} k={k} />

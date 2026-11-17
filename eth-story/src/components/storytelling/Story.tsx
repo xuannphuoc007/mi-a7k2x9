@@ -10,23 +10,11 @@ import { chapters, type PanelKind } from "@/data/coins/eth/chapters";
 import { registerSection, initScrollEngine } from "@/animations/scrollController";
 import { useI18n } from "@/lib/i18n";
 import Stage from "@/components/visualization/Stage";
-import ProblemPanel from "@/components/interactive/ProblemPanel";
-import JourneyPanel from "@/components/interactive/JourneyPanel";
-import EscrowPanel from "@/components/interactive/EscrowPanel";
-import GasPanel from "@/components/interactive/GasPanel";
-import StakingPanel from "@/components/interactive/StakingPanel";
-import LendingPanel from "@/components/interactive/LendingPanel";
-import SupplyPanel from "@/components/interactive/SupplyPanel";
+import ComparePanel from "@/components/interactive/ComparePanel";
 import { useIsMobile, useReducedMotion } from "@/hooks/useMedia";
 
 const PANELS: Record<PanelKind, () => React.ReactElement> = {
-  problem: ProblemPanel,
-  journey: JourneyPanel,
-  escrow: EscrowPanel,
-  gas: GasPanel,
-  staking: StakingPanel,
-  lending: LendingPanel,
-  supply: SupplyPanel,
+  compare: ComparePanel,
 };
 
 export default function Story() {

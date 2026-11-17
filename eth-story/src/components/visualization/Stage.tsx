@@ -1,7 +1,7 @@
 "use client";
 /**
  * The pinned illustration: an SVG layer (diagrams) with a Three.js layer
- * (the ETH diamond) on top. Both share one square coordinate system so scenes can
+ * (the ETH coin) on top. Both share one square coordinate system so scenes can
  * hand objects to each other. Stage colours are CSS variables, interpolated
  * when a chapter switches to the dark technical theme.
  */
@@ -26,8 +26,9 @@ import EconomicsScene from "./scenes/EconomicsScene";
 import Layer2Scene from "./scenes/Layer2Scene";
 import RealityScene from "./scenes/RealityScene";
 import FinaleScene from "./scenes/FinaleScene";
+import VersusScene from "./scenes/VersusScene";
 
-const DiamondCanvas = dynamic(() => import("./DiamondCanvas"), { ssr: false });
+const CoinCanvas = dynamic(() => import("./CoinCanvas"), { ssr: false });
 
 /** Ethereum identity: light paper, ETH blue-violet (#627EEA) and the facet colours of the diamond */
 const LIGHT = { ink: [28, 31, 58], paper: [246, 247, 253], mute: [104, 110, 145], line: [221, 225, 241], accent: [98, 126, 234], soft: [230, 234, 252] };
@@ -114,10 +115,11 @@ export default function Stage({ mobile }: { mobile: boolean }) {
           <DefiScene />
           <EconomicsScene />
           <Layer2Scene />
+          <VersusScene />
           <RealityScene />
           <FinaleScene />
         </svg>
-        <DiamondCanvas mobile={mobile} />
+        <CoinCanvas mobile={mobile} />
       </div>
       </div>
 

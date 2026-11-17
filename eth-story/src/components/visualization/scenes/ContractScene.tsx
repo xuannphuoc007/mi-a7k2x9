@@ -1,15 +1,14 @@
 "use client";
 /**
  * Act 3 · Simulation 1 — the escrow contract. Anna locks $500 (a stablecoin)
- * in a contract with three written rules. The reader picks a scenario in the
- * panel and presses play; the deciding rule lights up and the money moves.
+ * in a contract with three written rules. As the reader scrolls, three
+ * endings play one after another; the deciding rule lights up and the money moves.
  */
 import { chapterIndex } from "@/data/coins/eth/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
-import { clamp, lerp, smooth, useStore } from "@/lib/store";
-import { escrowStore } from "@/lib/simStores";
+import { clamp, lerp, smooth } from "@/lib/store";
 import { C, Chip, Label, Person } from "../svg";
 
 const IDX = chapterIndex("contract");
@@ -39,18 +38,16 @@ export default function ContractScene() {
   const L = t.scenes.contract;
   const k = useFontK();
   const mobile = k >= 1.5;
-  const scenario = useStore(escrowStore, (s) => s.scenario);
-  const run = useStore(escrowStore, (s) => s.run);
-  const runs = useStore(escrowStore, (s) => s.runs);
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, people: 0, deposit: 0, rules: 0, inter: 0, limits: 0, exit: 0 },
+    { vis: 0, people: 0, deposit: 0, rules: 0, inter: 0, play: 0, limits: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))
         .to(v, { people: 1, duration: 0.1 }, at(-0.1))
-        .to(v, { deposit: 1, duration: 0.16, ease: "none" }, at(0.04))
-        .to(v, { rules: 1, duration: 0.16, ease: "none" }, at(0.24))
-        .to(v, { inter: 1, duration: 0.04 }, at(0.42))
+        .to(v, { deposit: 1, duration: 0.14, ease: "none" }, at(0.04))
+        .to(v, { rules: 1, duration: 0.16, ease: "none" }, at(0.22))
+        .to(v, { inter: 1, duration: 0.03 }, at(0.41))
+        .to(v, { play: 3, duration: 0.42, ease: "none" }, at(0.43))
         .to(v, { limits: 1, duration: 0.1 }, at(0.84))
         .to(v, { exit: 1, duration: 0.08 }, at(0.92))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
@@ -61,7 +58,10 @@ export default function ContractScene() {
   const fs = (s: number) => s * k;
   const inter = smooth(v.inter);
   const limits = smooth(v.limits);
-  const active = runs > 0 ? run : 0;
+  // three endings, one after another: approve → silent 7 days → nothing delivered
+  const scenario = Math.min(2, Math.floor(v.play));
+  const runs = v.play > 0 ? 1 : 0;
+  const active = clamp((v.play - scenario) * 1.15);
 
   // ---- simulated run (0..1) ----
   const delivered = scenario !== 2;
@@ -142,9 +142,9 @@ export default function ContractScene() {
           )}
         </g>
       )}
-      {inter > 0.5 && runs === 0 && limits < 0.05 && (
-        <Label x={BOX.x} y={190} anchor="middle" color={C.accent} size={fs(10)}>
-          {L.pressPlay}
+      {inter > 0.5 && runs > 0 && limits < 0.05 && (
+        <Label x={BOX.x} y={130} anchor="middle" color={C.accent} size={fs(11)}>
+          {`${scenario + 1}/3 · ${L.endings[scenario]}`}
         </Label>
       )}
 

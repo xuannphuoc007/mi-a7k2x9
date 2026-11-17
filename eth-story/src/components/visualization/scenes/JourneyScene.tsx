@@ -11,8 +11,7 @@ import { journeyEvents, type JEvent } from "@/data/coins/eth/events";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
-import { clamp, smooth, useStore } from "@/lib/store";
-import { journeyStore } from "@/lib/simStores";
+import { clamp, smooth } from "@/lib/store";
 import { FIRST_T, LAST_T, NEWS_FROM, NEWS_LOG_PATH, PRICE_LOG_AREA, PRICE_LOG_PATH, fmtDate, priceAt, usd } from "@/lib/ethSeries";
 import { C, Label } from "../svg";
 
@@ -97,7 +96,7 @@ export default function JourneyScene() {
   const L = t.scenes.journey;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const selected = useStore(journeyStore, (s) => s.selected);
+  const selected = null as string | null;
   const v = useSceneTimeline(
     IDX,
     { vis: 0, frame: 0, T: KEYS[0][1], exit: 0 },
@@ -225,8 +224,6 @@ export default function JourneyScene() {
               key={e.id}
               transform={`translate(${x},${y})`}
               opacity={on ? 1 : 0.18}
-              style={{ cursor: "pointer" }}
-              onClick={() => journeyStore.set({ selected: isSel ? null : e.id })}
             >
               <circle r={18} fill="transparent" />
               {isSel && <circle r={16} fill="none" stroke={c} strokeWidth={1.6} className="ping" />}
@@ -277,22 +274,37 @@ export default function JourneyScene() {
   );
 }
 
+function wrap(text: string, max: number) {
+  const out: string[] = [];
+  let line = "";
+  for (const w of text.split(" ")) {
+    if ((line + " " + w).trim().length > max) {
+      out.push(line.trim());
+      line = w;
+    } else line += " " + w;
+  }
+  if (line.trim()) out.push(line.trim());
+  return out;
+}
+
 function EventCard({ e, lang, k, o, price, locale }: { e: JEvent; lang: "en" | "vi"; k: number; o: number; price: number | null; locale: string }) {
   if (o <= 0.02) return null;
   const x = xOf(e.t);
   const y = yEvent(e);
   const title = e[lang].title;
   const fsT = 13 * k;
-  const w = Math.min(520, Math.max(150, title.length * fsT * 0.56 + 28));
-  const h = 46 * k;
+  const showBody = k < 1.5;
+  const body = showBody ? wrap(e[lang].body, 64) : [];
+  const w = showBody ? 470 : Math.min(520, Math.max(150, title.length * fsT * 0.56 + 28));
+  const h = 46 * k + body.length * 16;
   const cx = Math.max(X0 + w / 2, Math.min(X1 - w / 2, x));
-  const above = y > YT + 130;
+  const above = y > YT + 130 + body.length * 16;
   const cy = above ? y - 34 - h : y + 34;
   const c = tone(e);
   return (
     <g opacity={o} pointerEvents="none">
       <line x1={x} y1={y} x2={x} y2={above ? cy + h : cy} stroke={c} strokeWidth={1} opacity={0.7} />
-      <rect x={cx - w / 2} y={cy} width={w} height={h} rx={4} fill={C.paper} stroke={c} strokeWidth={1.2} opacity={0.96} />
+      <rect x={cx - w / 2} y={cy} width={w} height={h} rx={4} fill={C.paper} stroke={c} strokeWidth={1.2} opacity={0.97} />
       <text x={cx - w / 2 + 12} y={cy + 16 * k} fill={c} style={{ fontFamily: "var(--font-mono)", fontSize: 9 * k, letterSpacing: "0.1em" }}>
         {fmtDate(e.t, lang).toUpperCase()}
         {price !== null ? ` · ${usd(price, locale)}` : ""}
@@ -300,6 +312,11 @@ function EventCard({ e, lang, k, o, price, locale }: { e: JEvent; lang: "en" | "
       <text x={cx - w / 2 + 12} y={cy + 36 * k} fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: fsT }}>
         {title}
       </text>
+      {body.map((l, i) => (
+        <text key={i} x={cx - w / 2 + 12} y={cy + 36 * k + 18 + i * 16} fill={C.mute} style={{ fontFamily: "var(--font-sans)", fontSize: 11.5 }}>
+          {l}
+        </text>
+      ))}
     </g>
   );
 }

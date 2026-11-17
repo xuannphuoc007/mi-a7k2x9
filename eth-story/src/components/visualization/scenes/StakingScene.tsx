@@ -9,8 +9,7 @@ import { chapterIndex } from "@/data/coins/eth/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
-import { clamp, lerp, mulberry32, smooth, useStore } from "@/lib/store";
-import { stakingStore } from "@/lib/simStores";
+import { clamp, lerp, mulberry32, smooth } from "@/lib/store";
 import { DEPOSIT, SLASH_DAY, stakeBalance } from "@/lib/models";
 import { C, EthGlyph, Label } from "../svg";
 
@@ -37,22 +36,20 @@ export default function StakingScene() {
   const L = t.scenes.staking;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const behaviour = useStore(stakingStore, (s) => s.behaviour);
-  const day = useStore(stakingStore, (s) => s.day);
-  const others = useStore(stakingStore, (s) => s.othersSlashed);
   const order = useMemo(() => {
     const r = mulberry32(42);
     return Array.from({ length: 40 }, () => Math.floor(r() * N));
   }, []);
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, ring: 0, slots: 0, rules: 0, inter: 0, exit: 0 },
+    { vis: 0, ring: 0, slots: 0, rules: 0, inter: 0, day: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))
         .to(v, { ring: 1, duration: 0.14 }, at(-0.08))
         .to(v, { slots: 1, duration: 0.22, ease: "none" }, at(0.04))
         .to(v, { rules: 1, duration: 0.12 }, at(0.26))
-        .to(v, { inter: 1, duration: 0.06 }, at(0.44))
+        .to(v, { inter: 1, duration: 0.04 }, at(0.44))
+        .to(v, { day: 365, duration: 0.42, ease: "none" }, at(0.47))
         .to(v, { exit: 1, duration: 0.08 }, at(0.92))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -81,8 +78,8 @@ export default function StakingScene() {
     pts.push(`${xOf(upTo).toFixed(1)},${yOf(Math.max(B0, stakeBalance(beh, upTo, others))).toFixed(1)}`);
     return "M" + pts.join("L");
   };
-  const bal = stakeBalance(behaviour, day, others);
-  const chg = bal - DEPOSIT;
+  const day = v.day;
+  const others = 0.01;
 
   return (
     <g opacity={v.vis * (1 - ex)}>
@@ -170,10 +167,12 @@ export default function StakingScene() {
             </text>
           ))}
           {[0, 1, 2].map((b) => (
-            <path key={b} d={path(b, 365)} fill="none" stroke={TONES[b]} strokeWidth={1} opacity={b === behaviour ? 0.25 : 0.12} strokeDasharray="3 4" />
+            <path key={`g${b}`} d={path(b, 365)} fill="none" stroke={TONES[b]} strokeWidth={1} opacity={0.15} strokeDasharray="3 4" />
           ))}
-          <path d={path(behaviour, day)} fill="none" stroke={TONES[behaviour]} strokeWidth={3} strokeLinejoin="round" />
-          {behaviour === 2 && day >= SLASH_DAY && (
+          {[0, 1, 2].map((b) => (
+            <path key={b} d={path(b, day)} fill="none" stroke={TONES[b]} strokeWidth={3} strokeLinejoin="round" />
+          ))}
+          {day >= SLASH_DAY && (
             <g transform={`translate(${xOf(SLASH_DAY)},${yOf(stakeBalance(2, SLASH_DAY, others))})`}>
               <circle r={10 + Math.min(1, (day - SLASH_DAY) / 30) * 40} fill="none" stroke={C.warn} strokeWidth={2} opacity={1 - Math.min(1, (day - SLASH_DAY) / 30)} />
               <Label x={8} y={-16} color={C.warn} size={fs(9.5)}>
@@ -181,13 +180,21 @@ export default function StakingScene() {
               </Label>
             </g>
           )}
-          <circle cx={xOf(day)} cy={yOf(Math.max(B0, bal))} r={7} fill={TONES[behaviour]} stroke={C.paper} strokeWidth={2} />
-          <text x={X1} y={Y0 - 50} textAnchor="end" fill={TONES[behaviour]} style={{ fontFamily: "var(--font-mono)", fontSize: fs(22), fontWeight: 600 }}>
-            {nf(bal, 3)} ETH
-          </text>
-          <Label x={X1} y={Y0 - 50 + fs(18)} anchor="end" size={fs(9)}>
-            {chg >= 0 ? "+" : ""}
-            {nf(chg, 3)} ETH · {L.day} {Math.round(day)}
+          {[0, 1, 2].map((b) => {
+            const bal = stakeBalance(b, day, others);
+            const chg = bal - DEPOSIT;
+            return (
+              <g key={`d${b}`}>
+                <circle cx={xOf(day)} cy={yOf(Math.max(B0, bal))} r={6} fill={TONES[b]} stroke={C.paper} strokeWidth={2} />
+                <text x={X1} y={Y1 + 90 + b * fs(22)} textAnchor="end" fill={TONES[b]} style={{ fontFamily: "var(--font-mono)", fontSize: fs(12), fontWeight: 600 }}>
+                  {L.rules[b].name} · {nf(bal, 2)} ETH ({chg >= 0 ? "+" : ""}
+                  {nf(chg, 2)})
+                </text>
+              </g>
+            );
+          })}
+          <Label x={X1} y={Y0 - 50} anchor="end" size={fs(10)} color={C.ink}>
+            {L.day} {Math.round(day)} / 365
           </Label>
         </g>
       )}

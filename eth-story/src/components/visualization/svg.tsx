@@ -190,17 +190,19 @@ export function Flame({ x, y, s = 1, t = 0, opacity = 1 }: { x: number; y: numbe
   );
 }
 
-/** The two-part ETH diamond glyph (flat). */
-export function EthGlyph({ x, y, s = 1, opacity = 1, color }: { x: number; y: number; s?: number; opacity?: number; color?: string }) {
+/** The Ethereum logo: white / pale-blue diamond on a #627EEA disc. */
+export const ETH_BLUE = "#627eea";
+export function EthGlyph({ x, y, s = 1, opacity = 1, disc = true }: { x: number; y: number; s?: number; opacity?: number; disc?: boolean; color?: string }) {
   if (opacity <= 0.01) return null;
-  const c1 = color ?? C.lilac;
-  const c2 = color ?? C.sky;
   return (
     <g transform={`translate(${x},${y}) scale(${s})`} opacity={opacity}>
-      <path d="M0,-30 L18,0 L0,10 Z" fill={c2} />
-      <path d="M0,-30 L-18,0 L0,10 Z" fill={c1} />
-      <path d="M0,14 L18,4 L0,30 Z" fill={c2} opacity={0.85} />
-      <path d="M0,14 L-18,4 L0,30 Z" fill={c1} opacity={0.85} />
+      {disc && <circle r={34} fill={ETH_BLUE} />}
+      <path d="M0,-25.5 L-15.9,0.3 L0,-6.4Z" fill="#ffffff" />
+      <path d="M0,-25.5 L15.9,0.3 L0,-6.4Z" fill="#c1ccf7" />
+      <path d="M-15.9,0.3 L0,-6.4 L0,9.6Z" fill="#c1ccf7" />
+      <path d="M15.9,0.3 L0,-6.4 L0,9.6Z" fill="#8a9ff0" />
+      <path d="M-15.9,3.5 L0,12.6 L0,25.2Z" fill="#ffffff" />
+      <path d="M15.9,3.5 L0,12.6 L0,25.2Z" fill="#c1ccf7" />
     </g>
   );
 }

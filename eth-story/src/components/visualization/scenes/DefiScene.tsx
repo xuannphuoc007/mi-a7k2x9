@@ -8,8 +8,7 @@ import { chapterIndex } from "@/data/coins/eth/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
-import { clamp, lerp, smooth, useStore } from "@/lib/store";
-import { lendingStore } from "@/lib/simStores";
+import { clamp, lerp, smooth } from "@/lib/store";
 import { BONUS, debtUsd, health, liqPrice, LT, START_PRICE } from "@/lib/models";
 import { C, EthGlyph, Label } from "../svg";
 
@@ -31,33 +30,27 @@ export default function DefiScene() {
   const L = t.scenes.defi;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const eth = useStore(lendingStore, (s) => s.eth);
-  const pct = useStore(lendingStore, (s) => s.borrowPct);
-  const priceI = useStore(lendingStore, (s) => s.price);
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, dep: 0, borrow: 0, drop: 0, inter: 0, exit: 0 },
+    { vis: 0, dep: 0, borrow: 0, drop: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))
         .to(v, { dep: 1, duration: 0.12 }, at(-0.04))
         .to(v, { borrow: 1, duration: 0.12 }, at(0.1))
-        .to(v, { drop: 1, duration: 0.16, ease: "none" }, at(0.26))
-        .to(v, { inter: 1, duration: 0.05 }, at(0.44))
+        .to(v, { drop: 1, duration: 0.38, ease: "none" }, at(0.46))
         .to(v, { exit: 1, duration: 0.08 }, at(0.92))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
   );
   if (v.vis <= 0.001) return null;
   const ex = smooth(v.exit);
-  const inter = v.inter > 0.5;
   const nf = (n: number, d = 0) => new Intl.NumberFormat(locale, { maximumFractionDigits: d, minimumFractionDigits: d }).format(n);
 
-  // story: 5 ETH, borrow 60% of the max, then the price slides to 20% below the liquidation price and back
-  const E = inter ? eth : 5;
-  const debt = debtUsd(E, inter ? pct : 0.6) * smooth(v.borrow);
-  const lp = liqPrice(E, debtUsd(E, inter ? pct : 0.6));
-  const storyPrice = v.drop < 0.75 ? lerp(START_PRICE, lp * 0.97, smooth(v.drop / 0.75)) : lerp(lp * 0.97, lp * 0.97, 1);
-  const price = inter ? priceI : storyPrice;
+  // 5 ETH deposited, 60% of the maximum borrowed, then ETH slides just past the liquidation price
+  const E = 5;
+  const debt = debtUsd(E, 0.6) * smooth(v.borrow);
+  const lp = liqPrice(E, debtUsd(E, 0.6));
+  const price = lerp(START_PRICE, lp * 0.97, v.drop < 0.85 ? v.drop / 0.85 : 1);
   const hf = health(E, price, debt);
   const liquidated = debt > 0 && hf < 1;
   const coll = E * price;
@@ -102,7 +95,7 @@ export default function DefiScene() {
       {/* price ticker */}
       <g opacity={dep}>
         <EthGlyph x={120} y={110} s={0.8} />
-        <text x={150} y={120} fill={C.ink} style={{ fontFamily: "var(--font-mono)", fontSize: fs(18), fontWeight: 600 }}>
+        <text x={162} y={120} fill={C.ink} style={{ fontFamily: "var(--font-mono)", fontSize: fs(18), fontWeight: 600 }}>
           ${nf(price)}
         </text>
         <Label x={120} y={150 + fs(4)} size={fs(8.5)}>

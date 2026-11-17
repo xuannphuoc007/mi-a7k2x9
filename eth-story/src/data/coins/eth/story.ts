@@ -30,8 +30,11 @@ export const chaptersEn: Chapter[] = [
         notes: ["Upwork and Fiverr help centres, as summarised by Lilach Bullock, Oct 2026."],
       },
       {
-        title: "Try it yourself: which way would you choose?",
-        body: ["Pick an option in the panel. The fourth one — a 'smart contract' — is what the rest of this story explains."],
+        title: "Four ways to settle — watch them one by one.",
+        body: [
+          "1. Anna pays first — Anna carries the risk. 2. Lan works first — Lan carries the risk. 3. A platform — safe for both, but $100 of the $500 is gone at Fiverr's 20%.",
+          "4. A smart contract — rules written in code, a few cents in fees. The rest of this story explains how that works.",
+        ],
       },
     ],
   },
@@ -119,6 +122,13 @@ export const chaptersEn: Chapter[] = [
         deep: ["Real escrow contracts often add a third person as referee for disputes. That person can be anyone both sides agree on — but then you are trusting a person again."],
       },
       {
+        title: "Three endings, played one after another.",
+        body: [
+          "Anna approves after two days → rule 1 pays Lan. Anna stays silent → after 7 days rule 2 pays Lan anyway. Lan never delivers → at the deadline rule 3 refunds Anna.",
+          "Nobody presses a button at a company. The fee is a few cents, not a percentage.",
+        ],
+      },
+      {
         title: "Honest limits.",
         body: [
           "Code cannot tell if a logo is beautiful — only whether a file was delivered on time. And a bug in the code is a bug forever: that is exactly what went wrong with The DAO.",
@@ -173,8 +183,12 @@ export const chaptersEn: Chapter[] = [
         notes: ["EIP-1559 (August 2021). Simplified: real blocks have a target of 50% full."],
       },
       {
-        title: "Try it: pack the bus.",
-        body: ["Move the slider to make blocks busier and watch the price climb block by block — and how much ETH gets burned."],
+        title: "Watch a rush hour.",
+        body: [
+          "Twelve nearly full buses in a row: the base fee climbs about 10% per block — more than three times higher in under 3 minutes. When the rush ends, it slides back down just as fast.",
+          "In 2026 a simple transfer costs cents. In busy 2021, it often cost several dollars.",
+        ],
+        notes: ["Simplified model: starting fee 1 gwei, ETH at $1,954 (13 Nov 2026)."],
       },
     ],
   },
@@ -201,8 +215,11 @@ export const chaptersEn: Chapter[] = [
         deep: ["Most people don't run their own validator. They stake through exchanges or pools such as Lido, which held roughly 23% of all staked ETH in 2026 — a concentration risk people debate."],
       },
       {
-        title: "Try it: be a validator for a year.",
-        body: ["Choose how your validator behaves and watch its deposit over 365 days. Numbers are simplified, not exact protocol maths."],
+        title: "One year, three validators.",
+        body: [
+          "The honest one ends near 32.9 ETH. The one that is offline a fifth of the time ends near 32.5. The one that double-signs on day 120 is slashed, loses about 1.7 ETH and is removed.",
+        ],
+        notes: ["Simplified: ≈2.8% a year; real penalties depend on how many validators are slashed at once."],
       },
     ],
   },
@@ -228,8 +245,10 @@ export const chaptersEn: Chapter[] = [
         deep: ["The 'health factor' = collateral × 83% ÷ debt. Above 1 is safe; at 1 or below, liquidation can happen."],
       },
       {
-        title: "Try it: borrow, then drop the price.",
-        body: ["Set how much you borrow, then drag the ETH price down and find the point where the code sells your collateral."],
+        title: "Watch the price fall.",
+        body: [
+          "Someone deposits 5 ETH (about $9,770) and borrows $4,690. As ETH slides from $1,954 toward $1,130, the health factor drops from 1.73 to below 1 — and the code lets someone repay half the loan and take ETH at a discount.",
+        ],
       },
     ],
   },
@@ -258,8 +277,15 @@ export const chaptersEn: Chapter[] = [
         title: "Four things people mix up.",
         body: [
           "Network success (people use it) ≠ network revenue (fees paid) ≠ token value (ETH price) ≠ holder profit (what you bought it for). Each can move without the others.",
-          "Try the calculator: choose how much is staked and how busy the network is.",
         ],
+      },
+      {
+        title: "A busy year vs a quiet year.",
+        body: [
+          "Like 2023 — about 20 million ETH staked and ~3,000 ETH burned a day: more is burned than created, so supply shrinks a little (≈ −0.3% a year).",
+          "Like 2026 — 41 million staked and ~300 burned a day: supply grows about 0.8% a year.",
+        ],
+        notes: ["Issuance ≈ 166.3 × √(staked ETH) per year. 2023 fees ≈ 3,600 ETH/day, spring 2026 ≈ 300 (Coin Metrics)."],
       },
     ],
   },
@@ -285,6 +311,29 @@ export const chaptersEn: Chapter[] = [
         body: [
           "Many Layer 2s are still run by one company that orders transactions. And because users pay Layer 2 instead of the main chain, less fee money is burned on Ethereum — part of why supply grew again.",
         ],
+      },
+    ],
+  },
+  {
+    label: "Bitcoin vs Ethereum",
+    title: "Bitcoin vs Ethereum",
+    question: "If Bitcoin is digital gold, what is Ethereum?",
+    figure: "Bitcoin and Ethereum side by side: what each is for, how many coins exist, how often a block is added, how the network is secured, how big each is and how each price did over the past year.",
+    takeaway: "Bitcoin does one job — scarce digital money — and changes very slowly. Ethereum is a programmable platform that keeps upgrading. Different goals, different risks.",
+    beats: [
+      {
+        title: "Same idea at the start, different goals.",
+        body: [
+          "Both are shared records that nobody owns. Bitcoin is built to be simple, scarce money. Ethereum is built to run programs — and ETH is the fuel.",
+          "The table below puts them side by side.",
+        ],
+      },
+      {
+        title: "Neither one is 'better'.",
+        body: [
+          "Bitcoin's strength is that it barely changes; its supply is fixed at 21 million. Ethereum's strength is that it can do much more; its supply has no fixed cap and depends on use. In the year to 13 November 2026, both prices fell — Bitcoin about 31%, ETH about 40%.",
+        ],
+        notes: ["Prices: Fortune, 13 Nov 2026. Bitcoin supply: 20 millionth coin mined 9 Mar 2026 (The Block)."],
       },
     ],
   },
@@ -322,7 +371,7 @@ export const chaptersEn: Chapter[] = [
     label: "Back to Lan",
     title: "Back to Lan",
     question: "So — did Lan get paid?",
-    figure: "The ETH diamond assembles from twelve facets, one per chapter. Drag to rotate it; click a facet to jump to that chapter.",
+    figure: "The ETH coin assembles from its logo pieces. Drag to rotate it.",
     takeaway: "Ethereum turns agreements into code that runs on a computer nobody owns. That is powerful and also unforgiving. Understanding both sides is the point.",
     beats: [
       {
@@ -336,8 +385,8 @@ export const chaptersEn: Chapter[] = [
         ],
       },
       {
-        title: "Twelve facets, twelve chapters.",
-        body: ["Drag the diamond to turn it. Click a facet to jump back to that part of the story."],
+        title: "One coin, the whole story.",
+        body: ["Drag the ETH coin to turn it. Or use the chapter list at the top to jump back to any part of the story."],
       },
     ],
   },
@@ -368,8 +417,11 @@ export const chaptersVi: Chapter[] = [
         notes: ["Trung tâm trợ giúp Upwork và Fiverr, theo tổng hợp của Lilach Bullock, 10/2026."],
       },
       {
-        title: "Thử chọn xem: bạn sẽ làm cách nào?",
-        body: ["Chọn một phương án trong bảng. Phương án thứ tư — 'hợp đồng thông minh' — chính là điều phần còn lại của câu chuyện sẽ giải thích."],
+        title: "Bốn cách thanh toán — xem lần lượt từng cách.",
+        body: [
+          "1. Anna trả trước — Anna chịu rủi ro. 2. Lan làm trước — Lan chịu rủi ro. 3. Dùng nền tảng — an toàn cho cả hai, nhưng mất 100 USD trong 500 USD với mức 20% của Fiverr.",
+          "4. Hợp đồng thông minh — luật viết bằng code, phí vài xu. Phần còn lại của câu chuyện sẽ giải thích cách nó hoạt động.",
+        ],
       },
     ],
   },
@@ -449,6 +501,13 @@ export const chaptersVi: Chapter[] = [
         deep: ["Hợp đồng ký quỹ thực tế thường thêm một người thứ ba làm trọng tài khi tranh chấp. Người đó có thể là bất kỳ ai hai bên đồng ý — nhưng lúc đó bạn lại đang tin vào một con người."],
       },
       {
+        title: "Ba kết cục, lần lượt diễn ra.",
+        body: [
+          "Anna duyệt sau hai ngày → luật 1 trả tiền cho Lan. Anna im lặng → sau 7 ngày luật 2 vẫn trả cho Lan. Lan không giao bài → đến hạn luật 3 hoàn tiền cho Anna.",
+          "Không có nhân viên công ty nào bấm nút. Phí là vài xu, không tính theo phần trăm.",
+        ],
+      },
+      {
         title: "Giới hạn, nói thật.",
         body: ["Code không biết logo có đẹp hay không — chỉ biết file có được giao đúng hạn hay không. Và lỗi trong code là lỗi vĩnh viễn: đó chính là chuyện đã xảy ra với The DAO."],
       },
@@ -499,8 +558,12 @@ export const chaptersVi: Chapter[] = [
         notes: ["EIP-1559 (8/2021). Đã đơn giản hoá: khối thực tế nhắm mức đầy 50%."],
       },
       {
-        title: "Thử xem: nhồi đầy xe.",
-        body: ["Kéo thanh trượt cho các khối đông hơn và xem giá leo lên từng khối — cùng lượng ETH bị đốt."],
+        title: "Xem một giờ cao điểm.",
+        body: [
+          "Mười hai chuyến xe gần như kín chỗ liên tiếp: phí cơ bản tăng khoảng 10% mỗi khối — gấp hơn ba lần chỉ trong chưa đầy 3 phút. Hết cao điểm, phí lại trượt xuống nhanh như vậy.",
+          "Năm 2026, chuyển tiền đơn giản tốn vài xu. Năm 2021 đông đúc, thường tốn vài đô la.",
+        ],
+        notes: ["Mô hình đơn giản: phí khởi điểm 1 gwei, giá ETH 1.954 USD (13/11/2026)."],
       },
     ],
   },
@@ -525,8 +588,11 @@ export const chaptersVi: Chapter[] = [
         deep: ["Phần lớn mọi người không tự chạy validator. Họ stake qua sàn hoặc các pool như Lido — nơi nắm khoảng 23% tổng ETH đang stake năm 2026, một rủi ro tập trung đang gây tranh luận."],
       },
       {
-        title: "Thử làm validator trong một năm.",
-        body: ["Chọn cách validator của bạn hành xử và theo dõi tiền cọc qua 365 ngày. Số liệu đã đơn giản hoá, không phải công thức chính xác của giao thức."],
+        title: "Một năm, ba validator.",
+        body: [
+          "Validator trung thực kết thúc gần 32,9 ETH. Validator mất kết nối một phần năm thời gian kết thúc gần 32,5. Validator ký hai lần vào ngày 120 bị slashing, mất khoảng 1,7 ETH và bị loại.",
+        ],
+        notes: ["Đơn giản hoá: ≈2,8%/năm; mức phạt thật phụ thuộc số validator bị phạt cùng lúc."],
       },
     ],
   },
@@ -548,8 +614,10 @@ export const chaptersVi: Chapter[] = [
         deep: ["'Chỉ số sức khoẻ' = tài sản thế chấp × 83% ÷ khoản nợ. Trên 1 là an toàn; bằng hoặc dưới 1 thì có thể bị thanh lý."],
       },
       {
-        title: "Thử xem: vay, rồi kéo giá xuống.",
-        body: ["Chọn mức vay, rồi kéo giá ETH xuống và tìm điểm mà code bán tài sản thế chấp của bạn."],
+        title: "Xem giá rơi.",
+        body: [
+          "Một người gửi 5 ETH (khoảng 9.770 USD) và vay 4.690 USD. Khi ETH trượt từ 1.954 USD về phía 1.130 USD, chỉ số sức khoẻ giảm từ 1,73 xuống dưới 1 — và code cho phép người khác trả nửa khoản nợ, lấy ETH với giá chiết khấu.",
+        ],
       },
     ],
   },
@@ -576,8 +644,15 @@ export const chaptersVi: Chapter[] = [
         title: "Bốn khái niệm người ta hay lẫn lộn.",
         body: [
           "Mạng thành công (nhiều người dùng) ≠ mạng có doanh thu (phí được trả) ≠ giá trị token (giá ETH) ≠ lợi nhuận người nắm giữ (bạn mua ở giá nào). Mỗi thứ có thể đi một hướng.",
-          "Thử máy tính bên cạnh: chọn lượng ETH stake và mức độ đông đúc của mạng.",
         ],
+      },
+      {
+        title: "Một năm đông và một năm vắng.",
+        body: [
+          "Như 2023 — khoảng 20 triệu ETH stake và ~3.000 ETH bị đốt mỗi ngày: đốt nhiều hơn tạo ra, tổng cung giảm nhẹ (≈ −0,3%/năm).",
+          "Như 2026 — 41 triệu stake và ~300 ETH bị đốt mỗi ngày: tổng cung tăng khoảng 0,8%/năm.",
+        ],
+        notes: ["Phát hành ≈ 166,3 × √(ETH stake) mỗi năm. Phí 2023 ≈ 3.600 ETH/ngày, mùa xuân 2026 ≈ 300 (Coin Metrics)."],
       },
     ],
   },
@@ -599,6 +674,29 @@ export const chaptersVi: Chapter[] = [
       {
         title: "Đánh đổi.",
         body: ["Nhiều mạng Layer 2 vẫn do một công ty sắp xếp thứ tự giao dịch. Và vì người dùng trả phí cho Layer 2 thay vì chuỗi chính, ít phí bị đốt trên Ethereum hơn — một phần lý do tổng cung tăng trở lại."],
+      },
+    ],
+  },
+  {
+    label: "Bitcoin và Ethereum",
+    title: "Bitcoin và Ethereum",
+    question: "Nếu Bitcoin là vàng số, thì Ethereum là gì?",
+    figure: "Bitcoin và Ethereum đặt cạnh nhau: dùng để làm gì, có bao nhiêu coin, bao lâu thêm một khối, mạng được bảo vệ ra sao, quy mô mỗi bên và giá mỗi bên đã đi thế nào trong năm qua.",
+    takeaway: "Bitcoin làm một việc — tiền số khan hiếm — và thay đổi rất chậm. Ethereum là nền tảng lập trình được và liên tục nâng cấp. Mục tiêu khác nhau, rủi ro khác nhau.",
+    beats: [
+      {
+        title: "Cùng ý tưởng ban đầu, khác mục tiêu.",
+        body: [
+          "Cả hai đều là bản ghi chung không ai sở hữu. Bitcoin được thiết kế làm tiền đơn giản, khan hiếm. Ethereum được thiết kế để chạy chương trình — và ETH là nhiên liệu.",
+          "Bảng dưới đây đặt hai bên cạnh nhau.",
+        ],
+      },
+      {
+        title: "Không bên nào 'tốt hơn'.",
+        body: [
+          "Điểm mạnh của Bitcoin là gần như không thay đổi; tổng cung cố định 21 triệu. Điểm mạnh của Ethereum là làm được nhiều hơn; tổng cung không có trần cố định và phụ thuộc mức sử dụng. Trong năm tính đến 13/11/2026, giá cả hai đều giảm — Bitcoin khoảng 31%, ETH khoảng 40%.",
+        ],
+        notes: ["Giá: Fortune, 13/11/2026. Tổng cung Bitcoin: coin thứ 20 triệu được đào ngày 9/3/2026 (The Block)."],
       },
     ],
   },
@@ -632,7 +730,7 @@ export const chaptersVi: Chapter[] = [
     label: "Quay lại với Lan",
     title: "Quay lại với Lan",
     question: "Vậy rốt cuộc Lan có được trả tiền không?",
-    figure: "Viên kim cương ETH ghép lại từ mười hai mặt, mỗi mặt là một chương. Kéo để xoay; bấm vào một mặt để nhảy tới chương đó.",
+    figure: "Đồng ETH ghép lại từ các mảnh logo. Kéo để xoay.",
     takeaway: "Ethereum biến thoả thuận thành code chạy trên một chiếc máy tính không ai sở hữu. Điều đó vừa mạnh mẽ vừa không khoan nhượng. Hiểu cả hai mặt mới là điều quan trọng.",
     beats: [
       {
@@ -644,8 +742,8 @@ export const chaptersVi: Chapter[] = [
         body: ["Lan vẫn cần một chiếc ví tự bảo vệ, và một cách đổi đô la số sang tiền đồng. Lỗi code hay mất mật khẩu thì không gọi lại được. Ethereum bỏ đi người trung gian — và cũng bỏ luôn quầy hỗ trợ."],
       },
       {
-        title: "Mười hai mặt, mười hai chương.",
-        body: ["Kéo viên kim cương để xoay. Bấm vào một mặt để quay lại phần đó của câu chuyện."],
+        title: "Một đồng coin, cả câu chuyện.",
+        body: ["Kéo đồng ETH để xoay. Hoặc dùng mục lục phía trên để quay lại bất kỳ phần nào của câu chuyện."],
       },
     ],
   },

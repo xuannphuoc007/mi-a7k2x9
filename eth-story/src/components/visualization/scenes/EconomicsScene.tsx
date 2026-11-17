@@ -9,8 +9,7 @@ import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useClock } from "@/hooks/useTween";
 import { useI18n } from "@/lib/i18n";
-import { clamp, lerp, smooth, useStore } from "@/lib/store";
-import { supplyStore } from "@/lib/simStores";
+import { clamp, lerp, smooth } from "@/lib/store";
 import { issuancePerYear } from "@/lib/models";
 import { DATA_END, MERGE_T, SUPPLY, supplyAt } from "@/lib/ethSeries";
 import { C, EthGlyph, Flame, Label } from "../svg";
@@ -39,11 +38,9 @@ export default function EconomicsScene() {
   const L = t.scenes.economics;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const staked = useStore(supplyStore, (s) => s.staked);
-  const burnDay = useStore(supplyStore, (s) => s.burn);
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, taps: 0, busy: 0, chart: 0, draw: 0, four: 0, saw: 0, exit: 0 },
+    { vis: 0, taps: 0, busy: 0, chart: 0, draw: 0, four: 0, saw: 0, year: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))
         .to(v, { taps: 1, duration: 0.1 }, at(-0.06))
@@ -54,7 +51,8 @@ export default function EconomicsScene() {
         .to(v, { chart: 0, duration: 0.05 }, at(0.5))
         .to(v, { four: 1, duration: 0.1 }, at(0.52))
         .to(v, { four: 0, duration: 0.05 }, at(0.7))
-        .to(v, { saw: 1, duration: 0.06 }, at(0.72))
+        .to(v, { saw: 1, duration: 0.05 }, at(0.72))
+        .to(v, { year: 1, duration: 0.08 }, at(0.84))
         .to(v, { exit: 1, duration: 0.08 }, at(0.92))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -75,7 +73,10 @@ export default function EconomicsScene() {
   const tNow = lerp(T0, DATA_END, v.draw);
   const chart = smooth(v.chart);
 
-  // --- see-saw
+  // --- see-saw: a busy year like 2023, then a quiet one like 2026
+  const yq = smooth(v.year);
+  const staked = lerp(20, 41.4, yq);
+  const burnDay = lerp(3000, 300, yq);
   const iss = issuancePerYear(staked);
   const burn = burnDay * 365;
   const net = iss - burn;
@@ -205,6 +206,9 @@ export default function EconomicsScene() {
         <g opacity={saw}>
           <Label x={500} y={160} anchor="middle" color={C.ink} size={fs(10.5)}>
             {L.perYear}
+          </Label>
+          <Label x={500} y={160 + fs(24)} anchor="middle" color={yq < 0.5 ? C.peach : C.lilac} size={fs(11)}>
+            {yq < 0.5 ? L.busyYear : L.quietYear}
           </Label>
           <g transform={`translate(500,520) rotate(${(-tilt * 180) / Math.PI})`}>
             <rect x={-380} y={-8} width={760} height={16} rx={8} fill={C.ink} opacity={0.85} />
