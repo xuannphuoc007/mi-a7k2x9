@@ -27,3 +27,5 @@ export const dexStore = createStore({
 });
 
 export const riskStore = createStore({ risk: -1 });
+
+export const rwaStore = createStore({ asset: -1 });

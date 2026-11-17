@@ -3,7 +3,7 @@
  * plus the categories used by the final explorer. Visual parameters live here
  * so another asset can reuse the same storytelling engine with its own anatomy.
  */
-export type CategoryId = "core" | "ledger" | "consensus" | "payments" | "liquidity" | "risks";
+export type CategoryId = "core" | "ledger" | "consensus" | "payments" | "liquidity" | "rwa" | "risks";
 
 export type LayerDef = {
   id: string;
@@ -16,13 +16,13 @@ export type LayerDef = {
   /** glyph drawn on the layer's face texture */
   glyph:
     | "shell" | "asset" | "ledger" | "signature" | "p2p" | "validators"
-    | "fees" | "routing" | "bridge" | "dex" | "supply" | "risk";
+    | "fees" | "routing" | "bridge" | "dex" | "rwa" | "supply" | "risk";
   tint: string;
   /** chapter where this layer is the protagonist (for the explorer's "see chapter" link) */
   chapter: number;
 };
 
-export const categories: CategoryId[] = ["core", "ledger", "consensus", "payments", "liquidity", "risks"];
+export const categories: CategoryId[] = ["core", "ledger", "consensus", "payments", "liquidity", "rwa", "risks"];
 
 export const layers: LayerDef[] = [
   { id: "shell", index: 0, category: "core", radius: 1.0, hole: 0, glyph: "shell", tint: "#e9e8df", chapter: 0 },
@@ -35,8 +35,9 @@ export const layers: LayerDef[] = [
   { id: "routing", index: 7, category: "payments", radius: 0.96, hole: 0.0, glyph: "routing", tint: "#eceee7", chapter: 4 },
   { id: "bridge", index: 8, category: "liquidity", radius: 0.88, hole: 0.3, glyph: "bridge", tint: "#e2ebe7", chapter: 5 },
   { id: "dex", index: 9, category: "liquidity", radius: 0.92, hole: 0.0, glyph: "dex", tint: "#eef0ea", chapter: 6 },
-  { id: "supply", index: 10, category: "core", radius: 0.97, hole: 0.62, glyph: "supply", tint: "#e8eae2", chapter: 7 },
-  { id: "risk", index: 11, category: "risks", radius: 1.0, hole: 0.7, glyph: "risk", tint: "#f3e3da", chapter: 8 },
+  { id: "rwa", index: 10, category: "rwa", radius: 0.93, hole: 0.0, glyph: "rwa", tint: "#ebe7da", chapter: 7 },
+  { id: "supply", index: 11, category: "core", radius: 0.97, hole: 0.62, glyph: "supply", tint: "#e8eae2", chapter: 8 },
+  { id: "risk", index: 12, category: "risks", radius: 1.0, hole: 0.7, glyph: "risk", tint: "#f3e3da", chapter: 9 },
 ];
 
 export const LAYER_COUNT = layers.length;

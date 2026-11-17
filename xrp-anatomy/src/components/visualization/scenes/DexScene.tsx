@@ -17,6 +17,8 @@ const ISO = { x: 9, y: -7 };
 /** chapter 8 supply ring centre/radius (AMM pool vessel morphs into it) */
 export const SUPPLY = { x: 500, y: 470, r: 300 };
 const POOL = { x: 780, y: 200, r: 56 };
+/** chapter 8 (RWA) issuer vault — the pool shrinks into it on exit */
+const POOL_EXIT = { x: 330, y: 485, r: 46 };
 
 export default function DexScene() {
   const { t, locale } = useI18n();
@@ -86,7 +88,7 @@ export default function DexScene() {
   const p1 = amm.complete ? { x: sx(amm.x2), y: sy(amm.y2) } : p0;
 
   // pool vessel → supply ring on exit
-  const pool = { x: lerp(POOL.x, SUPPLY.x, ex), y: lerp(POOL.y, SUPPLY.y, ex), r: lerp(POOL.r, SUPPLY.r, ex) };
+  const pool = { x: lerp(POOL.x, POOL_EXIT.x, ex), y: lerp(POOL.y, POOL_EXIT.y, ex), r: lerp(POOL.r, POOL_EXIT.r, ex) };
   const xrpShare = amm.complete && interactive && morph > 0.5 ? amm.x2 / (amm.x2 + amm.y2 / MID) : 0.5;
 
   return (
@@ -131,7 +133,7 @@ export default function DexScene() {
       )}
       <g opacity={clamp(v.match * 3) * (1 - morph) * (1 - ex)}>
         <Label x={500} y={BASE - 380} anchor="middle" color={C.ink}>
-          {L.spread} {fmt(0.004, 3, locale)}
+          {L.spread}
         </Label>
       </g>
 
@@ -143,10 +145,10 @@ export default function DexScene() {
             {L.curve}
           </Label>
           <Label x={130} y={sy(Ymax) - 8} size={9.5}>
-            USD reserve ↑
+            USD ↑
           </Label>
           <Label x={870} y={BASE + 46} anchor="end" size={9.5}>
-            XRP reserve →
+            XRP →
           </Label>
           <circle cx={p0.x} cy={p0.y} r={6} fill={C.paper} stroke={C.ink} strokeWidth={1.4} />
           {interactive && amm.complete && (
@@ -180,7 +182,7 @@ export default function DexScene() {
           {L.pool}
         </Label>
         <Label x={0} y={pool.r + 36} anchor="middle" size={9.5} opacity={1 - ex}>
-          {L.lp} · fee 0.3%
+          {L.lp}
         </Label>
       </g>
 
@@ -188,13 +190,13 @@ export default function DexScene() {
       {interactive && (
         <g transform="translate(110,120)" opacity={1 - ex}>
           <Label x={0} y={0} color={C.ink}>
-            {morph < 0.5 ? t.panels.dex.book : t.panels.dex.amm} · buy {fmt(dex.size, 0, locale)} XRP
+            {morph < 0.5 ? t.panels.dex.book : t.panels.dex.amm} · {fmt(dex.size, 0, locale)} XRP
           </Label>
           {morph < 0.5 ? (
             fill.complete ? (
               <>
                 <Label x={0} y={20} upper={false} spacing="0" color={C.ink} size={11}>
-                  avg {fmt(fill.avg, 4, locale)} · {fill.levels} lvls · +{fmt(fill.slippagePct, 2, locale)}%
+                  {t.panels.dex.avg} ${fmt(fill.avg, 3, locale)} · +{fmt(fill.slippagePct, 2, locale)}%
                 </Label>
               </>
             ) : (
@@ -204,7 +206,7 @@ export default function DexScene() {
             )
           ) : amm.complete ? (
             <Label x={0} y={20} upper={false} spacing="0" color={C.ink} size={11}>
-              avg {fmt(amm.avg, 4, locale)} · +{fmt(amm.slippagePct, 2, locale)}%
+              {t.panels.dex.avg} ${fmt(amm.avg, 3, locale)} · +{fmt(amm.slippagePct, 2, locale)}%
             </Label>
           ) : null}
           <Label x={0} y={40} size={9.5}>

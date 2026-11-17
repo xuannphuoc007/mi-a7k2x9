@@ -29,7 +29,7 @@ export default function Header() {
               transition={{ duration: 0.25 }}
               className="tag truncate text-mute"
             >
-              <span className="text-ink">{String(chapter + 1).padStart(2, "0")}</span> {t.ui.of} 10 — {t.chapters[chapter].label}
+              <span className="text-ink">{String(chapter + 1).padStart(2, "0")}</span> {t.ui.of} {t.chapters.length} — {t.chapters[chapter].label}
             </motion.span>
           </AnimatePresence>
         </div>
@@ -49,7 +49,7 @@ export default function Header() {
           </div>
           <button className="flex items-center gap-1.5 md:hidden" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-contents">
             {open ? <X size={18} /> : <List size={18} />}
-            <span className="tag">{String(chapter + 1).padStart(2, "0")}/10</span>
+            <span className="tag">{String(chapter + 1).padStart(2, "0")}/{t.chapters.length}</span>
           </button>
         </div>
       </div>

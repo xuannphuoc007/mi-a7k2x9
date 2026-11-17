@@ -108,7 +108,7 @@ export default function SendPanel() {
       <div className="mt-3.5 grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-line pt-3">
         <Stat label={`${t.scenes.send.walletA} · ${P.spendable}`} value={`${fmt(toXrp(spendable(s.t >= 4 ? s.after.a : s.before.a)), 6, locale)}`} />
         <Stat label={`${t.scenes.send.walletB}`} value={`${fmt(toXrp(s.t >= 4 ? s.after.b : s.before.b), 6, locale)}`} />
-        <Stat label={P.fee} value={`${s.fee.drops} drops = ${fmt(feeXrp, 6, locale)} XRP`} tone="warn" />
+        <Stat label={P.fee} value={`${fmt(feeXrp, 5, locale)} XRP`} tone="warn" />
         <Stat label={P.result} value={status} tone={s.failed ? "warn" : s.t >= 4 ? "accent" : "ink"} />
       </div>
 
@@ -125,11 +125,6 @@ export default function SendPanel() {
           {s.fee.source === "live" ? `${P.feeLive} · ${new Date(s.fee.at!).toLocaleTimeString(locale)}` : P.feeIllustrative}
         </span>
       </div>
-      {s.hash && (
-        <div className="mono mt-2 truncate text-[11px] text-mute">
-          {P.hash}: {s.hash} <span className="tag">({t.ui.simulated})</span>
-        </div>
-      )}
       <div className="mt-1 text-[11.5px] text-mute">{P.reserveNote}</div>
     </Panel>
   );

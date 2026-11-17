@@ -12,6 +12,7 @@ import * as THREE from "three";
 import { engine, subscribeG } from "@/animations/scrollController";
 import { cameraAt } from "@/animations/cameraController";
 import { layers, type LayerDef } from "@/data/coins/xrp/anatomy";
+import { FINALE } from "@/data/coins/xrp/chapters";
 import { ledgerAccounts, ledgerServers, accountServer, serverLinks } from "@/data/coins/xrp/layouts";
 import { makeDotTexture, makeLayerTexture, makeRimTexture } from "./coinTextures";
 import { clamp, lerp, mulberry32, range, smooth } from "@/lib/store";
@@ -22,7 +23,8 @@ const R = 1.55;
 const N = layers.length;
 const SHELL_HALF = 0.13;
 const assembledZ = (i: number) => (i === 0 ? 0 : 0.1 - (i - 1) * 0.0185);
-const explodedZ = (i: number, s: number) => (5.5 - i) * s;
+const MID = (N - 1) / 2;
+const explodedZ = (i: number, s: number) => (MID - i) * s;
 
 type LState = { x: number; y: number; z: number; rx: number; ry: number; rz: number; s: number; o: number; h: number };
 type Frame = {
@@ -38,7 +40,7 @@ const scatter = layers.map(() => ({
   x: (rnd() - 0.5) * 9, y: (rnd() - 0.5) * 5.5, z: -1.5 - rnd() * 3,
   rx: (rnd() - 0.5) * 3, ry: (rnd() - 0.5) * 3, rz: (rnd() - 0.5) * 3,
 }));
-const cluster = layers.map((_, i) => ({ x: Math.sin(i * 1.7) * 0.9, y: Math.cos(i * 1.3) * 0.6, z: (5.5 - i) * 0.55 }));
+const cluster = layers.map((_, i) => ({ x: Math.sin(i * 1.7) * 0.9, y: Math.cos(i * 1.3) * 0.6, z: ((layers.length - 1) / 2 - i) * 0.55 }));
 
 function makeFrame(): Frame {
   return {
@@ -51,7 +53,7 @@ function makeFrame(): Frame {
 /** Choreography for the coin. Writes into `f` to avoid allocations per frame. */
 function choreograph(f: Frame, g: number, time: number, reduced: boolean) {
   const ex = explorer.get();
-  f.visible = g < 0.72 || g > 8.72;
+  f.visible = g < 0.72 || g > FINALE - 0.28;
   if (g <= 1.2) {
     const p0 = smooth(range(g, 0, 0.2));
     const e = smooth(range(g, 0.2, 0.45));
@@ -70,7 +72,7 @@ function choreograph(f: Frame, g: number, time: number, reduced: boolean) {
       const s = f.L[i];
       s.x = 0; s.y = 0;
       s.z = lerp(assembledZ(i), explodedZ(i, 0.42), e);
-      s.rx = 0; s.ry = 0; s.rz = e * (i - 5.5) * 0.035;
+      s.rx = 0; s.ry = 0; s.rz = e * (i - MID) * 0.035;
       s.s = 1;
       s.o = 1 - smooth(range(g, 0.46 + i * 0.011, 0.57 + i * 0.011));
       s.h = i === 1 ? 0.35 * range(g, 0.3, 0.4) : 0;
@@ -78,8 +80,8 @@ function choreograph(f: Frame, g: number, time: number, reduced: boolean) {
     return;
   }
   // finale
-  const l = g - 9;
-  const fade = range(g, 8.76, 8.98);
+  const l = g - FINALE;
+  const fade = range(g, FINALE - 0.24, FINALE - 0.02);
   const m = smooth(range(l, -0.2, 0.32));
   const a = smooth(range(l, 0.36, 0.62));
   const c = smooth(range(l, 0.65, 0.82));
@@ -343,7 +345,7 @@ function Particles({ count, frameGroup }: { count: number; frameGroup: React.Mut
       for (let i = 0; i < count; i++) {
         const li = data.layerOf[i];
         obj.position.set(0, 0, explodedZ(li, 0.42));
-        obj.rotation.set(0, 0, (li - 5.5) * 0.035);
+        obj.rotation.set(0, 0, (li - MID) * 0.035);
         obj.updateMatrix();
         m4.multiplyMatrices(fg.matrixWorld, obj.matrix);
         tmp.set(data.local[i * 2], data.local[i * 2 + 1], 0).applyMatrix4(m4);
@@ -473,7 +475,7 @@ function Rig({ mobile }: { mobile: boolean }) {
     }
     // small stages: shrink and shift left in the finale so the layer labels fit
     const small = size.width < 620;
-    if (small && g > 8.7) f.numLabels = true;
+    if (small && g > FINALE - 0.3) f.numLabels = true;
     if (outer.current) {
       const k = g < 1.2 || !small ? 0 : f.explore;
       outer.current.scale.setScalar(lerp(1, 0.8, k));
@@ -554,7 +556,7 @@ function useDragRotate(el: HTMLElement | null) {
     if (!el) return;
     let down = false, sx = 0, sy = 0, yaw0 = 0, pitch0 = 0;
     const onDown = (e: PointerEvent) => {
-      if (engine.g < 9.85) return;
+      if (engine.g < FINALE + 0.85) return;
       down = true;
       sx = e.clientX; sy = e.clientY;
       yaw0 = explorer.get().yaw; pitch0 = explorer.get().pitch;
@@ -590,8 +592,8 @@ export default function CoinCanvas({ mobile }: { mobile: boolean }) {
   useEffect(
     () =>
       subscribeG((g) => {
-        setActive(g < 1.25 || g > 8.7);
-        setExplore(g > 9.85);
+        setActive(g < 1.25 || g > FINALE - 0.3);
+        setExplore(g > FINALE + 0.85);
       }),
     [],
   );
@@ -614,7 +616,7 @@ export default function CoinCanvas({ mobile }: { mobile: boolean }) {
         dpr={[1, mobile ? 1.75 : 2]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         camera={{ position: [0, 0.25, 9.2], fov: 35, near: 0.1, far: 100 }}
-        onPointerMissed={() => engine.g > 9.85 && explorer.set({ selected: -1 })}
+        onPointerMissed={() => engine.g > FINALE + 0.85 && explorer.set({ selected: -1 })}
       >
         <ambientLight intensity={1.6} />
         <hemisphereLight args={["#ffffff", "#c7cfcc", 0.9]} />

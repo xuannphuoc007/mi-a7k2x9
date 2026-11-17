@@ -6,7 +6,6 @@ import { CENTER, UNL, UNL_OWNER, VALIDATOR_COUNT, validatorPos } from "@/data/co
 import { C, DrawPath, Label, mix } from "../svg";
 
 const IDX = 2;
-const THRESHOLDS = [50, 65, 70, 80];
 const rnd = mulberry32(77);
 /** each validator's initial candidate set (3 bits) — they disagree at first */
 const initialSets = Array.from({ length: VALIDATOR_COUNT }, () => [rnd() > 0.3, rnd() > 0.5, rnd() > 0.6]);
@@ -118,10 +117,7 @@ export default function ConsensusScene() {
               {L.validated}
             </Label>
             <Label x={-70} y={4} color={C.ink} size={10} upper={false} spacing="0">
-              {L.ledgerIndex} #N+1 · {t.ui.simulated.toLowerCase()}
-            </Label>
-            <Label x={-70} y={19} size={9.5} upper={false} spacing="0">
-              {L.ledgerHash} 9F3A…C21E
+              {L.ledgerIndex} #N+1 ✓
             </Label>
           </g>
         )}
@@ -135,8 +131,8 @@ export default function ConsensusScene() {
             <Label x={-70} y={-10} size={9.5} upper={false} spacing="0">
               {L.ledgerIndex} #N{k === -1 ? "" : k + 1}
             </Label>
-            <Label x={-70} y={8} size={9.5} upper={false} spacing="0">
-              prev → {["4E1B", "A07D", "77C2"][k + 3]}…
+            <Label x={-70} y={8} size={9.5} upper={false} spacing="0" color={C.accent}>
+              ✓
             </Label>
             <line x1={78} y1={0} x2={98} y2={0} stroke={C.ink} strokeWidth={1} />
           </g>
@@ -149,14 +145,11 @@ export default function ConsensusScene() {
       {/* round meter */}
       <g transform="translate(60,118)" opacity={clamp(v.proposals * 4) * (1 - ex) * (1 - v.chain * 0.6)}>
         <Label x={0} y={0} color={C.ink}>
-          {L.round} {Math.min(4, round + 1)} · {L.threshold} {conv > 0.6 ? 80 : THRESHOLDS[Math.min(3, round)]}%
+          {L.agreement} {agree}% · {L.threshold} 80%
         </Label>
         <rect x={0} y={12} width={240} height={6} fill="none" stroke={C.ink} strokeWidth={0.8} />
         <rect x={0} y={12} width={(240 * agree) / 100} height={6} fill={agree >= 80 ? C.accent : C.ink} />
         <line x1={192} y1={7} x2={192} y2={24} stroke={C.warn} strokeWidth={1.4} />
-        <Label x={0} y={40}>
-          {L.agreement} {agree}%
-        </Label>
         <Label x={192} y={40} anchor="middle" color={C.warn} size={9.5}>
           80%
         </Label>

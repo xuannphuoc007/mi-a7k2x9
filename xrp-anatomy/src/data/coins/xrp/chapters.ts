@@ -4,7 +4,7 @@
  * sits in the reading column; they are synchronised with the scene timelines.
  * `height` is the chapter's scroll length in viewport heights.
  */
-export type PanelKind = "send" | "route" | "liquidity" | "dex" | "risk" | "explorer" | null;
+export type PanelKind = "send" | "route" | "liquidity" | "dex" | "rwa" | "risk" | "explorer" | null;
 
 export type ChapterConfig = {
   id: string;
@@ -27,9 +27,13 @@ export const chapters: ChapterConfig[] = [
   { id: "crossborder", beats: [0.02, 0.2, 0.84], height: 4.2, panel: "route", panelAt: 0.4, panelSpan: 0.4 },
   { id: "bridge", beats: [0.02, 0.28, 0.86], height: 4.0, panel: "liquidity", panelAt: 0.46, panelSpan: 0.36 },
   { id: "dex", beats: [0.02, 0.24, 0.86], height: 4.0, panel: "dex", panelAt: 0.44, panelSpan: 0.38 },
+  { id: "rwa", beats: [0.02, 0.24, 0.86], height: 4.2, panel: "rwa", panelAt: 0.42, panelSpan: 0.4 },
   { id: "supply", beats: [0.02, 0.26, 0.5, 0.76], height: 4.0, panel: null },
   { id: "risk", beats: [0.02, 0.84], height: 3.8, panel: "risk", panelAt: 0.22, panelSpan: 0.58 },
   { id: "pieces", beats: [0.02, 0.33, 0.6], height: 5.0, panel: "explorer", panelAt: 0.84, panelSpan: 0.16 },
 ];
 
 export const CHAPTER_COUNT = chapters.length;
+
+/** index of the finale (exploded coin) chapter */
+export const FINALE = CHAPTER_COUNT - 1;

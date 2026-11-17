@@ -16,6 +16,7 @@ import LiquidityPanel from "@/components/interactive/LiquidityPanel";
 import DexPanel from "@/components/interactive/DexPanel";
 import RiskPanel from "@/components/interactive/RiskPanel";
 import ExplorerPanel from "@/components/interactive/ExplorerPanel";
+import RwaPanel from "@/components/interactive/RwaPanel";
 import { useIsMobile, useReducedMotion } from "@/hooks/useMedia";
 import { Badge } from "@/components/interactive/ui";
 
@@ -24,6 +25,7 @@ const PANELS: Record<Exclude<PanelKind, null>, () => React.ReactElement> = {
   route: RoutePanel,
   liquidity: LiquidityPanel,
   dex: DexPanel,
+  rwa: RwaPanel,
   risk: RiskPanel,
   explorer: ExplorerPanel,
 };
@@ -130,6 +132,12 @@ export default function Story() {
                               {n}
                             </p>
                           ))}
+                          {j === c.beats.length - 1 && ch.takeaway && (
+                            <aside className="mt-5 border border-ink bg-accent-soft/60 px-4 py-3">
+                              <div className="tag text-accent">{t.ui.inShort}</div>
+                              <p className="serif mt-1 text-[18px] leading-snug">{ch.takeaway}</p>
+                            </aside>
+                          )}
                         </>
                       )}
                     </div>

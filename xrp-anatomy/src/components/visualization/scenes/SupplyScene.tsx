@@ -5,7 +5,7 @@ import { clamp, lerp, smooth } from "@/lib/store";
 import { C, Label, mix } from "../svg";
 import { SUPPLY } from "./DexScene";
 
-const IDX = 7;
+const IDX = 8;
 const RI = 232;
 const RO = 296;
 /** chapter 9 risk-map core node, where the ring shrinks to */
@@ -107,7 +107,7 @@ export default function SupplyScene() {
           ■ {L.escrow} · {L.locked}
         </Label>
         <Label x={60} y={168} anchor="start" size={9.5} upper={false} spacing="0">
-          FinishAfter · CancelAfter · 55 × 10⁹
+          {L.schedule} · 55 × 1B
         </Label>
       </g>
 
@@ -166,7 +166,7 @@ export default function SupplyScene() {
         </g>
       )}
       <Label x={60} y={118} opacity={o * smooth(v.ring)}>
-        1 ▮ ≈ 10⁹ XRP · {t.ui.illustrative}
+        {L.block} · {t.ui.illustrative}
       </Label>
     </g>
   );

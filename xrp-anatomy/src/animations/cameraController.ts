@@ -19,12 +19,12 @@ const keys: Key[] = [
   { g: 0.62, pose: { pos: [0.6, 0.8, 10.2], target: [0, 0, 0], fov: 36 } }, // dolly out as it dissolves
   { g: 0.9, pose: CANONICAL },
   { g: 1.2, pose: CANONICAL },
-  // finale (chapter 10 = g 9..10)
-  { g: 8.8, pose: { pos: [0, 0, 11], target: [0, 0, 0], fov: 35 } },
-  { g: 9.3, pose: { pos: [-1.5, 0.8, 10], target: [0, 0, 0], fov: 35 } },
-  { g: 9.6, pose: { pos: [0.9, 1.2, 10.6], target: [0, 0, 0], fov: 36 } }, // layers align
-  { g: 9.8, pose: { pos: [0.0, 0.15, 7.8], target: [0, 0, 0], fov: 35 } }, // reassembled, front
-  { g: 9.97, pose: { pos: [0.0, 1.5, 11.0], target: [0, -0.15, 0], fov: 35 } }, // explorer
+  // finale (chapter 11 = g 10..11)
+  { g: 9.8, pose: { pos: [0, 0, 11], target: [0, 0, 0], fov: 35 } },
+  { g: 10.3, pose: { pos: [-1.5, 0.8, 10], target: [0, 0, 0], fov: 35 } },
+  { g: 10.6, pose: { pos: [0.9, 1.2, 10.6], target: [0, 0, 0], fov: 36 } }, // layers align
+  { g: 10.8, pose: { pos: [0.0, 0.15, 7.8], target: [0, 0, 0], fov: 35 } }, // reassembled, front
+  { g: 10.97, pose: { pos: [0.0, 1.5, 11.0], target: [0, -0.15, 0], fov: 35 } }, // explorer
 ];
 
 export function cameraAt(g: number): Pose {

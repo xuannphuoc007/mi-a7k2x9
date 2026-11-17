@@ -85,7 +85,7 @@ export function route(p: RouteParams): RouteResult {
 export const DEFAULT_ROUTE: RouteParams = {
   amountUsd: 5_000,
   directDepthUsd: 40_000,
-  leg1DepthUsd: 400_000,
-  leg2DepthUsd: 250_000,
+  leg1DepthUsd: 300_000,
+  leg2DepthUsd: 300_000,
   hopCostBps: 20,
 };

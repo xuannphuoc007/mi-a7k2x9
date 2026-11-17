@@ -8,7 +8,7 @@ import { engine } from "@/animations/scrollController";
 import { C, DrawPath, Label, mix } from "../svg";
 import { RISK_CORE } from "./SupplyScene";
 
-const IDX = 8;
+const IDX = 9;
 const P = {
   sender: { x: 100, y: 560 },
   onramp: { x: 285, y: 560 },
@@ -25,11 +25,9 @@ const P = {
 const AFFECTS: Record<number, string[]> = {
   0: ["market", "dex"],
   1: ["dex", "route"],
-  2: ["dex"],
-  3: ["issuer", "onramp", "payout"],
-  4: ["border", "onramp", "payout"],
-  5: ["payout"],
-  6: ["vals", "core"],
+  2: ["issuer", "onramp", "payout"],
+  3: ["border", "onramp", "payout"],
+  4: ["payout"],
 };
 
 export default function RiskScene() {
@@ -58,11 +56,10 @@ export default function RiskScene() {
   // effects
   const routeW = risk === 1 ? lerp(10, 2.5, fx) : 10;
   const rate = 36 * (1 + (risk === 0 ? 0.045 * Math.sin(time * 2.2) + 0.02 * Math.sin(time * 5.1) : 0));
-  const cost = risk === 1 ? lerp(0.6, 4.8, fx) : risk === 2 ? lerp(0.6, 2.9, fx) : 0.6;
-  const payoutDown = risk === 5 ? fx : 0;
-  const gate = risk === 4 ? fx : 0;
-  const offline = risk === 6 ? 3 : 0;
-  const quorum = (10 - offline) * 10;
+  const cost = risk === 1 ? lerp(0.6, 4.8, fx) : 0.6;
+  const payoutDown = risk === 4 ? fx : 0;
+  const gate = risk === 3 ? fx : 0;
+  const offline = 0;
 
   const node = (key: keyof typeof P, label: string, k: number, shape: "circle" | "square" = "circle", extra?: React.ReactNode) => {
     const p = pull(P[key] as { x: number; y: number });
@@ -145,7 +142,7 @@ export default function RiskScene() {
         {hit("dex") > 0 && <circle r={60} fill="url(#glow-warn)" opacity={fx} />}
         <rect x={-46} y={-26} width={92} height={52} fill={C.paper} stroke={hit("dex") ? C.warn : C.ink} strokeWidth={hit("dex") ? 2 : 1.2} />
         {Array.from({ length: 6 }, (_, i) => {
-          const consumed = risk === 2 ? clamp(fx * 6 - i) : 0;
+          const consumed = risk === 1 ? clamp(fx * 6 - i) : 0;
           const thin = risk === 1 ? lerp(1, 0.3, fx) : 1;
           return <rect key={i} x={-38 + i * 13} y={18 - (10 + i * 5) * thin} width={9} height={(10 + i * 5) * thin} fill={consumed > 0.5 ? C.warn : C.accent} opacity={0.7} />;
         })}
@@ -172,9 +169,6 @@ export default function RiskScene() {
           const off = i < offline;
           return <circle key={i} cx={Math.cos(a) * 48} cy={Math.sin(a) * 48} r={7} fill={off ? C.paper : C.ink} stroke={off ? C.warn : C.ink} strokeDasharray={off ? "2 2" : undefined} opacity={off ? lerp(1, 0.6, fx) : 1} />;
         })}
-        <Label x={0} y={4} anchor="middle" size={9.5} color={offline ? C.warn : C.ink}>
-          {quorum}%
-        </Label>
         <Label x={0} y={78} anchor="middle" color={hit("vals") ? C.warn : C.ink} size={10}>
           {L.validators}
         </Label>
@@ -182,7 +176,7 @@ export default function RiskScene() {
 
       {/* contextual readouts */}
       <g opacity={o * fx}>
-        {(risk === 0 || risk === 1 || risk === 2) && (
+        {(risk === 0 || risk === 1) && (
           <g transform="translate(70,120)">
             <Label x={0} y={0} color={C.ink}>
               {R.price}: 1 XRP ≈ {fmt(rate, 2, locale)} MXN
@@ -195,12 +189,12 @@ export default function RiskScene() {
             </Label>
           </g>
         )}
-        {risk === 3 && (
+        {risk === 2 && (
           <Label x={is.x} y={is.y - 38} anchor="middle" color={C.warn}>
             IOU ≠ XRP
           </Label>
         )}
-        {risk === 4 && (
+        {risk === 3 && (
           <g transform={`translate(${P.border},560)`}>
             <rect x={-6} y={-60 * gate} width={12} height={120 * gate} fill="url(#hatch-warn)" stroke={C.warn} />
             <Label x={14} y={-70} color={C.warn}>
@@ -208,7 +202,7 @@ export default function RiskScene() {
             </Label>
           </g>
         )}
-        {risk === 5 && (
+        {risk === 4 && (
           <g>
             <Label x={co.x} y={co.y - 66} anchor="middle" color={C.accent}>
               ✓ {R.settled}
@@ -218,16 +212,6 @@ export default function RiskScene() {
             </Label>
             <Label x={pa.x + 20} y={pa.y + 70} anchor="middle" color={C.warn}>
               … {R.waiting}
-            </Label>
-          </g>
-        )}
-        {risk === 6 && (
-          <g>
-            <Label x={va.x + 80} y={va.y - 10} color={C.warn}>
-              {R.quorum} {quorum}% &lt; 80%
-            </Label>
-            <Label x={va.x + 80} y={va.y + 8} color={C.warn}>
-              {R.halted}
             </Label>
           </g>
         )}

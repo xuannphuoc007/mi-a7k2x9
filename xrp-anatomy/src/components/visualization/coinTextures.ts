@@ -405,6 +405,57 @@ const glyphs: Record<LayerDef["glyph"], (ctx: Ctx, S: number, r: number, def: La
     ctx.lineTo(cx, cx + r * 0.7);
     ctx.stroke();
   },
+  rwa(ctx, S, r) {
+    const cx = S / 2;
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 2.2;
+    // building
+    const bx = cx - r * 0.42, by = cx + r * 0.25;
+    ctx.strokeRect(bx - r * 0.12, by - r * 0.42, r * 0.24, r * 0.42);
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) ctx.strokeRect(bx - r * 0.08 + i * r * 0.06, by - r * 0.37 + j * r * 0.09, r * 0.03, r * 0.05);
+    // bond certificate
+    const dx = cx + r * 0.05, dy = cx - r * 0.38;
+    ctx.fillStyle = "#f7f7f2";
+    ctx.fillRect(dx - r * 0.16, dy, r * 0.32, r * 0.22);
+    ctx.strokeRect(dx - r * 0.16, dy, r * 0.32, r * 0.22);
+    ctx.beginPath();
+    ctx.arc(dx + r * 0.1, dy + r * 0.15, r * 0.035, 0, Math.PI * 2);
+    ctx.fillStyle = ACCENT;
+    ctx.fill();
+    for (let k = 0; k < 3; k++) {
+      ctx.beginPath();
+      ctx.moveTo(dx - r * 0.12, dy + r * (0.05 + k * 0.045));
+      ctx.lineTo(dx + r * 0.05, dy + r * (0.05 + k * 0.045));
+      ctx.stroke();
+    }
+    // gold bar
+    const gx = cx + r * 0.38, gy = cx + r * 0.22;
+    ctx.beginPath();
+    ctx.moveTo(gx - r * 0.16, gy);
+    ctx.lineTo(gx - r * 0.1, gy - r * 0.1);
+    ctx.lineTo(gx + r * 0.1, gy - r * 0.1);
+    ctx.lineTo(gx + r * 0.16, gy);
+    ctx.closePath();
+    ctx.fillStyle = "#e6d39a";
+    ctx.fill();
+    ctx.stroke();
+    // token hexagons in the middle
+    for (let k = 0; k < 3; k++) {
+      const hx = cx - r * 0.12 + k * r * 0.12, hy = cx + r * 0.05;
+      ctx.beginPath();
+      for (let a = 0; a < 6; a++) {
+        const ang = (a / 6) * Math.PI * 2;
+        const px = hx + Math.cos(ang) * r * 0.05, py = hy + Math.sin(ang) * r * 0.05;
+        if (a === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = k === 1 ? ACCENT : "#f7f7f2";
+      ctx.fill();
+      ctx.stroke();
+    }
+    ringText(ctx, S, "REAL-WORLD ASSETS · BONDS · PROPERTY · GOLD · RLUSD · ", r * 0.86, r * 0.05, MUTE, 1.12);
+  },
   supply(ctx, S, r, def) {
     const cx = S / 2;
     const r1 = r * def.hole + 4;

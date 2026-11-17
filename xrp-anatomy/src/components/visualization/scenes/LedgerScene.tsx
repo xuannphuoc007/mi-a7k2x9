@@ -113,13 +113,13 @@ export default function LedgerScene() {
       {hover >= 0 && v.exit < 0.5 && <AccountCard i={hover} locale={locale} />}
 
       {/* account state callout */}
-      <Callout from={{ x: ledgerAccounts[2].x + 22, y: ledgerAccounts[2].y }} to={{ x: 760, y: 78 }} text={L.accountState} sub="addr · balance · seq · flags" p={v.labels * (1 - ex)} />
-      <Callout from={{ x: ledgerServers[2].x + 18, y: ledgerServers[2].y }} to={{ x: 820, y: 640 }} text={L.server} sub="rippled / xrpld" p={v.labels * (1 - ex) * (1 - v.sign)} />
+      <Callout from={{ x: ledgerAccounts[2].x + 22, y: ledgerAccounts[2].y }} to={{ x: 760, y: 78 }} text={L.accountState} sub={L.accountSub} p={v.labels * (1 - ex)} />
+      <Callout from={{ x: ledgerServers[2].x + 18, y: ledgerServers[2].y }} to={{ x: 820, y: 640 }} text={L.server} sub={L.serverSub} p={v.labels * (1 - ex) * (1 - v.sign)} />
 
       {/* signing */}
       <TxCard x={sender.x + 34} y={sender.y + 52} signed={v.sign} label={L.payment} opacity={clamp(v.sign * 3) * (1 - v.travel)} />
       <Label x={sender.x + 76} y={sender.y + 58} color={C.accent} opacity={clamp(v.sign * 2 - 1) * (1 - v.travel)}>
-        {L.signed} · seq {ledgerAccounts[SENDER].seq + 1}
+        {L.signed} ✓
       </Label>
 
       {/* packet */}
@@ -147,13 +147,11 @@ export default function LedgerScene() {
     const rows: [string, string][] = [
       [L.address, a.addr.slice(0, 14) + "…"],
       [L.balance, `${fmt(a.balance, 6, locale)} XRP`],
-      [L.sequence, String(a.seq)],
       [L.reserve, `${fmt(reserve, 1, locale)} XRP`],
-      [L.state, L.active],
     ];
     return (
       <g transform={`translate(${x},${y})`} style={{ pointerEvents: "none" }}>
-        <rect width={222} height={128} fill={C.paper} stroke={C.ink} strokeWidth={1} />
+        <rect width={222} height={88} fill={C.paper} stroke={C.ink} strokeWidth={1} />
         <rect width={222} height={20} fill={C.ink} />
         <Label x={8} y={14} color={C.paper} size={9.5}>
           {L.simulated}

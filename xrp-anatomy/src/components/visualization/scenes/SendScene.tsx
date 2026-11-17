@@ -68,7 +68,7 @@ export default function SendScene() {
                 {isNew ? t.scenes.consensus.validated : t.scenes.consensus.ledgerIndex}
               </Label>
               <Label x={-58} y={12} size={9.5} upper={false} spacing="0" color={C.ink}>
-                {isNew && sim.hash ? `tx ${sim.hash.slice(0, 10)}…` : `#N${k === 2 ? "" : k - 2}`}
+                {isNew ? `#N+1 ✓` : `#N${k === 2 ? "" : k - 2}`}
               </Label>
               {k < 3 && <line x1={66} y1={0} x2={94} y2={0} stroke={C.ink} />}
             </g>
@@ -144,7 +144,7 @@ export default function SendScene() {
       </g>
       {sim.failed && (
         <Label x={500} y={420} anchor="middle" color={C.warn} opacity={en}>
-          tecUNFUNDED_PAYMENT · {t.ui.simulated}
+          {L.failed}
         </Label>
       )}
     </g>

@@ -1,6 +1,6 @@
 # Anatomy of XRP
 
-A cinematic, scroll-driven interactive explainer of XRP and the XRP Ledger — ten chapters, bilingual (English / Tiếng Việt).
+A cinematic, scroll-driven interactive explainer of XRP and the XRP Ledger — eleven chapters (incl. real-world assets), beginner-friendly, bilingual (English / Tiếng Việt).
 
 **Live:** https://xuannphuoc007.github.io/mi-a7k2x9/xrp/
 
@@ -13,7 +13,7 @@ Next.js 15 (static export) · TypeScript · Tailwind CSS v4 · GSAP + ScrollTrig
 - One ScrollTrigger converts scroll position into a single story coordinate `g` (chapter index + local progress), smoothed with `gsap.quickTo`.
 - Each chapter owns a paused GSAP timeline that is scrubbed with `timeline.progress()` from `g`, so every transformation reverses exactly and chapter jumps render intermediate states in order.
 - The 3D coin (12 conceptual layers, particle field, camera) is a pure function of `g` — see `src/animations/cameraController.ts` and `src/components/visualization/CoinCanvas.tsx`.
-- Scenes share one 1000×1000 coordinate system (`src/data/coins/xrp/layouts.ts`) so each chapter hands its objects to the next (coin → ledger → validators → wallets → map → liquidity → order book → supply ring → risk map → exploded coin).
+- Scenes share one 1000×1000 coordinate system (`src/data/coins/xrp/layouts.ts`) so each chapter hands its objects to the next (coin → ledger → validators → wallets → map → liquidity → order book → RWA vault → supply ring → risk map → exploded coin).
 
 ## Structure
 ```

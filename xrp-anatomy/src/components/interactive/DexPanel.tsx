@@ -32,9 +32,9 @@ export default function DexPanel() {
           <div className="tag text-ink">{P.book}</div>
           {fill.complete ? (
             <>
-              <Stat label={P.avg} value={`${fmt(fill.avg, 4, locale)}`} />
+              <Stat label={P.avg} value={`$${fmt(fill.avg, 3, locale)}`} />
               <Stat label={P.slippage} value={`+${fmt(fill.slippagePct, 2, locale)}%`} tone={fill.slippagePct > 1 ? "warn" : "ink"} />
-              <Stat label={P.levels} value={fill.levels} />
+              <Stat label={P.cost} value={`$${fmt(fill.cost, 0, locale)}`} />
             </>
           ) : (
             <p className="text-[12.5px] text-warn">{P.insufficient}</p>
@@ -44,7 +44,7 @@ export default function DexPanel() {
           <div className="tag text-ink">{P.amm}</div>
           {amm.complete ? (
             <>
-              <Stat label={P.avg} value={`${fmt(amm.avg, 4, locale)}`} />
+              <Stat label={P.avg} value={`$${fmt(amm.avg, 3, locale)}`} />
               <Stat label={P.slippage} value={`+${fmt(amm.slippagePct, 2, locale)}%`} tone={amm.slippagePct > 1 ? "warn" : "ink"} />
               <Stat label={P.cost} value={`$${fmt(amm.cost, 0, locale)}`} />
             </>

@@ -6,7 +6,7 @@ import { explorer } from "@/lib/explorerStore";
 import { layers } from "@/data/coins/xrp/anatomy";
 import { C, DrawPath, Label } from "../svg";
 
-const IDX = 9;
+const IDX = 10;
 
 /** Engineering-plate frame and title block drawn around the 3D exploded view. */
 export default function PiecesScene() {
@@ -73,7 +73,7 @@ export default function PiecesScene() {
           {t.scenes.pieces.title}
         </text>
         <Label x={12} y={50} size={9.5}>
-          {sel >= 0 ? `${t.panels.explorer.layer} ${String(sel + 1).padStart(2, "0")}` : `12 × ${t.panels.explorer.layer}`}
+          {sel >= 0 ? `${t.panels.explorer.layer} ${String(sel + 1).padStart(2, "0")}` : `${layers.length} × ${t.panels.explorer.layer}`}
         </Label>
         <Label x={12} y={68} size={9.5} color={C.ink} upper={false} spacing="0">
           {sel >= 0 ? t.anatomy[sel].name : "1 : 1 · conceptual"}
@@ -82,7 +82,7 @@ export default function PiecesScene() {
           rev 2026·11
         </Label>
         <Label x={210} y={68} size={9.5}>
-          sheet 10/10
+          sheet 11/11
         </Label>
       </g>
       <g opacity={clamp(v.block * 2 - 1)}>

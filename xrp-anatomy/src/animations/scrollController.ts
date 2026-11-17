@@ -15,6 +15,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { createStore, clamp } from "@/lib/store";
+import { CHAPTER_COUNT } from "@/data/coins/xrp/chapters";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -33,7 +34,7 @@ export const engine = {
   g: 0,
   /** raw (unsmoothed) story coordinate */
   target: 0,
-  count: 10,
+  count: CHAPTER_COUNT,
   sections: [] as (HTMLElement | null)[],
   ranges: [] as Range[],
   scenes: new Set<SceneRegistration>(),

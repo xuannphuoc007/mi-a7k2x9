@@ -22,6 +22,7 @@ import DexScene from "./scenes/DexScene";
 import SupplyScene from "./scenes/SupplyScene";
 import RiskScene from "./scenes/RiskScene";
 import PiecesScene from "./scenes/PiecesScene";
+import RwaScene from "./scenes/RwaScene";
 
 const CoinCanvas = dynamic(() => import("./CoinCanvas"), { ssr: false });
 
@@ -58,7 +59,7 @@ export default function Stage({ mobile }: { mobile: boolean }) {
         el.style.setProperty("--s-accent", mixRgb(LIGHT.accent, DARK.accent, d));
         el.style.setProperty("--s-accent-soft", mixRgb(LIGHT.soft, DARK.soft, d));
         el.style.backgroundColor = mixRgb(LIGHT.paper, DARK.paper, d);
-        if (figRef.current) figRef.current.textContent = `${(g * 10).toFixed(1).padStart(4, "0")}%`;
+        if (figRef.current) figRef.current.textContent = `${((g / chapters.length) * 100).toFixed(1).padStart(4, "0")}%`;
       }),
     [],
   );
@@ -94,6 +95,7 @@ export default function Stage({ mobile }: { mobile: boolean }) {
           <MapScene />
           <BridgeScene />
           <DexScene />
+          <RwaScene />
           <SupplyScene />
           <RiskScene />
           <PiecesScene />
