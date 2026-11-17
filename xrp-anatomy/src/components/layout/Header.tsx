@@ -5,6 +5,7 @@ import { List, X } from "lucide-react";
 import { goToChapter, ui } from "@/animations/scrollController";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
+import { chapters } from "@/data/coins/xrp/chapters";
 
 export default function Header() {
   const { t, lang, setLang } = useI18n();
@@ -29,19 +30,19 @@ export default function Header() {
               transition={{ duration: 0.25 }}
               className="tag truncate text-mute"
             >
-              <span className="text-ink">{String(chapter + 1).padStart(2, "0")}</span> {t.ui.of} {t.chapters.length} — {t.chapters[chapter].label}
+              <span className="text-ink">{String(chapter + 1).padStart(2, "0")}</span> {t.ui.of} {t.chapters.length} — <span className="text-accent">{t.acts[chapters[chapter].act]}</span> · {t.chapters[chapter].label}
             </motion.span>
           </AnimatePresence>
         </div>
 
         <div className="flex items-center gap-3">
-          <div role="group" aria-label={t.ui.language} className="flex items-center rounded-full border border-ink/80 p-[2px]">
+          <div role="group" aria-label={t.ui.language} className="flex items-center rounded-full border border-line p-[2px]">
             {(["en", "vi"] as Lang[]).map((l) => (
               <button
                 key={l}
                 onClick={() => setLang(l)}
                 aria-pressed={lang === l}
-                className={`tag rounded-full px-2.5 py-1 transition-colors ${lang === l ? "bg-ink text-paper" : "text-ink hover:bg-paper-2"}`}
+                className={`tag rounded-full px-2.5 py-1 transition-colors ${lang === l ? "bg-accent text-paper" : "text-ink hover:bg-paper-2"}`}
               >
                 {l.toUpperCase()}
               </button>

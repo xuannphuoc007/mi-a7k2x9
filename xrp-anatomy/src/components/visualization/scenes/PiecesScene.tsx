@@ -1,4 +1,5 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useI18n } from "@/lib/i18n";
 import { clamp, smooth, useStore } from "@/lib/store";
@@ -6,7 +7,7 @@ import { explorer } from "@/lib/explorerStore";
 import { layers } from "@/data/coins/xrp/anatomy";
 import { C, DrawPath, Label } from "../svg";
 
-const IDX = 10;
+const IDX = chapterIndex("pieces");
 
 /** Engineering-plate frame and title block drawn around the 3D exploded view. */
 export default function PiecesScene() {

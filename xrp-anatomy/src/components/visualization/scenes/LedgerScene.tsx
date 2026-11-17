@@ -1,4 +1,5 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useState } from "react";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useI18n } from "@/lib/i18n";
@@ -6,7 +7,7 @@ import { clamp, fmt, lerp, smooth } from "@/lib/store";
 import { CENTER, accountServer, ledgerAccounts, ledgerServers, serverLinks, SENDER, validatorPos } from "@/data/coins/xrp/layouts";
 import { C, Callout, DrawPath, Label, TxCard, mix } from "../svg";
 
-const IDX = 1;
+const IDX = chapterIndex("ledger");
 /** servers glide onto these validator slots when the scene hands over to consensus */
 const SERVER_TO_VALIDATOR = [10, 1, 4, 6, 8];
 

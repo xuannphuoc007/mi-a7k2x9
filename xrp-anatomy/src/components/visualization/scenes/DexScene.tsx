@@ -1,4 +1,5 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useMemo } from "react";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useTween } from "@/hooks/useTween";
@@ -9,7 +10,7 @@ import { buildBook, walkBook, ammBuy, ammReserves, MID, LEVELS } from "@/simulat
 import { C, DrawPath, Label } from "../svg";
 import { BOOK_AXIS_Y as BASE } from "./BridgeScene";
 
-const IDX = 6;
+const IDX = chapterIndex("dex");
 const COLW = 30;
 const STEP = 38;
 const MAXH = 290;

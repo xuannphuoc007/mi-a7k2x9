@@ -8,7 +8,7 @@ import { mulberry32 } from "@/lib/store";
 
 const INK = "#171c1e";
 const MUTE = "#777e80";
-const ACCENT = "#327f76";
+const ACCENT = "#12a160";
 const WARN = "#bb6946";
 const LINE = "#c7cfcc";
 

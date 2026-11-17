@@ -1,4 +1,5 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useMemo } from "react";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useI18n } from "@/lib/i18n";
@@ -7,7 +8,7 @@ import { routeStore } from "@/lib/simStores";
 import { MAP, dotPath, mxPoly, polyPath, project, usPoly, type Pt } from "@/data/coins/xrp/layouts";
 import { C, DrawPath, Label, along, mix } from "../svg";
 
-const IDX = 4;
+const IDX = chapterIndex("crossborder");
 /** chapter 6 asset node positions — chips morph into these on exit */
 export const BRIDGE_NODES = { usd: { x: 210, y: 640 }, xrp: { x: 500, y: 290 }, mxn: { x: 790, y: 640 } };
 

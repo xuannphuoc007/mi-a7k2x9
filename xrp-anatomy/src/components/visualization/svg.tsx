@@ -13,6 +13,7 @@ export const C = {
   accent: "var(--s-accent)",
   warn: "var(--s-warn)",
   accentSoft: "var(--s-accent-soft)",
+  violet: "var(--s-violet, #9a52ff)",
 };
 
 /** Draw-on stroke: renders `p` (0..1) of a path using pathLength normalisation. */

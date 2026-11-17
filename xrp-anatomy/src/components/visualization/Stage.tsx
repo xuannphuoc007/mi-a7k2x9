@@ -12,7 +12,12 @@ import { chapters } from "@/data/coins/xrp/chapters";
 import { useI18n } from "@/lib/i18n";
 import { useStore, range } from "@/lib/store";
 import { ui } from "@/animations/scrollController";
+import { stageStore } from "@/lib/simStores";
 import { Defs } from "./svg";
+import ProblemScene from "./scenes/ProblemScene";
+import OriginScene from "./scenes/OriginScene";
+import JourneyScene from "./scenes/JourneyScene";
+import EconomicsScene from "./scenes/EconomicsScene";
 import LedgerScene from "./scenes/LedgerScene";
 import ConsensusScene from "./scenes/ConsensusScene";
 import SendScene from "./scenes/SendScene";
@@ -26,8 +31,9 @@ import RwaScene from "./scenes/RwaScene";
 
 const CoinCanvas = dynamic(() => import("./CoinCanvas"), { ssr: false });
 
-const LIGHT = { ink: [23, 28, 30], paper: [247, 247, 242], mute: [119, 126, 128], line: [199, 207, 204], accent: [50, 127, 118], soft: [216, 231, 227] };
-const DARK = { ink: [232, 236, 232], paper: [21, 26, 28], mute: [140, 150, 150], line: [62, 72, 74], accent: [94, 186, 172], soft: [32, 66, 62] };
+/** XRP identity: black and white, with the XRP Ledger's green; technical scenes go deeper and bluer */
+const LIGHT = { ink: [238, 242, 243], paper: [10, 12, 15], mute: [139, 149, 155], line: [44, 52, 60], accent: [50, 230, 133], soft: [14, 53, 38] };
+const DARK = { ink: [232, 240, 248], paper: [5, 9, 18], mute: [128, 146, 168], line: [36, 52, 78], accent: [25, 163, 255], soft: [10, 40, 70] };
 const mixRgb = (a: number[], b: number[], t: number) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(",")})`;
 
 /** dark amount for a given g, from chapter config */
@@ -45,6 +51,14 @@ export default function Stage({ mobile }: { mobile: boolean }) {
   const figRef = useRef<HTMLSpanElement>(null);
   const { t } = useI18n();
   const chapter = useStore(ui, (s) => s.chapter);
+  const squareRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = squareRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => stageStore.set({ px: el.clientWidth || 800 }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(
     () =>
@@ -70,14 +84,15 @@ export default function Stage({ mobile }: { mobile: boolean }) {
       className="relative h-full w-full overflow-hidden"
       style={
         {
-          "--s-ink": "#171c1e",
-          "--s-paper": "#f7f7f2",
-          "--s-mute": "#777e80",
-          "--s-line": "#c7cfcc",
-          "--s-accent": "#327f76",
-          "--s-warn": "#bb6946",
-          "--s-accent-soft": "#d8e7e3",
-          backgroundColor: "#f7f7f2",
+          "--s-ink": "#eef2f3",
+          "--s-paper": "#0a0c0f",
+          "--s-mute": "#8b959b",
+          "--s-line": "#2c343c",
+          "--s-accent": "#32e685",
+          "--s-warn": "#ff6b5a",
+          "--s-violet": "#9a52ff",
+          "--s-accent-soft": "#0e3526",
+          backgroundColor: "#0a0c0f",
         } as React.CSSProperties
       }
       role="img"
@@ -85,16 +100,20 @@ export default function Stage({ mobile }: { mobile: boolean }) {
     >
       {/* square drawing area, centred */}
       <div className="absolute inset-0" style={{ containerType: "size" }}>
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: "min(100cqw, 100cqh)", height: "min(100cqw, 100cqh)" }}>
+      <div ref={squareRef} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: "min(100cqw, 100cqh)", height: "min(100cqw, 100cqh)" }}>
         <CoinCanvas mobile={mobile} />
         <svg viewBox="0 0 1000 1000" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid meet" style={{ overflow: "visible" }}>
           <Defs />
+          <ProblemScene />
+          <OriginScene />
+          <JourneyScene />
           <LedgerScene />
           <ConsensusScene />
           <SendScene />
           <MapScene />
           <BridgeScene />
           <DexScene />
+          <EconomicsScene />
           <RwaScene />
           <SupplyScene />
           <RiskScene />
@@ -104,7 +123,7 @@ export default function Stage({ mobile }: { mobile: boolean }) {
       </div>
 
       {/* stage chrome: figure tag + progress readout */}
-      <div className="pointer-events-none absolute bottom-3 left-4 flex items-center gap-3 md:bottom-auto md:left-6 md:top-[calc(var(--header-h)+8px)]" style={{ color: "var(--s-mute)" }}>
+      <div className="pointer-events-none absolute bottom-3 left-4 flex items-center gap-3 md:bottom-auto md:left-6 md:top-3" style={{ color: "var(--s-mute)" }}>
         <span className="tag">
           FIG. {String(chapter + 1).padStart(2, "0")} — {t.chapters[chapter].label}
         </span>

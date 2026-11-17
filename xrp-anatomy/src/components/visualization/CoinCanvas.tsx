@@ -12,7 +12,7 @@ import * as THREE from "three";
 import { engine, subscribeG } from "@/animations/scrollController";
 import { cameraAt } from "@/animations/cameraController";
 import { layers, type LayerDef } from "@/data/coins/xrp/anatomy";
-import { FINALE } from "@/data/coins/xrp/chapters";
+import { FINALE, COIN } from "@/data/coins/xrp/chapters";
 import { ledgerAccounts, ledgerServers, accountServer, serverLinks } from "@/data/coins/xrp/layouts";
 import { makeDotTexture, makeLayerTexture, makeRimTexture } from "./coinTextures";
 import { clamp, lerp, mulberry32, range, smooth } from "@/lib/store";
@@ -51,10 +51,11 @@ function makeFrame(): Frame {
 }
 
 /** Choreography for the coin. Writes into `f` to avoid allocations per frame. */
-function choreograph(f: Frame, g: number, time: number, reduced: boolean) {
+function choreograph(f: Frame, gAbs: number, time: number, reduced: boolean) {
   const ex = explorer.get();
-  f.visible = g < 0.72 || g > FINALE - 0.28;
-  if (g <= 1.2) {
+  const g = gAbs - COIN; // intro runs in coin-chapter-local units
+  f.visible = (g > -0.05 && g < 0.72) || gAbs > FINALE - 0.16;
+  if (gAbs < FINALE - 0.5) {
     const p0 = smooth(range(g, 0, 0.2));
     const e = smooth(range(g, 0.2, 0.45));
     const idle = reduced ? 0 : Math.sin(time * 0.45) * 0.38 * (1 - range(g, 0.02, 0.24));
@@ -80,8 +81,8 @@ function choreograph(f: Frame, g: number, time: number, reduced: boolean) {
     return;
   }
   // finale
-  const l = g - FINALE;
-  const fade = range(g, FINALE - 0.24, FINALE - 0.02);
+  const l = gAbs - FINALE;
+  const fade = range(gAbs, FINALE - 0.24, FINALE - 0.02);
   const m = smooth(range(l, -0.2, 0.32));
   const a = smooth(range(l, 0.36, 0.62));
   const c = smooth(range(l, 0.65, 0.82));
@@ -141,7 +142,7 @@ function LayerMesh({
     const face = new THREE.MeshStandardMaterial({
       map: textures[def.index], transparent: true, alphaTest: 0.03,
       roughness: isShell ? 0.5 : 0.92, metalness: isShell ? 0.22 : 0.0,
-      emissive: new THREE.Color("#327f76"), emissiveIntensity: 0,
+      emissive: new THREE.Color("#32e685"), emissiveIntensity: 0,
     });
     const back = new THREE.MeshStandardMaterial({
       map: isShell ? textures[0] : null, color: isShell ? "#ffffff" : def.tint, transparent: true,
@@ -190,7 +191,7 @@ function LayerMesh({
     mats.back.opacity = isShell ? o * f.shellBack : o;
     mats.side.opacity = isShell ? o * f.shellRim : o * 0.9;
     mats.edge.opacity = o;
-    mats.edge.color.set(s.h > 0.5 ? "#327f76" : "#171c1e");
+    mats.edge.color.set(s.h > 0.5 ? "#12a160" : "#171c1e");
     mats.face.depthWrite = o > 0.5;
   });
 
@@ -271,7 +272,7 @@ function Particles({ count, frameGroup }: { count: number; frameGroup: React.Mut
       delay[i] = r();
     }
     const colors = new Float32Array(count * 3);
-    const ink = new THREE.Color("#171c1e"), acc = new THREE.Color("#327f76");
+    const ink = new THREE.Color("#eef2f3"), acc = new THREE.Color("#32e685");
     for (let i = 0; i < count; i++) {
       const c = r() < 0.16 ? acc : ink;
       colors.set([c.r, c.g, c.b], i * 3);
@@ -329,7 +330,7 @@ function Particles({ count, frameGroup }: { count: number; frameGroup: React.Mut
   const obj = useMemo(() => new THREE.Object3D(), []);
 
   useFrame(() => {
-    const g = engine.g;
+    const g = engine.g - COIN;
     const pts = pointsRef.current;
     if (!pts) return;
     const visible = g > 0.44 && g < 1.12;
@@ -477,7 +478,7 @@ function Rig({ mobile }: { mobile: boolean }) {
     const small = size.width < 620;
     if (small && g > FINALE - 0.3) f.numLabels = true;
     if (outer.current) {
-      const k = g < 1.2 || !small ? 0 : f.explore;
+      const k = g < FINALE - 0.5 || !small ? 0 : f.explore;
       outer.current.scale.setScalar(lerp(1, 0.8, k));
       outer.current.position.x = lerp(0, -0.55, k);
     }
@@ -587,24 +588,30 @@ export default function CoinCanvas({ mobile }: { mobile: boolean }) {
   const [active, setActive] = useState(true);
   const [explore, setExplore] = useState(false);
   const [wrap, setWrap] = useState<HTMLDivElement | null>(null);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
   useDragRotate(wrap);
 
   useEffect(
     () =>
       subscribeG((g) => {
-        setActive(g < 1.25 || g > FINALE - 0.3);
+        const l = g - COIN;
+        setActive((l > -0.05 && l < 1.25) || g > FINALE - 0.16);
         setExplore(g > FINALE + 0.85);
+        // fade the canvas in as the coin chapter approaches
+        if (wrapRef.current) wrapRef.current.style.opacity = String(g > FINALE - 0.5 ? smooth(range(g, FINALE - 0.14, FINALE - 0.02)) : smooth(range(l, -0.01, 0.07)));
       }),
     [],
   );
 
   return (
     <div
-      ref={setWrap}
+      ref={(el) => {
+        wrapRef.current = el;
+        setWrap(el);
+      }}
       className="absolute inset-0"
       style={{
         visibility: active ? "visible" : "hidden",
-        opacity: active ? 1 : 0,
         touchAction: explore ? "none" : "auto",
         pointerEvents: explore ? "auto" : "none",
         cursor: explore ? "grab" : "default",

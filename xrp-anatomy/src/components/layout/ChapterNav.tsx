@@ -3,6 +3,7 @@ import { goToChapter, ui } from "@/animations/scrollController";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { useG } from "@/hooks/useG";
+import { chapters } from "@/data/coins/xrp/chapters";
 
 /** Vertical progress indicator with direct chapter navigation (desktop). */
 export default function ChapterNav() {
@@ -11,13 +12,13 @@ export default function ChapterNav() {
   const g = useG(0.01);
   return (
     <nav aria-label={t.ui.contents} className="fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 md:block">
-      <ol className="relative flex flex-col items-end gap-[14px]">
+      <ol className="relative flex flex-col items-end gap-[11px]">
         <span aria-hidden className="absolute right-[3px] top-1 bottom-1 w-px bg-line" />
-        <span aria-hidden className="absolute right-[3px] top-1 w-px bg-ink transition-[height] duration-150" style={{ height: `calc(${Math.min(1, g / 9.999) * 100}% - 8px)` }} />
+        <span aria-hidden className="absolute right-[3px] top-1 w-px bg-accent transition-[height] duration-150" style={{ height: `calc(${Math.min(1, g / (t.chapters.length - 0.001)) * 100}% - 8px)` }} />
         {t.chapters.map((c, i) => {
           const active = i === chapter;
           return (
-            <li key={i} className="group relative flex items-center">
+            <li key={i} className={`group relative flex items-center ${i > 0 && chapters[i - 1].act !== chapters[i].act ? "mt-3" : ""}`}>
               <button
                 onClick={() => goToChapter(i)}
                 className="flex items-center gap-3 outline-offset-4"
@@ -32,7 +33,7 @@ export default function ChapterNav() {
                   {c.label}
                 </span>
                 <span className={`tag w-5 text-right ${active ? "text-ink" : "text-mute"}`}>{String(i + 1).padStart(2, "0")}</span>
-                <span className={`relative z-10 block h-[7px] w-[7px] rounded-full border transition-all ${active ? "scale-125 border-accent bg-accent" : i < chapter ? "border-ink bg-ink" : "border-ink bg-paper"}`} />
+                <span className={`relative z-10 block h-[7px] w-[7px] rounded-full border transition-all ${active ? "scale-150 border-accent bg-accent shadow-[0_0_10px_#32e685]" : i < chapter ? "border-accent bg-accent/70" : "border-mute bg-paper"}`} />
               </button>
             </li>
           );

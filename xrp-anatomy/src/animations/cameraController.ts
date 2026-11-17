@@ -4,6 +4,7 @@
  * smoothstep so motion eases between beats yet stays exactly reversible.
  */
 import { smooth, range, lerp } from "@/lib/store";
+import { COIN as C0, FINALE as F } from "@/data/coins/xrp/chapters";
 
 export type Pose = { pos: [number, number, number]; target: [number, number, number]; fov: number };
 
@@ -13,18 +14,18 @@ type Key = { g: number; pose: Pose };
 export const CANONICAL: Pose = { pos: [0, 0, 8], target: [0, 0, 0], fov: 35 };
 
 const keys: Key[] = [
-  { g: 0.0, pose: { pos: [0.0, 0.25, 9.2], target: [0, 0, 0], fov: 35 } },
-  { g: 0.2, pose: { pos: [0.0, 0.1, 7.0], target: [0, 0, 0], fov: 35 } }, // dolly in
-  { g: 0.42, pose: { pos: [0.9, 1.2, 10.4], target: [0, 0, 0], fov: 36 } }, // orbit to 3/4 exploded view
-  { g: 0.62, pose: { pos: [0.6, 0.8, 10.2], target: [0, 0, 0], fov: 36 } }, // dolly out as it dissolves
-  { g: 0.9, pose: CANONICAL },
-  { g: 1.2, pose: CANONICAL },
-  // finale (chapter 11 = g 10..11)
-  { g: 9.8, pose: { pos: [0, 0, 11], target: [0, 0, 0], fov: 35 } },
-  { g: 10.3, pose: { pos: [-1.5, 0.8, 10], target: [0, 0, 0], fov: 35 } },
-  { g: 10.6, pose: { pos: [0.9, 1.2, 10.6], target: [0, 0, 0], fov: 36 } }, // layers align
-  { g: 10.8, pose: { pos: [0.0, 0.15, 7.8], target: [0, 0, 0], fov: 35 } }, // reassembled, front
-  { g: 10.97, pose: { pos: [0.0, 1.5, 11.0], target: [0, -0.15, 0], fov: 35 } }, // explorer
+  { g: C0 + 0.0, pose: { pos: [0.0, 0.25, 9.2], target: [0, 0, 0], fov: 35 } },
+  { g: C0 + 0.2, pose: { pos: [0.0, 0.1, 7.0], target: [0, 0, 0], fov: 35 } }, // dolly in
+  { g: C0 + 0.42, pose: { pos: [0.9, 1.2, 10.4], target: [0, 0, 0], fov: 36 } }, // orbit to 3/4 exploded view
+  { g: C0 + 0.62, pose: { pos: [0.6, 0.8, 10.2], target: [0, 0, 0], fov: 36 } }, // dolly out as it dissolves
+  { g: C0 + 0.9, pose: CANONICAL },
+  { g: C0 + 1.2, pose: CANONICAL },
+  // finale
+  { g: F - 0.2, pose: { pos: [0, 0, 11], target: [0, 0, 0], fov: 35 } },
+  { g: F + 0.3, pose: { pos: [-1.5, 0.8, 10], target: [0, 0, 0], fov: 35 } },
+  { g: F + 0.6, pose: { pos: [0.9, 1.2, 10.6], target: [0, 0, 0], fov: 36 } }, // layers align
+  { g: F + 0.8, pose: { pos: [0.0, 0.15, 7.8], target: [0, 0, 0], fov: 35 } }, // reassembled, front
+  { g: F + 0.97, pose: { pos: [0.0, 1.5, 11.0], target: [0, -0.15, 0], fov: 35 } }, // explorer
 ];
 
 export function cameraAt(g: number): Pose {

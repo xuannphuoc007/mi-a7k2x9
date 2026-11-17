@@ -22,7 +22,7 @@ export default function ScrollHint() {
           <span className="tag text-ink">{t.ui.scroll}</span>
           <span className="relative block h-10 w-px overflow-hidden bg-line">
             <motion.span
-              className="absolute left-0 top-0 block h-4 w-px bg-ink"
+              className="absolute left-0 top-0 block h-4 w-px bg-accent"
               animate={{ y: [-16, 40] }}
               transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
             />

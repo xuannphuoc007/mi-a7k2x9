@@ -1,4 +1,5 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useTween } from "@/hooks/useTween";
 import { useI18n } from "@/lib/i18n";
@@ -7,7 +8,7 @@ import { rwaStore } from "@/lib/simStores";
 import { C, DrawPath, Label, mix } from "../svg";
 import { SUPPLY } from "./DexScene";
 
-const IDX = 7;
+const IDX = chapterIndex("rwa");
 /** where the DEX pool lands as this scene begins */
 export const RWA_VAULT = { x: 330, y: 485, w: 150, h: 250 };
 

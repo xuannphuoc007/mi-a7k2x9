@@ -1,4 +1,5 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useMemo } from "react";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useI18n } from "@/lib/i18n";
@@ -8,7 +9,7 @@ import { route } from "@/simulations/paymentRouter";
 import { C, DrawPath, Label } from "../svg";
 import { BRIDGE_NODES as N } from "./MapScene";
 
-const IDX = 5;
+const IDX = chapterIndex("bridge");
 /** chapter 7 baselines the channels flatten into */
 export const BOOK_AXIS_Y = 560;
 

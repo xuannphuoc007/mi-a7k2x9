@@ -35,3 +35,7 @@ NEXT_PUBLIC_BASE_PATH=/mi-a7k2x9/xrp npm run build   # static export to out/
 rm -rf ../public/xrp && cp -r out ../public/xrp       # publish with the dashboard's Pages build
 ```
 The repository's existing Vite build copies `public/xrp/` into `dist/xrp/`, so the explainer deploys with the dashboard's GitHub Pages workflow.
+
+## Story structure (v3)
+
+Six acts: The Problem → The Origin → The Journey → The Simulation → The Economics → The Reality Check. New scenes: ProblemScene, OriginScene, JourneyScene, EconomicsScene; new panels: Problem, Journey, Economics (fee-burn calculator), Verdict. Price/activity data: Coin Metrics (CC BY-NC 4.0) to 23 May 2026, then dated news.

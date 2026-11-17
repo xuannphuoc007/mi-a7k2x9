@@ -4,7 +4,7 @@ export type Reference = {
   title: string;
   publisher: string;
   url: string;
-  kind: "protocol" | "company" | "market";
+  kind: "protocol" | "company" | "market" | "data" | "public";
   date?: string; // publication or "as of" date
   accessed: string;
   supports: string;
@@ -13,6 +13,21 @@ export type Reference = {
 const ACCESSED = "2026-11-17";
 
 export const references: Reference[] = [
+  { id: "cm", title: "Coin Metrics community network data (xrp.csv)", publisher: "Coin Metrics · GitHub", url: "https://github.com/coinmetrics/data", kind: "data", date: "to 2026-05-23", accessed: ACCESSED, supports: "Daily price, transactions per day, fees burned and supply (CC BY-NC 4.0)" },
+  { id: "rpw", title: "Remittance Prices Worldwide", publisher: "World Bank", url: "https://remittanceprices.worldbank.org", kind: "data", date: "Q3 2025", accessed: ACCESSED, supports: "Average cost of sending $200: global 6.3%, banks 14.9%, money transfer operators 4.7%, mobile 4.6% (as reported by Inpay)" },
+  { id: "inpay", title: "Why remittance is still broken", publisher: "Inpay", url: "https://www.inpay.com/news-and-insights/why-remittance-is-still-broken/", kind: "market", date: "2025", accessed: ACCESSED, supports: "Q3 2025 World Bank averages by channel; 3% UN target" },
+  { id: "swift", title: "Swift data shows focus needed on beneficiary leg for faster international payments", publisher: "Swift", url: "https://www.swift.com/news-events/news/swift-data-shows-focus-needed-beneficiary-leg-faster-international-payments", kind: "market", accessed: ACCESSED, supports: "90% of Swift payments reach the beneficiary bank within an hour; 43% end-to-end within an hour" },
+  { id: "history", title: "XRPL's Origin", publisher: "XRPL.org", url: "https://xrpl.org/history.html", kind: "protocol", accessed: ACCESSED, supports: "2011 development by Schwartz, McCaleb, Britto; June 2012 launch; 80 billion XRP gifted to NewCoin/OpenCoin/Ripple" },
+  { id: "ripplelabs", title: "Ripple Labs", publisher: "CoinDesk", url: "https://www.coindesk.com/learn/ripple-labs", kind: "market", accessed: ACCESSED, supports: "RipplePay created in 2004 by Ryan Fugger" },
+  { id: "fincen", title: "FinCEN Fines Ripple Labs Inc. in First Civil Enforcement Action Against a Virtual Currency Exchanger", publisher: "FinCEN", url: "https://www.fincen.gov/news/news-releases/fincen-fines-ripple-labs-inc-first-civil-enforcement-action-against-virtual", kind: "public", date: "2015-05-05", accessed: ACCESSED, supports: "$700,000 civil money penalty" },
+  { id: "xrapid", title: "Ripple's cryptocurrency product goes live for the first time with three financial firms", publisher: "CNBC", url: "https://www.cnbc.com/amp/2018/10/01/ripple-xrp-cryptocurrency-product-xrapid-goes-live-for-first-time.html", kind: "market", date: "2018-10-01", accessed: ACCESSED, supports: "xRapid commercially available" },
+  { id: "sec2020", title: "SEC Charges Ripple and Two Executives with Conducting $1.3 Billion Unregistered Securities Offering", publisher: "U.S. SEC", url: "https://www.sec.gov/news/press-release/2020-338", kind: "public", date: "2020-12-22", accessed: ACCESSED, supports: "Start of the SEC case" },
+  { id: "sec2025", title: "SEC Announces Joint Stipulation to Dismiss Appeals (LR-26369)", publisher: "U.S. SEC", url: "https://www.sec.gov/enforcement-litigation/litigation-releases/lr-26369", kind: "public", date: "2025-08", accessed: ACCESSED, supports: "End of the case; $125M penalty and injunction remain" },
+  { id: "caseend", title: "SEC ends lawsuit against Ripple, company to pay $125 million fine", publisher: "Reuters via Yahoo Finance", url: "https://finance.yahoo.com/news/sec-ends-lawsuit-against-ripple-154403017.html", kind: "market", date: "2025-08-07", accessed: ACCESSED, supports: "Torres 2023 ruling; $125M penalty vs ~$2B sought" },
+  { id: "etf", title: "XRP defends $1.05 as Binance outflows hit 418.5M tokens", publisher: "TradingNews", url: "https://www.tradingnews.com/news/xrp-defends-1-05-usd-as-binance-outflows-hit-418m-tokens-and-large-wallets-grow", kind: "market", date: "2026-11", accessed: ACCESSED, supports: "Spot XRP ETFs launched Nov 2025, >$666M first month; 2026 low $0.98 (14 Aug) and $1.70 (22 Aug)" },
+  { id: "below1", title: "XRP price today: lowest close since 2024", publisher: "Blockchain Reporter", url: "https://blockchainreporter.net/xrp-price-today-lowest-close-since-2024/", kind: "market", date: "2026-11-15", accessed: ACCESSED, supports: "14 Nov 2026 close $0.914, lowest daily close since Nov 2024" },
+  { id: "ytd", title: "Why Is XRP Crashing Below $1?", publisher: "24/7 Wall St.", url: "https://247wallst.com/investing/cryptocurrency/2026/11/14/why-is-xrp-crashing-below-1/", kind: "market", date: "2026-11-14", accessed: ACCESSED, supports: "XRP down 47.9% in 2026" },
+  { id: "forklog", title: "What's happening with Ripple", publisher: "ForkLog", url: "https://forklog.com/en/whats-happening-with-ripple/", kind: "market", date: "2026", accessed: ACCESSED, supports: "Ripple's business growth vs XRP's price in 2026" },
   { id: "tx-cost", title: "Transaction Cost", publisher: "XRPL.org", url: "https://xrpl.org/docs/concepts/transactions/transaction-cost", kind: "protocol", accessed: ACCESSED, supports: "10-drop reference cost; fees are destroyed, not paid to any party; load scaling" },
   { id: "reserves", title: "Reserves", publisher: "XRPL.org", url: "https://xrpl.org/docs/concepts/accounts/reserves", kind: "protocol", accessed: ACCESSED, supports: "1 XRP base reserve, 0.2 XRP owner reserve on Mainnet" },
   { id: "reserves-blog", title: "Lower Reserves Are In Effect", publisher: "XRPL.org blog", url: "https://xrpl.org/blog/2024/lower-reserves-are-in-effect", kind: "protocol", date: "2024-12", accessed: ACCESSED, supports: "Reserves lowered from 10/2 XRP to 1/0.2 XRP" },

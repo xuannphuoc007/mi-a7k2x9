@@ -1,4 +1,5 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useClock, useTween } from "@/hooks/useTween";
 import { useI18n } from "@/lib/i18n";
@@ -8,7 +9,7 @@ import { engine } from "@/animations/scrollController";
 import { C, DrawPath, Label, mix } from "../svg";
 import { RISK_CORE } from "./SupplyScene";
 
-const IDX = 9;
+const IDX = chapterIndex("risk");
 const P = {
   sender: { x: 100, y: 560 },
   onramp: { x: 285, y: 560 },

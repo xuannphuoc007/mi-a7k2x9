@@ -24,9 +24,10 @@ export function Panel({ title, badge, children, id }: { title: string; badge?: R
     <section
       id={id}
       aria-label={title}
-      className="relative border border-ink/90 bg-paper/95 shadow-[6px_6px_0_0_rgba(23,28,30,0.08)] backdrop-blur-sm"
+      className="relative border border-line bg-paper-2/95 shadow-[0_18px_50px_-22px_rgba(50,230,133,0.28)] backdrop-blur-sm"
     >
-      <header className="flex items-center justify-between gap-3 border-b border-ink/90 px-4 py-2.5">
+      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
+        <span aria-hidden className="absolute left-0 top-0 h-[2px] w-16 bg-accent" />
         <h3 className="serif text-[19px] leading-tight">{title}</h3>
         {badge}
       </header>
@@ -57,7 +58,7 @@ export function Slider({
 
 export function Segmented<T extends string>({ options, value, onChange, label }: { options: { value: T; label: string }[]; value: T | null; onChange: (v: T) => void; label: string }) {
   return (
-    <div role="radiogroup" aria-label={label} className="flex w-full border border-ink/90">
+    <div role="radiogroup" aria-label={label} className="flex w-full border border-line">
       {options.map((o, i) => {
         const on = value === o.value;
         return (
@@ -66,9 +67,9 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
             role="radio"
             aria-checked={on}
             onClick={() => onChange(o.value)}
-            className={`tag relative flex-1 px-2 py-2 text-center transition-colors ${i > 0 ? "border-l border-ink/90" : ""} ${on ? "text-paper" : "text-ink hover:bg-paper-2"}`}
+            className={`tag relative flex-1 px-2 py-2 text-center transition-colors ${i > 0 ? "border-l border-line" : ""} ${on ? "text-paper" : "text-ink hover:text-accent"}`}
           >
-            {on && <motion.span layoutId={`seg-${label}`} className="absolute inset-0 bg-ink" transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
+            {on && <motion.span layoutId={`seg-${label}`} className="absolute inset-0 bg-accent" transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
             <span className="relative">{o.label}</span>
           </button>
         );
@@ -96,7 +97,7 @@ export function IconButton({ onClick, label, children, disabled, primary }: { on
       aria-label={label}
       title={label}
       className={`tag inline-flex items-center gap-1.5 border px-2.5 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-35 ${
-        primary ? "border-ink bg-ink text-paper hover:bg-accent hover:border-accent" : "border-ink/90 text-ink hover:bg-paper-2"
+        primary ? "border-accent bg-accent text-paper hover:bg-ink hover:border-ink" : "border-line text-ink hover:border-accent hover:text-accent"
       }`}
     >
       {children}

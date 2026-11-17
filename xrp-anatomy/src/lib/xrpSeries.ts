@@ -1,0 +1,56 @@
+/** Price and ledger-activity helpers for the Journey and Economics acts. */
+import { PRICE, PRICE_NEWS, ACTIVITY } from "@/data/coins/xrp/series";
+
+export const SERIES: [number, number][] = [...PRICE, ...PRICE_NEWS].sort((a, b) => a[0] - b[0]);
+export const FIRST_T = SERIES[0][0];
+export const LAST_T = SERIES[SERIES.length - 1][0];
+export const NEWS_FROM = PRICE_NEWS[0][0];
+
+function search(arr: [number, number][], t: number) {
+  let lo = 0;
+  let hi = arr.length - 1;
+  while (hi - lo > 1) {
+    const m = (lo + hi) >> 1;
+    if (arr[m][0] <= t) lo = m;
+    else hi = m;
+  }
+  return lo;
+}
+
+/** log-interpolated price at decimal year t (null before the first price) */
+export function priceAt(t: number): number | null {
+  if (t < FIRST_T) return null;
+  if (t >= LAST_T) return SERIES[SERIES.length - 1][1];
+  const i = search(SERIES, t);
+  const [t0, p0] = SERIES[i];
+  const [t1, p1] = SERIES[i + 1];
+  const f = (t - t0) / (t1 - t0 || 1);
+  return Math.exp(Math.log(p0) + (Math.log(p1) - Math.log(p0)) * f);
+}
+
+const f4 = (n: number) => Math.round(n * 10000) / 10000;
+/** price path in (year, log10 price) */
+export const PRICE_LOG_PATH = "M" + PRICE.map(([t, p]) => `${f4(t)},${f4(Math.log10(p))}`).join("L");
+/** news-reported tail, starting from the last Coin Metrics point */
+export const NEWS_LOG_PATH = "M" + [PRICE[PRICE.length - 1], ...PRICE_NEWS].map(([t, p]) => `${f4(t)},${f4(Math.log10(p))}`).join("L");
+export const PRICE_LOG_AREA =
+  PRICE_LOG_PATH + `L${f4(PRICE[PRICE.length - 1][0])},-4L${f4(PRICE[0][0])},-4Z`;
+
+/** transactions per day in (year, log10 tx/day) */
+export const TX_LOG_PATH = "M" + ACTIVITY.filter((a) => a[1] > 0).map(([t, n]) => `${f4(t)},${f4(Math.log10(n))}`).join("L");
+/** latest weekly averages from Coin Metrics */
+export const LATEST_ACTIVITY = ACTIVITY[ACTIVITY.length - 1];
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export function fmtDate(t: number, lang: "en" | "vi", day = true) {
+  const y = Math.floor(t);
+  const ms = Date.UTC(y, 0, 1) + (t - y) * (Date.UTC(y + 1, 0, 1) - Date.UTC(y, 0, 1));
+  const d = new Date(ms);
+  const m = d.getUTCMonth();
+  if (lang === "vi") return day ? `${d.getUTCDate()}/${m + 1}/${y}` : `${m + 1}/${y}`;
+  return day ? `${d.getUTCDate()} ${MONTHS[m]} ${y}` : `${MONTHS[m]} ${y}`;
+}
+export function usd(n: number, locale = "en-US") {
+  const d = n < 0.1 ? 4 : n < 10 ? 2 : 0;
+  return "$" + new Intl.NumberFormat(locale, { minimumFractionDigits: d, maximumFractionDigits: d }).format(n);
+}

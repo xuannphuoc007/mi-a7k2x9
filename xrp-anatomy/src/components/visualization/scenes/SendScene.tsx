@@ -1,4 +1,5 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useI18n } from "@/lib/i18n";
 import { clamp, fmt, lerp, mulberry32, range, smooth, useStore } from "@/lib/store";
@@ -7,7 +8,7 @@ import { toXrp } from "@/simulations/transactionSimulator";
 import { MAP, VALIDATOR_COUNT, validatorPos } from "@/data/coins/xrp/layouts";
 import { C, Label, TxCard, mix } from "../svg";
 
-const IDX = 3;
+const IDX = chapterIndex("send");
 const A = { x: 190, y: 500 };
 const B = { x: 810, y: 500 };
 const RING = { x: 500, y: 520, r: 74 };

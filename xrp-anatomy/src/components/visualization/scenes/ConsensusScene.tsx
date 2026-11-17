@@ -1,11 +1,12 @@
 "use client";
+import { chapterIndex } from "@/data/coins/xrp/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, mulberry32, smooth } from "@/lib/store";
 import { CENTER, UNL, UNL_OWNER, VALIDATOR_COUNT, validatorPos } from "@/data/coins/xrp/layouts";
 import { C, DrawPath, Label, mix } from "../svg";
 
-const IDX = 2;
+const IDX = chapterIndex("consensus");
 const rnd = mulberry32(77);
 /** each validator's initial candidate set (3 bits) — they disagree at first */
 const initialSets = Array.from({ length: VALIDATOR_COUNT }, () => [rnd() > 0.3, rnd() > 0.5, rnd() > 0.6]);

@@ -4,301 +4,8 @@
  * is explained. Every structure in `vi` must match `en` (enforced by `Dict`).
  */
 
-type Beat = { title: string; body: string[]; notes?: string[] };
-type Chapter = { label: string; title: string; kicker: string; figure: string; takeaway?: string; beats: Beat[] };
+import { chaptersEn, chaptersVi, storyEn, storyVi } from "./story";
 type RwaTab = { name: string; what: string; example: string; who: string; risk: string };
-
-const enChapters: Chapter[] = [
-  {
-    label: "The coin that isn't a coin",
-    title: "The coin that isn't a coin",
-    kicker: "Chapter 01",
-    figure: "A drawn coin turns, splits into thin layers, breaks into thousands of dots and re-forms as a network of accounts.",
-    takeaway: "XRP is a balance in a shared public record (the XRP Ledger). Ripple is a company, not the network.",
-    beats: [
-      {
-        title: "One digital asset. An entire financial network. Let's take it apart.",
-        body: ["This page opens XRP up piece by piece. You don't need to know anything about crypto — just scroll."],
-      },
-      {
-        title: "XRP is a number in a shared record book.",
-        body: [
-          "XRP is the digital currency of the XRP Ledger (XRPL). There is no physical coin and no file. Your XRP is simply a balance written in a public record book that many computers around the world keep identical.",
-        ],
-        notes: ["The smallest amount is 0.000001 XRP (called a 'drop')."],
-      },
-      {
-        title: "XRP, XRPL and Ripple are three different things.",
-        body: [
-          "XRP is the currency. XRPL is the public network that records it — anyone can use it and no single company runs it. Ripple is a private company that builds products on top and owns a lot of XRP. Ripple cannot approve or block payments on the ledger.",
-        ],
-      },
-      {
-        title: "From coin to records.",
-        body: [
-          "The layers you just saw are ideas, not parts: records, checks, rules and markets. Take away the picture of a coin and what is left is a list of accounts and their balances.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Inside the ledger",
-    title: "Inside the ledger",
-    kicker: "Chapter 02",
-    figure: "Account circles connected to servers. One account signs a payment and it is passed from server to server.",
-    takeaway: "Accounts hold balances, a signature proves the payment is yours, and servers pass it around.",
-    beats: [
-      {
-        title: "Every account is a line in the book.",
-        body: [
-          "Each account has an address (like an email address for money) and a balance. To open an account you must keep a small minimum — 1 XRP today — so nobody can flood the book with empty accounts.",
-          "Tap or hover a circle to look inside. All values are made up for the demo.",
-        ],
-      },
-      {
-        title: "Signing = your digital signature.",
-        body: [
-          "To send XRP you create a payment and sign it with your secret key. Anyone can check the signature is real, but nobody ever sees the key. If you lose the key, nobody can recover it for you.",
-        ],
-      },
-      {
-        title: "The message spreads.",
-        body: [
-          "The signed payment goes to any XRPL server. The server checks it and passes it on to others. In a moment, much of the network has heard about it.",
-        ],
-      },
-      {
-        title: "Heard about is not done.",
-        body: ["At this point the payment is only waiting. It counts once the network agrees on it — that's the next chapter."],
-      },
-    ],
-  },
-  {
-    label: "Agreement without mining",
-    title: "Agreement without mining",
-    kicker: "Chapter 03",
-    figure: "A ring of validators compares notes until 80% agree; the waiting payment becomes part of a confirmed page in the record book.",
-    takeaway: "Trusted validators agree every few seconds. 80% agreement = confirmed and final. No mining.",
-    beats: [
-      {
-        title: "No mining. No staking.",
-        body: [
-          "Bitcoin uses mining; many other networks use staking. The XRP Ledger uses neither. A group of servers called validators simply compare notes and agree on which payments to accept. They earn no reward for it.",
-        ],
-      },
-      {
-        title: "Each server picks validators it trusts.",
-        body: [
-          "Every server keeps a list of validators it trusts not to cheat. Most use a recommended list, but anyone can change theirs. The dashed lines show the list of one server.",
-        ],
-      },
-      {
-        title: "Agreement at 80%.",
-        body: [
-          "Validators compare their lists of payments a few times, quickly setting aside anything disputed. When at least 80% of the trusted validators agree, the decision is made. No single company decides.",
-        ],
-      },
-      {
-        title: "Confirmed means final.",
-        body: [
-          "Every 3–5 seconds a new page of the record book is confirmed. Once confirmed it cannot be changed. If 80% agreement can't be reached, the network pauses instead of splitting in two.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Send XRP",
-    title: "Send XRP",
-    kicker: "Chapter 04",
-    figure: "Two demo wallets. Press play to watch a payment get signed, agreed, confirmed, and the tiny fee burned.",
-    takeaway: "Sign → share → agree → confirm → balances change → fee burned. It takes a few seconds.",
-    beats: [
-      {
-        title: "Try it: send XRP.",
-        body: ["Two pretend wallets with pretend money. Choose an amount and press play to follow one payment from start to finish."],
-      },
-      {
-        title: "Why a fee if it's so tiny?",
-        body: [
-          "Every payment burns a tiny fee — normally 0.00001 XRP. It isn't paid to anyone; it simply disappears. That makes spamming the network expensive while keeping normal use almost free. Each wallet also keeps its 1 XRP minimum.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Sending money abroad",
-    title: "Sending money abroad",
-    kicker: "Chapter 05",
-    figure: "A map of the United States and Mexico with a payment route from a sender in the US to a family in Mexico, compared with a traditional bank route.",
-    takeaway: "XRP can act as a bridge between currencies, but banks, apps and local rules are still part of the trip.",
-    beats: [
-      {
-        title: "Dollars in Texas, pesos in Jalisco.",
-        body: [
-          "A worker in the United States wants to send money home to Mexico. They pay in dollars; the family needs pesos. That means two currencies, two banking systems and two sets of rules.",
-        ],
-      },
-      {
-        title: "One possible route.",
-        body: [
-          "A licensed company takes in the dollars, the value moves across the XRP Ledger — possibly passing through XRP for a few seconds — and a partner in Mexico pays out pesos.",
-        ],
-        notes: ["1 start · 2 route · 3 convert · 4 bridge · 5 deliver"],
-      },
-      {
-        title: "The ledger is only part of the trip.",
-        body: [
-          "The ledger step is final within seconds. But the money still has to enter and leave through banks or apps, pass legal checks and be paid out locally. We don't promise any time or cost — that depends on the companies involved.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "XRP as a bridge",
-    title: "XRP as a bridge",
-    kicker: "Chapter 06",
-    figure: "Three circles — dollar token, XRP and peso token. A thin direct path joins dollars to pesos; a wider path goes through XRP.",
-    takeaway: "More buyers and sellers means better prices. XRP can connect two quieter markets.",
-    beats: [
-      {
-        title: "Swapping two small currencies is hard.",
-        body: [
-          "Few people swap dollar tokens directly for peso tokens. With few traders, a big swap pushes the price against you and you receive less.",
-        ],
-      },
-      {
-        title: "Go through XRP instead.",
-        body: [
-          "Many people trade dollars↔XRP and XRP↔pesos. Using those two busy markets can give a better result than the quiet direct one. The ledger can choose this route automatically.",
-        ],
-      },
-      {
-        title: "The ledger can split the trip.",
-        body: [
-          "It can even send part one way and part the other, choosing whatever delivers the most at that moment. The numbers above come from a simple model, not real prices.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Built-in marketplace",
-    title: "Built-in marketplace",
-    kicker: "Chapter 07",
-    figure: "Buyer and seller bars meet in the middle and trade, then turn into a money pool with a price curve.",
-    takeaway: "Two ways to trade on XRPL: order lists and money pools. Big trades move the price more.",
-    beats: [
-      {
-        title: "A marketplace inside the ledger.",
-        body: ["The XRP Ledger has its own exchange (a DEX). Buy and sell orders are stored right in the record book — no separate company runs it."],
-      },
-      {
-        title: "Orders meet in the middle.",
-        body: [
-          "Buyers list the price they'll pay, sellers list the price they want. When the prices meet, the trade happens instantly as part of the same confirmed page.",
-        ],
-      },
-      {
-        title: "Plus pools of money (AMM).",
-        body: [
-          "Since March 2024 there are also 'pools': piles of two currencies that anyone can add to and trade against. The pool sets its price automatically — the more you buy, the more each unit costs. A trade can use orders, pools or both.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Real-world assets (RWA)",
-    title: "Real-world assets on XRPL",
-    kicker: "Chapter 08",
-    figure: "A bond, a building, a gold bar and a fund pass through an issuer's vault and come out as tokens on the ledger; only verified wallets can receive them, and they swap with a dollar token in one step.",
-    takeaway: "A token is only as good as the company, the custodian and the legal agreement behind it.",
-    beats: [
-      {
-        title: "Real things, digital receipts.",
-        body: [
-          "Real-world assets (RWA) are things that exist outside the internet: government bonds, buildings, gold, investment funds, dollars in a bank. 'Tokenizing' means a regulated company holds the real asset and issues tokens on a ledger that stand for a share of it — a digital receipt you can move in seconds.",
-        ],
-      },
-      {
-        title: "Why issuers choose the XRP Ledger.",
-        body: [
-          "The basic tools are already built in: a token format designed for real assets (live since October 2025), ID checks recorded on the ledger, members-only markets where only verified buyers can trade (live since February 2026), plus the built-in exchange and fast, low-cost settlement.",
-        ],
-        notes: ["Tokens move on the ledger. The real asset stays with the issuer and its custodian."],
-      },
-      {
-        title: "Where XRP fits — and where it doesn't.",
-        body: [
-          "These tokens are not XRP. XRP's role is small and technical: every transaction burns a tiny XRP fee, and holding tokens requires a small XRP reserve. Tokenized assets on XRPL grew to about $4.18 billion in June 2026, from roughly $147 million a year earlier (Evernorth, using RWA.xyz data). But a few large issuers make up much of that, and growth does not automatically move XRP's price.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Supply and escrow",
-    title: "Supply and escrow",
-    kicker: "Chapter 09",
-    figure: "A ring of 100 blocks stands for 100 billion XRP. 55 blocks are locked; one unlocks, part moves on and the rest is locked again.",
-    takeaway: "The supply was fixed on day one. Escrow controls when Ripple can use its own XRP.",
-    beats: [
-      {
-        title: "All XRP was created at the start.",
-        body: ["100 billion XRP were created when the ledger launched in 2012. Nobody can mine or print more. Because every fee is burned, the total shrinks very slowly."],
-        notes: ["Each block ≈ 1 billion XRP"],
-      },
-      {
-        title: "Escrow: a time lock.",
-        body: ["Escrow locks coins until a set date. The ledger itself enforces the lock, so nobody has to be trusted to keep the promise."],
-      },
-      {
-        title: "Ripple's 55 billion.",
-        body: ["In December 2017 Ripple locked 55 billion of its XRP in escrow, unlocking up to 1 billion each month."],
-      },
-      {
-        title: "Unlocked is not new — and not automatically sold.",
-        body: [
-          "Unlocked XRP goes back to Ripple's own account; it is not newly created. Whatever Ripple doesn't use has usually been locked again for later. About 31.28 billion XRP were still in escrow on 1 September 2026, according to Crypto Briefing citing on-chain data. This number changes every month.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "What can go wrong?",
-    title: "What can go wrong?",
-    kicker: "Chapter 10",
-    figure: "The payment route redrawn as a risk map. Choosing a risk highlights the part that fails and shows what happens.",
-    takeaway: "A fast ledger is not risk-free. Check the companies, the market and the rules.",
-    beats: [
-      {
-        title: "Every step can fail.",
-        body: ["A payment is a chain. The ledger part is fast, but every other link can break. Pick a risk to see where it hits."],
-      },
-      {
-        title: "Know which link broke.",
-        body: ["Most real problems happen off the ledger — at companies, banks, regulators, or in the market itself. Nothing on this page is investment advice."],
-      },
-    ],
-  },
-  {
-    label: "All the pieces",
-    title: "All the pieces",
-    kicker: "Chapter 11",
-    figure: "Every layer returns, lines up, rebuilds the coin and opens into an interactive exploded drawing with thirteen layers you can select.",
-    beats: [
-      {
-        title: "Everything comes back.",
-        body: ["Records, signatures, servers, validators, fees, routes, markets, real-world assets, supply and risk — each idea is a layer of the same object."],
-      },
-      {
-        title: "The layers line up.",
-        body: ["Records and agreement at the core. Payments, markets and real-world assets around them. Risk wrapped around everything."],
-      },
-      {
-        title: "A coin again — and now you know what's inside.",
-        body: ["XRP itself is the thin bright disc near the middle. Everything else is what gives it meaning. Explore it below."],
-      },
-    ],
-  },
-];
 
 const enRwaTabs: RwaTab[] = [
   {
@@ -337,6 +44,7 @@ export const en = {
     description: "One digital asset. An entire financial network. A beginner-friendly, scroll-driven explainer of XRP and the XRP Ledger.",
   },
   ui: {
+    ...storyEn.ui,
     brand: "Anatomy of XRP",
     tagline: "One digital asset. An entire financial network. Let's take it apart.",
     scroll: "Scroll to explore",
@@ -359,8 +67,10 @@ export const en = {
     credits: "Design & illustration: original work. Technical reference: xrpl.org.",
     skip: "Skip to content",
   },
-  chapters: enChapters,
+  acts: storyEn.acts,
+  chapters: chaptersEn,
   scenes: {
+    ...storyEn.scenes,
     coin: {
       ring: "Digital currency · XRP Ledger",
       genesis: "Created in 2012",
@@ -501,6 +211,7 @@ export const en = {
     },
   },
   panels: {
+    ...storyEn.panels,
     send: {
       title: "Payment simulator",
       amount: "Amount to send",
@@ -659,278 +370,6 @@ export const en = {
 
 export type Dict = typeof en;
 
-const viChapters: Chapter[] = [
-  {
-    label: "Đồng xu không phải đồng xu",
-    title: "Đồng xu không phải đồng xu",
-    kicker: "Chương 01",
-    figure: "Một đồng xu được vẽ tay xoay chậm, tách thành nhiều lớp mỏng, vỡ thành hàng nghìn chấm rồi tụ lại thành mạng lưới tài khoản.",
-    takeaway: "XRP là một con số số dư trong cuốn sổ chung công khai (XRP Ledger). Ripple là một công ty, không phải là mạng lưới.",
-    beats: [
-      {
-        title: "Một tài sản số. Cả một mạng lưới tài chính. Hãy mổ xẻ nó.",
-        body: ["Trang này mở XRP ra từng phần. Bạn không cần biết gì về crypto — chỉ cần cuộn xuống."],
-      },
-      {
-        title: "XRP là một con số trong cuốn sổ chung.",
-        body: [
-          "XRP là tiền số của XRP Ledger (XRPL). Không có đồng xu thật, cũng không có tệp nào cả. XRP của bạn chỉ là một số dư được ghi trong một cuốn sổ công khai, được rất nhiều máy tính trên thế giới giữ giống hệt nhau.",
-        ],
-        notes: ["Đơn vị nhỏ nhất là 0,000001 XRP (gọi là một 'drop')."],
-      },
-      {
-        title: "XRP, XRPL và Ripple là ba thứ khác nhau.",
-        body: [
-          "XRP là đồng tiền. XRPL là mạng lưới công khai ghi lại nó — ai cũng dùng được và không công ty nào điều hành một mình. Ripple là một công ty tư nhân xây dựng sản phẩm trên đó và nắm giữ nhiều XRP. Ripple không thể duyệt hay chặn giao dịch trên sổ cái.",
-        ],
-      },
-      {
-        title: "Từ đồng xu đến sổ ghi chép.",
-        body: [
-          "Những lớp bạn vừa thấy là ý tưởng, không phải linh kiện: sổ sách, kiểm tra, quy tắc và thị trường. Bỏ hình đồng xu đi, thứ còn lại là danh sách các tài khoản và số dư.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Bên trong sổ cái",
-    title: "Bên trong sổ cái",
-    kicker: "Chương 02",
-    figure: "Các vòng tròn tài khoản nối với máy chủ. Một tài khoản ký lệnh chuyển tiền và lệnh được chuyền từ máy chủ này sang máy chủ khác.",
-    takeaway: "Tài khoản giữ số dư, chữ ký chứng minh lệnh là của bạn, và các máy chủ chuyền lệnh đi.",
-    beats: [
-      {
-        title: "Mỗi tài khoản là một dòng trong sổ.",
-        body: [
-          "Mỗi tài khoản có một địa chỉ (giống email nhưng dành cho tiền) và một số dư. Để mở tài khoản, bạn phải giữ lại một khoản tối thiểu nhỏ — hiện là 1 XRP — để không ai có thể làm đầy sổ bằng tài khoản rỗng.",
-          "Chạm hoặc di chuột vào một vòng tròn để xem bên trong. Mọi số liệu đều là giả lập.",
-        ],
-      },
-      {
-        title: "Ký = chữ ký số của bạn.",
-        body: [
-          "Để gửi XRP, bạn tạo lệnh chuyển và ký bằng khoá bí mật. Ai cũng kiểm tra được chữ ký là thật, nhưng không ai nhìn thấy khoá. Mất khoá thì không ai khôi phục giúp bạn được.",
-        ],
-      },
-      {
-        title: "Lệnh được lan ra.",
-        body: ["Lệnh đã ký được gửi tới bất kỳ máy chủ XRPL nào. Máy chủ kiểm tra rồi chuyền tiếp cho máy chủ khác. Chỉ trong chốc lát, phần lớn mạng lưới đã biết về nó."],
-      },
-      {
-        title: "Đã biết chưa phải là đã xong.",
-        body: ["Lúc này lệnh chỉ đang chờ. Nó chỉ có hiệu lực khi mạng lưới đồng ý — đó là chương tiếp theo."],
-      },
-    ],
-  },
-  {
-    label: "Đồng thuận không cần đào",
-    title: "Đồng thuận không cần đào",
-    kicker: "Chương 03",
-    figure: "Một vòng validator so sánh với nhau cho đến khi 80% đồng ý; lệnh đang chờ trở thành một trang đã xác nhận trong sổ.",
-    takeaway: "Các validator tin cậy đồng ý vài giây một lần. Đạt 80% = đã xác nhận và không đổi được. Không cần đào.",
-    beats: [
-      {
-        title: "Không đào. Không staking.",
-        body: [
-          "Bitcoin dùng đào; nhiều mạng khác dùng staking. XRP Ledger không dùng cả hai. Một nhóm máy chủ gọi là validator chỉ so sánh với nhau và thống nhất nên chấp nhận giao dịch nào. Họ không nhận thưởng cho việc này.",
-        ],
-      },
-      {
-        title: "Mỗi máy chủ tự chọn validator để tin.",
-        body: ["Mỗi máy chủ giữ một danh sách validator mà nó tin là sẽ không gian lận. Phần lớn dùng danh sách được khuyến nghị, nhưng ai cũng có thể tự thay đổi. Các đường nét đứt là danh sách của một máy chủ."],
-      },
-      {
-        title: "Đồng ý ở mức 80%.",
-        body: ["Các validator so danh sách giao dịch vài lượt, nhanh chóng gác lại những giao dịch còn tranh cãi. Khi ít nhất 80% validator tin cậy đồng ý, quyết định được chốt. Không công ty nào quyết một mình."],
-      },
-      {
-        title: "Đã xác nhận nghĩa là cuối cùng.",
-        body: ["Cứ 3–5 giây, một trang mới của cuốn sổ được xác nhận. Đã xác nhận thì không sửa được. Nếu không đạt 80%, mạng sẽ tạm dừng thay vì tách làm đôi."],
-      },
-    ],
-  },
-  {
-    label: "Gửi XRP",
-    title: "Gửi XRP",
-    kicker: "Chương 04",
-    figure: "Hai ví giả lập. Bấm phát để xem một lệnh chuyển được ký, đồng thuận, xác nhận và khoản phí nhỏ bị đốt.",
-    takeaway: "Ký → chia sẻ → đồng thuận → xác nhận → số dư thay đổi → phí bị đốt. Mất vài giây.",
-    beats: [
-      {
-        title: "Thử ngay: gửi XRP.",
-        body: ["Hai ví giả với tiền giả. Chọn số lượng rồi bấm phát để theo dõi một lệnh chuyển từ đầu đến cuối."],
-      },
-      {
-        title: "Phí nhỏ vậy thì để làm gì?",
-        body: [
-          "Mỗi giao dịch đốt một khoản phí rất nhỏ — thường là 0,00001 XRP. Khoản này không trả cho ai, nó biến mất luôn. Nhờ vậy, spam mạng lưới trở nên tốn kém, còn dùng bình thường thì gần như miễn phí. Mỗi ví cũng luôn giữ lại 1 XRP tối thiểu.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Gửi tiền ra nước ngoài",
-    title: "Gửi tiền ra nước ngoài",
-    kicker: "Chương 05",
-    figure: "Bản đồ Hoa Kỳ và Mexico với tuyến chuyển tiền từ người gửi ở Mỹ tới gia đình ở Mexico, so sánh với tuyến ngân hàng truyền thống.",
-    takeaway: "XRP có thể làm cầu nối giữa hai đồng tiền, nhưng ngân hàng, ứng dụng và luật địa phương vẫn là một phần của hành trình.",
-    beats: [
-      {
-        title: "Đô la ở Texas, peso ở Jalisco.",
-        body: ["Một người lao động ở Mỹ muốn gửi tiền về Mexico. Họ trả bằng đô la; gia đình cần peso. Nghĩa là hai đồng tiền, hai hệ thống ngân hàng và hai bộ luật."],
-      },
-      {
-        title: "Một tuyến có thể đi.",
-        body: ["Một công ty được cấp phép nhận đô la, giá trị đi qua XRP Ledger — có thể đi qua XRP trong vài giây — rồi đối tác ở Mexico chi trả bằng peso."],
-        notes: ["1 bắt đầu · 2 tìm tuyến · 3 đổi tiền · 4 cầu nối · 5 giao tiền"],
-      },
-      {
-        title: "Sổ cái chỉ là một phần của chuyến đi.",
-        body: [
-          "Bước trên sổ cái được chốt trong vài giây. Nhưng tiền vẫn phải vào và ra qua ngân hàng hoặc ứng dụng, qua kiểm tra pháp lý và được chi trả tại chỗ. Chúng tôi không hứa thời gian hay chi phí — điều đó tuỳ vào các công ty tham gia.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "XRP làm cầu nối",
-    title: "XRP làm cầu nối",
-    kicker: "Chương 06",
-    figure: "Ba vòng tròn — token đô la, XRP và token peso. Một đường mảnh nối thẳng đô la với peso; một đường rộng hơn đi qua XRP.",
-    takeaway: "Càng nhiều người mua bán thì giá càng tốt. XRP có thể nối hai thị trường vắng người.",
-    beats: [
-      {
-        title: "Đổi hai đồng tiền nhỏ với nhau rất khó.",
-        body: ["Ít người đổi trực tiếp token đô la sang token peso. Khi ít người giao dịch, một lệnh đổi lớn sẽ đẩy giá bất lợi và bạn nhận về ít hơn."],
-      },
-      {
-        title: "Hãy đi vòng qua XRP.",
-        body: ["Rất nhiều người giao dịch đô la↔XRP và XRP↔peso. Dùng hai thị trường đông đúc đó có thể cho kết quả tốt hơn thị trường trực tiếp vắng vẻ. Sổ cái có thể tự chọn tuyến này."],
-      },
-      {
-        title: "Sổ cái có thể chia đôi chuyến đi.",
-        body: ["Nó thậm chí có thể gửi một phần đi đường này, một phần đi đường kia, miễn sao người nhận được nhiều nhất vào lúc đó. Các con số phía trên lấy từ mô hình đơn giản, không phải giá thật."],
-      },
-    ],
-  },
-  {
-    label: "Chợ giao dịch có sẵn",
-    title: "Chợ giao dịch có sẵn",
-    kicker: "Chương 07",
-    figure: "Các cột người mua và người bán gặp nhau ở giữa và khớp lệnh, rồi biến thành một bể tiền với đường cong giá.",
-    takeaway: "Có hai cách giao dịch trên XRPL: danh sách lệnh và bể tiền. Lệnh càng lớn thì giá càng bị đẩy nhiều.",
-    beats: [
-      {
-        title: "Một khu chợ nằm ngay trong sổ cái.",
-        body: ["XRP Ledger có sàn giao dịch riêng (DEX). Lệnh mua và bán được ghi ngay trong cuốn sổ — không có công ty riêng nào điều hành."],
-      },
-      {
-        title: "Lệnh gặp nhau ở giữa.",
-        body: ["Người mua niêm yết giá họ chịu trả, người bán niêm yết giá họ muốn. Khi hai giá gặp nhau, giao dịch xảy ra ngay trong cùng một trang được xác nhận."],
-      },
-      {
-        title: "Thêm các bể tiền (AMM).",
-        body: [
-          "Từ tháng 3/2024 còn có các 'bể': hai loại tiền được gom lại, ai cũng có thể góp vào hoặc giao dịch với bể. Bể tự đặt giá — mua càng nhiều thì mỗi đơn vị càng đắt. Một giao dịch có thể dùng lệnh, bể, hoặc cả hai.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Tài sản thực (RWA)",
-    title: "Tài sản thực trên XRPL",
-    kicker: "Chương 08",
-    figure: "Trái phiếu, toà nhà, thỏi vàng và quỹ đi qua kho của đơn vị phát hành và thành token trên sổ cái; chỉ ví đã xác minh mới nhận được, và token đổi lấy đồng đô la số trong một bước.",
-    takeaway: "Một token chỉ đáng tin bằng công ty, đơn vị lưu ký và thoả thuận pháp lý đứng sau nó.",
-    beats: [
-      {
-        title: "Tài sản thật, biên nhận số.",
-        body: [
-          "Tài sản thực (RWA — real-world assets) là những thứ tồn tại ngoài internet: trái phiếu chính phủ, toà nhà, vàng, quỹ đầu tư, tiền đô trong ngân hàng. 'Token hoá' nghĩa là một công ty được quản lý giữ tài sản thật và phát hành token trên sổ cái đại diện cho một phần của nó — như một tờ biên nhận số chuyển đi được trong vài giây.",
-        ],
-      },
-      {
-        title: "Vì sao các đơn vị phát hành chọn XRP Ledger.",
-        body: [
-          "Các công cụ cơ bản đã có sẵn: định dạng token thiết kế cho tài sản thực (hoạt động từ tháng 10/2025), xác minh danh tính ghi trên sổ cái, chợ 'chỉ dành cho thành viên' nơi chỉ người mua đã xác minh mới giao dịch được (hoạt động từ tháng 2/2026), cùng sàn giao dịch có sẵn và thanh toán nhanh, rẻ.",
-        ],
-        notes: ["Token di chuyển trên sổ cái. Tài sản thật vẫn nằm ở đơn vị phát hành và đơn vị lưu ký."],
-      },
-      {
-        title: "XRP nằm ở đâu — và không nằm ở đâu.",
-        body: [
-          "Các token này không phải XRP. Vai trò của XRP nhỏ và mang tính kỹ thuật: mỗi giao dịch đốt một khoản phí XRP rất nhỏ, và nắm giữ token cần một khoản dự trữ XRP nhỏ. Tài sản token hoá trên XRPL tăng lên khoảng 4,18 tỷ USD vào tháng 6/2026, từ khoảng 147 triệu USD một năm trước (Evernorth, dựa trên dữ liệu RWA.xyz). Nhưng một vài đơn vị phát hành lớn chiếm phần lớn con số đó, và sự tăng trưởng này không tự động đẩy giá XRP.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Nguồn cung và ký quỹ",
-    title: "Nguồn cung và ký quỹ",
-    kicker: "Chương 09",
-    figure: "Một vòng 100 khối tượng trưng cho 100 tỷ XRP. 55 khối bị khoá; một khối được mở, một phần đi tiếp và phần còn lại bị khoá lại.",
-    takeaway: "Nguồn cung cố định từ ngày đầu. Ký quỹ quyết định khi nào Ripple được dùng XRP của chính mình.",
-    beats: [
-      {
-        title: "Toàn bộ XRP được tạo ngay từ đầu.",
-        body: ["100 tỷ XRP được tạo khi sổ cái ra mắt năm 2012. Không ai đào hay in thêm được. Vì mọi khoản phí đều bị đốt, tổng lượng XRP giảm rất chậm."],
-        notes: ["Mỗi khối ≈ 1 tỷ XRP"],
-      },
-      {
-        title: "Ký quỹ: một chiếc khoá hẹn giờ.",
-        body: ["Ký quỹ (escrow) khoá tiền đến một ngày định trước. Chính sổ cái thực thi chiếc khoá, nên không cần tin ai giữ lời."],
-      },
-      {
-        title: "55 tỷ của Ripple.",
-        body: ["Tháng 12/2017, Ripple khoá 55 tỷ XRP của mình vào ký quỹ, mỗi tháng mở ra tối đa 1 tỷ."],
-      },
-      {
-        title: "Được mở khoá không phải là mới tạo — và không tự động bị bán.",
-        body: [
-          "XRP được mở khoá quay về tài khoản của chính Ripple; nó không phải XRP mới. Phần Ripple không dùng thường được khoá lại cho sau này. Khoảng 31,28 tỷ XRP vẫn nằm trong ký quỹ vào ngày 1/9/2026, theo Crypto Briefing dẫn dữ liệu on-chain. Con số này thay đổi hằng tháng.",
-        ],
-      },
-    ],
-  },
-  {
-    label: "Điều gì có thể sai?",
-    title: "Điều gì có thể sai?",
-    kicker: "Chương 10",
-    figure: "Tuyến thanh toán được vẽ lại thành bản đồ rủi ro. Chọn một rủi ro sẽ làm nổi bật phần bị hỏng và cho thấy điều xảy ra.",
-    takeaway: "Sổ cái nhanh không có nghĩa là không có rủi ro. Hãy xem xét các công ty, thị trường và luật lệ.",
-    beats: [
-      {
-        title: "Bước nào cũng có thể hỏng.",
-        body: ["Một khoản thanh toán là một chuỗi. Phần sổ cái thì nhanh, nhưng mắt xích nào khác cũng có thể đứt. Chọn một rủi ro để xem nó đánh vào đâu."],
-      },
-      {
-        title: "Biết mắt xích nào bị đứt.",
-        body: ["Phần lớn sự cố thật xảy ra ngoài sổ cái — ở các công ty, ngân hàng, cơ quan quản lý, hoặc chính thị trường. Không nội dung nào ở đây là lời khuyên đầu tư."],
-      },
-    ],
-  },
-  {
-    label: "Tất cả các mảnh ghép",
-    title: "Tất cả các mảnh ghép",
-    kicker: "Chương 11",
-    figure: "Mọi lớp quay trở lại, xếp thẳng hàng, ghép lại thành đồng xu rồi mở ra thành bản vẽ tách lớp tương tác với mười ba lớp có thể chọn.",
-    beats: [
-      {
-        title: "Mọi thứ quay trở lại.",
-        body: ["Sổ sách, chữ ký, máy chủ, validator, phí, tuyến chuyển, thị trường, tài sản thực, nguồn cung và rủi ro — mỗi ý tưởng là một lớp của cùng một vật thể."],
-      },
-      {
-        title: "Các lớp xếp thẳng hàng.",
-        body: ["Sổ sách và đồng thuận ở lõi. Thanh toán, thị trường và tài sản thực bao quanh. Rủi ro bọc ngoài tất cả."],
-      },
-      {
-        title: "Lại là đồng xu — và giờ bạn biết bên trong có gì.",
-        body: ["Bản thân XRP là chiếc đĩa mỏng sáng ở gần giữa. Mọi thứ khác là thứ mang lại ý nghĩa cho nó. Hãy khám phá ở bên dưới."],
-      },
-    ],
-  },
-];
-
 const viRwaTabs: RwaTab[] = [
   {
     name: "Trái phiếu chính phủ",
@@ -968,6 +407,7 @@ export const vi: Dict = {
     description: "Một tài sản số. Cả một mạng lưới tài chính. Bài giải thích dễ hiểu cho người mới, điều khiển bằng thao tác cuộn, về XRP và XRP Ledger.",
   },
   ui: {
+    ...storyVi.ui,
     brand: "Giải phẫu XRP",
     tagline: "Một tài sản số. Cả một mạng lưới tài chính. Hãy mổ xẻ nó.",
     scroll: "Cuộn để khám phá",
@@ -990,8 +430,10 @@ export const vi: Dict = {
     credits: "Thiết kế & minh hoạ: tác phẩm gốc. Tham chiếu kỹ thuật: xrpl.org.",
     skip: "Bỏ qua tới nội dung",
   },
-  chapters: viChapters,
+  acts: storyVi.acts,
+  chapters: chaptersVi,
   scenes: {
+    ...storyVi.scenes,
     coin: {
       ring: "Tiền số · XRP Ledger",
       genesis: "Tạo ra năm 2012",
@@ -1132,6 +574,7 @@ export const vi: Dict = {
     },
   },
   panels: {
+    ...storyVi.panels,
     send: {
       title: "Mô phỏng chuyển tiền",
       amount: "Số XRP muốn gửi",

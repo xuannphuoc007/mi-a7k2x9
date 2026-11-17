@@ -29,3 +29,12 @@ export const dexStore = createStore({
 export const riskStore = createStore({ risk: -1 });
 
 export const rwaStore = createStore({ asset: -1 });
+
+/** Act 1: Maria's transfer — channel index (bank / money transfer firm / app) and partner banks in the middle */
+export const problemStore = createStore({ channel: 0, hops: 2 });
+
+/** Act 3: selected journey event id */
+export const journeyStore = createStore({ selected: null as string | null });
+
+/** stage square size in CSS px (for scaling SVG text on small screens) */
+export const stageStore = createStore({ px: 800 });
