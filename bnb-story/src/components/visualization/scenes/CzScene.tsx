@@ -9,7 +9,7 @@ import { useSegmentTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
-import { C, Label, Portrait } from "../svg";
+import { C, Label } from "../svg";
 import { asset } from "@/lib/asset";
 
 const IDX = chapterIndex("team");
@@ -25,7 +25,7 @@ export default function CzScene() {
   const mobile = k >= 1.5;
   const v = useSegmentTimeline(
     IDX,
-    0.45,
+    0.3,
     1,
     { vis: 0, line: 0, alpha: 0, sides: 0, exit: 0 },
     (tl, v, at) => {
@@ -53,7 +53,7 @@ export default function CzScene() {
       {/* --- timeline (vertical, reads top to bottom) --- */}
       {lineFade > 0.02 && (
         <g opacity={lineFade}>
-          <Portrait x={170} y={128} r={44} href={asset("/img/cz-portrait.jpg")} id="cz-timeline" />
+          <image href={asset("/img/cz-four-art.png")} x={124} y={82} width={92} height={92} />
           <line x1={170} x2={170} y1={Y0} y2={Y0 + step * (evs.length - 1) * clamp(line * 1.15)} stroke={C.ink} strokeWidth={2.5} />
           {evs.map((e, i) => {
             const q = smooth(clamp((line * 1.15 * (evs.length - 1) - i + 0.6) * 2));

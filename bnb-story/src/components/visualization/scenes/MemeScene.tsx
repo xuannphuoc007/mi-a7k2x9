@@ -129,13 +129,8 @@ export default function MemeScene() {
       {/* --- stage 2: the "4" meme --- */}
       {s2 > 0.01 && (
         <g opacity={s2} transform={`translate(0,${lerp(24, 0, four)})`}>
-          <defs>
-            <clipPath id="meme-four">
-              <rect x={260} y={120} width={480} height={352} rx={16} />
-            </clipPath>
-          </defs>
-          <image href={asset("/img/cz-four.jpg")} x={260} y={120} width={480} height={352} clipPath="url(#meme-four)" preserveAspectRatio="xMidYMid slice" />
-          <Label x={740} y={494} anchor="end" size={fs(8)} upper={false} spacing="0.02em">
+          <image href={asset("/img/cz-four-art.png")} x={325} y={110} width={350} height={350} />
+          <Label x={500} y={494} anchor="middle" size={fs(8)} upper={false} spacing="0.02em">
             {L.photoCredit}
           </Label>
           <text x={500} y={560} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-sans)", fontSize: 20 * Math.min(k, 1.25), fontWeight: 700 }}>

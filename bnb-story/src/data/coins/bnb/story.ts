@@ -385,27 +385,13 @@ export const chaptersEn: Chapter[] = [
     label: "The people at the top",
     title: "The people at the top",
     question: "Who runs Binance now — and why does CZ divide the crypto world?",
-    figure: "Three profile cards: the founder, the co-founder and co-CEO, and the ex-regulator co-CEO — each with role, dates and the main criticism.",
+    figure: "A power map: CZ, Yi He and Richard Teng around the Binance mark; then CZ's timeline, the Alpha-listing backlash and two readings of him.",
     takeaway: "Binance is led by a former regulator and a co-founder, while its pardoned founder remains its most influential voice. Critics say the founder's circle still holds the real power; Binance says the two-CEO model combines compliance and innovation.",
     beats: [
       {
-        title: "CZ — the founder.",
-        body: [
-          "Pleaded guilty in 2023, served four months, pardoned in 2025. He says he no longer manages the exchange, but remains Binance's best-known figure and a constant voice on X. After the pardon, The Block noted it could pave the way for his return.",
-        ],
-      },
-      {
-        title: "Yi He — co-founder, co-CEO since December 2025.",
-        body: [
-          "Ran marketing and customer service from the start. Named co-CEO on 3 December 2025 alongside Richard Teng. She is CZ's life partner; CZ wrote she \"should have been the Binance CEO from day 1\". Critics see the appointment as founder control continuing.",
-        ],
-        notes: ["The Block; Banking Dive, Dec 2025."],
-      },
-      {
-        title: "Richard Teng — the ex-regulator.",
-        body: [
-          "A former financial regulator in Singapore and Abu Dhabi, CEO since November 2023, now co-CEO. He is the face of Binance's compliance push — and the one answering the 2026 Senate letters and leading the response to the hack.",
-        ],
+        title: "Who runs Binance now.",
+        body: ["Since November 2023 the CEO has been Richard Teng, a former financial regulator in Singapore and Abu Dhabi. On 3 December 2025 co-founder Yi He — CZ's life partner, who ran marketing and customer service from the start — became co-CEO beside him. CZ holds no formal role but remains the largest shareholder and Binance's loudest voice. Critics say the founder's circle still holds the real power; Binance says the two-CEO model pairs compliance with product."],
+        notes: ["The Block; Binance announcement, Dec 2025."],
       },
       {
         title: "CZ: from hero to lightning rod.",
@@ -841,21 +827,13 @@ export const chaptersVi: Chapter[] = [
     label: "Những người đứng đầu",
     title: "Những người đứng đầu",
     question: "Ai đang điều hành Binance — và vì sao CZ chia rẽ giới crypto?",
-    figure: "Ba thẻ hồ sơ: nhà sáng lập, đồng sáng lập kiêm đồng CEO, và đồng CEO từng là nhà quản lý — mỗi thẻ có vai trò, mốc thời gian và lời phê bình chính.",
+    figure: "Sơ đồ quyền lực: CZ, Yi He và Richard Teng quanh biểu tượng Binance; rồi dòng thời gian của CZ, làn sóng phản đối vụ niêm yết Alpha và hai cách nhìn về ông.",
     takeaway: "Binance do một cựu nhà quản lý và một đồng sáng lập điều hành, còn nhà sáng lập đã được ân xá vẫn là tiếng nói có ảnh hưởng nhất. Giới phê bình cho rằng nhóm thân cận nhà sáng lập vẫn nắm quyền thật; Binance nói mô hình hai CEO kết hợp tuân thủ và đổi mới.",
     beats: [
       {
-        title: "CZ — nhà sáng lập.",
-        body: ["Nhận tội năm 2023, ngồi tù bốn tháng, được ân xá năm 2025. Ông nói không còn điều hành sàn, nhưng vẫn là gương mặt nổi tiếng nhất của Binance và lên tiếng liên tục trên X. Sau lệnh ân xá, The Block nhận định điều này có thể mở đường cho ông quay lại."],
-      },
-      {
-        title: "Yi He — đồng sáng lập, đồng CEO từ tháng 12/2025.",
-        body: ["Phụ trách marketing và chăm sóc khách hàng từ ngày đầu. Được bổ nhiệm đồng CEO ngày 3/12/2025 cùng Richard Teng. Bà là bạn đời của CZ; CZ viết rằng bà \"lẽ ra phải là CEO Binance từ ngày đầu\". Giới phê bình xem việc bổ nhiệm là sự tiếp nối quyền kiểm soát của nhà sáng lập."],
-        notes: ["The Block; Banking Dive, 12/2025."],
-      },
-      {
-        title: "Richard Teng — cựu nhà quản lý.",
-        body: ["Từng là quan chức quản lý tài chính ở Singapore và Abu Dhabi, CEO từ tháng 11/2023, nay là đồng CEO. Ông là gương mặt của nỗ lực tuân thủ — và là người trả lời các bức thư của Thượng viện năm 2026, dẫn dắt việc ứng phó vụ hack."],
+        title: "Ai đang điều hành Binance.",
+        body: ["Từ tháng 11/2023, CEO là Richard Teng — cựu quan chức quản lý tài chính ở Singapore và Abu Dhabi. Ngày 3/12/2025, đồng sáng lập Yi He — bạn đời của CZ, phụ trách marketing và chăm sóc khách hàng từ ngày đầu — trở thành đồng CEO bên cạnh ông. CZ không giữ chức vụ chính thức nhưng vẫn là cổ đông lớn nhất và là tiếng nói lớn nhất của Binance. Giới phê bình cho rằng nhóm thân cận nhà sáng lập vẫn nắm quyền thật; Binance nói mô hình hai CEO kết hợp tuân thủ với phát triển sản phẩm."],
+        notes: ["The Block; thông báo của Binance, 12/2025."],
       },
       {
         title: "CZ: từ người hùng thành tâm bão.",

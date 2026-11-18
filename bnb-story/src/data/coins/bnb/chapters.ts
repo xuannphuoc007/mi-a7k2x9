@@ -19,7 +19,7 @@ export const chapters: ChapterConfig[] = [
   { id: "pardon", act: 4, beats: [0.02, 0.3, 0.6], height: 4.4, panels: [], dark: true },
   { id: "probes", act: 4, beats: [0.01, 0.15, 0.3, 0.51, 0.65, 0.8], height: 8.4, panels: [], dark: true },
   { id: "hack", act: 4, beats: [0.02, 0.3, 0.6], height: 4.4, panels: [], dark: true },
-  { id: "team", act: 5, beats: [0.01, 0.135, 0.27, 0.46, 0.615, 0.78], height: 8, panels: [] },
+  { id: "team", act: 5, beats: [0.01, 0.31, 0.51, 0.72], height: 6.8, panels: [] },
   { id: "custody", act: 5, beats: [0.02, 0.8], height: 4.4, panels: [{ kind: "compare", at: 0.2, span: 0.46 }] },
   { id: "reality", act: 5, beats: [0.01, 0.18, 0.34, 0.51, 0.61, 0.71], height: 8, panels: [{ kind: "versus", at: 0.8, span: 0.17 }] },
   { id: "finale", act: 5, beats: [0.02, 0.3, 0.56], height: 4.2, panels: [] },
