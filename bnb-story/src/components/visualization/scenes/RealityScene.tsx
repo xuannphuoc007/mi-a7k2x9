@@ -4,7 +4,7 @@
  * other; underneath, the last year of BNB's price. Both are true at once.
  */
 import { chapterIndex } from "@/data/coins/bnb/chapters";
-import { useSceneTimeline } from "@/hooks/useSceneTimeline";
+import { useSegmentTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
@@ -19,8 +19,10 @@ export default function RealityScene() {
   const L = t.scenes.reality;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const v = useSceneTimeline(
+  const v = useSegmentTimeline(
     IDX,
+    0,
+    0.5,
     { vis: 0, beam: 0, good: 0, bad: 0, price: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))

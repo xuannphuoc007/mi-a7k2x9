@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { asset } from "@/lib/asset";
 import { engine, subscribeG } from "@/animations/scrollController";
 import { chapterIndex, FINALE } from "@/data/coins/bnb/chapters";
 import { clamp, createStore, lerp, range, smooth } from "@/lib/store";
@@ -47,6 +48,14 @@ function faceTexture() {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
+  // swap in the official BNB coin artwork once it has loaded
+  const img = new Image();
+  img.onload = () => {
+    g.clearRect(0, 0, 512, 512);
+    g.drawImage(img, 0, 0, 512, 512);
+    tex.needsUpdate = true;
+  };
+  img.src = asset("/img/bnb-coin.png");
   return tex;
 }
 

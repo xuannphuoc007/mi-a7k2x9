@@ -6,7 +6,7 @@
  * Binance's denial and lawsuit, the newspaper's position, and "no ruling yet".
  */
 import { chapterIndex } from "@/data/coins/bnb/chapters";
-import { useSceneTimeline } from "@/hooks/useSceneTimeline";
+import { useSegmentTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
@@ -23,8 +23,10 @@ export default function ProbesScene() {
   const L = t.scenes.probes;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const v = useSceneTimeline(
+  const v = useSegmentTimeline(
     IDX,
+    0,
+    0.5,
     { vis: 0, crash: 0, repay: 0, chain: 0, resp: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))

@@ -164,9 +164,9 @@ export const chaptersEn: Chapter[] = [
   {
     label: "BNB: the exchange's own coin",
     title: "BNB: the exchange's own coin",
-    question: "What is BNB for, and why is its supply shrinking?",
+    question: "What is BNB for, why is its supply shrinking — and why do meme coins move it?",
     figure: "Uses of BNB orbit the coin — fee discounts, gas on BNB Chain, token launches — while a supply bar burns down from 200 million toward a 100 million target.",
-    takeaway: "BNB gives discounts and pays fees on BNB Chain, and Binance burns part of the supply every quarter. That makes BNB unusually tied to one company's fortunes.",
+    takeaway: "BNB gives discounts and pays fees on BNB Chain, and Binance burns part of the supply every quarter. That makes BNB unusually tied to one company's fortunes — and, in meme seasons, to a single founder's posts.",
     beats: [
       {
         title: "Three main jobs.",
@@ -187,14 +187,30 @@ export const chaptersEn: Chapter[] = [
           "Unlike bitcoin or ether, BNB was created by a company that sold it to fund itself, kept 40% for its team and still drives most of its use. Good news for Binance tends to lift BNB; bad news hits it directly.",
         ],
       },
+      {
+        title: "Meme coins: the casino on BNB Chain.",
+        body: ["Anyone can launch a token on BNB Chain for a few dollars through launchpads such as Four.meme. In February 2025 CZ posted a photo of his dog and its name, Broccoli. Within hours hundreds of copycat 'Broccoli' tokens appeared — at least 300 on Four.meme and more than 480 on Solana. CZ said he was not issuing a coin himself: it was \"up to the community\"."],
+        notes: ["The Block; Cointelegraph, 13 Feb 2025."],
+        deep: ["A week earlier, TST — a 'test' token BNB Chain staff created for a how-to video — had turned into a real meme coin."],
+      },
+      {
+        title: "October 2025: \"BNB meme szn\".",
+        body: ["As BNB set records above $1,300, CZ posted \"#BNB meme szn!\". The leader was a token called '4' — named after his habit of replying '4' to criticism, meaning 'ignore the FUD' — which passed $240 million in value. Chinese-named tokens such as 币安人生 ('Binance Life') rose by thousands of percent, and Four.meme briefly out-earned Solana's Pump.fun."],
+        notes: ["Decrypt; Forklog; Cointelegraph, Oct 2025."],
+      },
+      {
+        title: "Who actually wins?",
+        body: ["The pattern repeats: early wallets buy cheap, hype spreads, late buyers arrive near the top, insiders sell. One Broccoli token's creator reportedly sold his whole stack within 20 minutes for about $6.5 million. In October an on-chain analyst claimed single wallets held about 39% of PALU, 23% of 'Binance Life' and 14% of '4' at points — unverified claims — and many of these coins fell around 30% within days."],
+        notes: ["KuCoin News; Cointelegraph (Oct 2025)."],
+      },
     ],
   },
   {
     label: "BNB Chain: fast, but few",
     title: "BNB Chain: fast, but few",
-    question: "Is BNB Chain decentralised?",
+    question: "Is BNB Chain decentralised — and what do people actually do on it?",
     figure: "Forty-five validators on BNB Chain beside the crowd of validators on Ethereum; blocks fly by every 0.45 seconds; in 2022 the validators are contacted one by one and the chain stops.",
-    takeaway: "BNB Chain is fast and cheap because only a small set of validators run it. That same smallness let it be paused within hours in 2022 — useful in a crisis, and the main reason critics call it centralised.",
+    takeaway: "BNB Chain is fast and cheap because only a small set of validators run it. That same smallness let it be paused within hours in 2022 — useful in a crisis, and the main reason critics call it centralised. On top run swaps, loans and futures: cheap and fast, with far less money than Ethereum and plenty of bots and scams.",
     beats: [
       {
         title: "A copy of Ethereum, tuned for speed.",
@@ -213,6 +229,22 @@ export const chaptersEn: Chapter[] = [
           "Supporters: fast, cheap, and able to protect users in an emergency. Critics: a few parties — many close to Binance — can coordinate to change or stop the chain. One analysis puts the number needed to stall it at about 7, versus about 30 for Ethereum. BNB Chain says Binance does not control BNB or the chain.",
         ],
         notes: ["Blockworks (2022); QuickNode on validator concentration."],
+      },
+      {
+        title: "DeFi: bank-like apps with no bank.",
+        body: ["Most activity on BNB Chain is 'DeFi' — finance run by code. On PancakeSwap, the biggest app, there is no seller on the other side: Minh trades against a pool holding two tokens, and the price shifts as the pool's balance changes. Venus lets people deposit coins as collateral and borrow against them; Aster offers futures with high leverage."],
+        notes: ["Messari, Q4 2025: PancakeSwap, Lista DAO and Venus were the largest apps."],
+      },
+      {
+        title: "Busy, but smaller than it looks.",
+        body: ["DefiLlama counted about $4.9 billion deposited in BNB Chain apps on 12 November 2026 — around Solana's level, but roughly a tenth of Ethereum's ~$50 billion. BNB Chain often leads in daily users and trades because fees are tiny."],
+        notes: ["DefiLlama; CryptoBriefing (2026)."],
+        deep: ["In October 2025 DefiLlama stopped showing Aster's futures volume, saying it mirrored Binance's almost one-to-one and could not be checked for wash trading. Supporters said Binance liquidity had simply moved on-chain. Aster is advised by CZ and backed by YZi Labs, formerly Binance Labs."],
+      },
+      {
+        title: "The dark side of cheap trades.",
+        body: ["Bots watch for pending swaps, buy just before and sell just after — a 'sandwich' that makes the victim pay more. In late 2024 a record of more than a third of BNB Chain blocks contained one. BNB Chain says a validator alliance launched in 2025 cut such attacks by about 95%, though waves returned. Immunefi has counted about $1.6 billion lost to hacks and rug pulls on the chain since 2017; HashDit counted $61 million across 120 incidents in 2025."],
+        notes: ["Decrypt; BNB Chain; Immunefi; HashDit."],
       },
     ],
   },
@@ -276,11 +308,11 @@ export const chaptersEn: Chapter[] = [
     ],
   },
   {
-    label: "Open allegations",
-    title: "Open allegations",
-    question: "What is Binance accused of now — and what does it say?",
+    label: "Open allegations & market questions",
+    title: "Open allegations & market questions",
+    question: "What is Binance accused of now — including moving prices — and what does it say?",
     figure: "Two cases side by side. The 10/10 crash: prices on Binance briefly break, then $283 million is repaid. The 2026 Iran-flow reports: a newspaper report, Senate letters, a reported Justice Department probe — and Binance's denial and lawsuit.",
-    takeaway: "These are allegations, not findings. Binance denies the Iran-flow reports and is suing the Wall Street Journal; the newspaper stands by its reporting. Watch how the investigations and the lawsuit end.",
+    takeaway: "These are allegations, not findings. Binance denies the Iran-flow reports and is suing the Wall Street Journal; the newspaper stands by its reporting. Watch how the investigations and the lawsuit end. On market abuse, some cases were confirmed and punished by Binance itself; others were dropped, denied or remain disputed. No court has found Binance guilty of market manipulation.",
     beats: [
       {
         title: "10 October 2025: the biggest liquidation day ever.",
@@ -302,6 +334,21 @@ export const chaptersEn: Chapter[] = [
           "Binance told the Senate its review found no accounts transacting directly with Iranian entities, said it did not fire staff for raising concerns, and on 11 March 2026 sued the Journal's publisher for defamation. The Journal stands by its reporting and has asked the court to dismiss the suit. No court has ruled on the facts.",
         ],
         notes: ["The Block; Courthouse News via Talking Biz News (Aug 2026)."],
+      },
+      {
+        title: "What 'manipulation' means.",
+        body: ["Wash trading: trading with yourself to make a coin look busy. Front-running: buying before news you know is coming. Dumping: a big holder selling into everyone else's buy orders. In stock markets these are crimes; in crypto the rules are patchier.", "The SEC's 2023 lawsuit alleged that a CZ-controlled firm, Sigma Chain, wash-traded on Binance.US and that customer money was mixed at another CZ firm, Merit Peak. Binance denied it. The SEC dropped the case in 2025, so no court ever ruled on those claims."],
+        notes: ["SEC press release 2023-101; Reuters."],
+      },
+      {
+        title: "Cases Binance itself confirmed.",
+        body: ["In March 2025 Binance banned a market maker that had sold about 66 million MOVE tokens the day after listing, with few buy orders, netting $38 million; it froze the proceeds. That month, and again in December 2025, it suspended employees for trading on inside information about token launches."],
+        notes: ["Cointelegraph; The Block; Binance announcements."],
+      },
+      {
+        title: "Claims Binance disputes.",
+        body: ["A fund boss claimed in 2024 that Binance asked a project for 15% of its tokens to list it; co-founder Yi He denied it, saying listing fees are voluntary donations to charity. After the 10/10 crash, critics — including the CEO of rival exchange OKX — blamed Binance's pricing system and promotions. Binance admitted a pricing-feed glitch and repaid users; CZ called claims that Binance caused the crash \"far-fetched\"."],
+        notes: ["The Defiant; Cointelegraph; Bloomberg via Yahoo Finance."],
       },
     ],
   },
@@ -337,7 +384,7 @@ export const chaptersEn: Chapter[] = [
   {
     label: "The people at the top",
     title: "The people at the top",
-    question: "Who runs Binance now — and who still shapes it?",
+    question: "Who runs Binance now — and why does CZ divide the crypto world?",
     figure: "Three profile cards: the founder, the co-founder and co-CEO, and the ex-regulator co-CEO — each with role, dates and the main criticism.",
     takeaway: "Binance is led by a former regulator and a co-founder, while its pardoned founder remains its most influential voice. Critics say the founder's circle still holds the real power; Binance says the two-CEO model combines compliance and innovation.",
     beats: [
@@ -359,6 +406,21 @@ export const chaptersEn: Chapter[] = [
         body: [
           "A former financial regulator in Singapore and Abu Dhabi, CEO since November 2023, now co-CEO. He is the face of Binance's compliance push — and the one answering the 2026 Senate letters and leading the response to the hack.",
         ],
+      },
+      {
+        title: "CZ: from hero to lightning rod.",
+        body: ["In 2019, after a hack, he reassured users that funds were 'SAFU' — Binance paid the losses and the phrase became a meme. In 2022 his public sale of FTX's token helped set off the run that exposed FTX's fraud; FTX later accused Binance of speeding its fall. Then came the 2023 guilty plea and four months in prison. His raised-four-fingers photo — '4' means 'ignore the FUD' — became a meme of its own."],
+        notes: ["Cointelegraph; Yahoo Finance."],
+      },
+      {
+        title: "2025–2026: the backlash.",
+        body: ["After the pardon, CZ posted constantly — dog photos, 'meme season', predictions of a 'supercycle'. Each post moved coins. In January 2026 traders turned on him and Binance over 'Alpha' listings: community-compiled data suggested more than 90% of 221 projects listed in 2025–26 were trading far below their post-listing highs. Viral posts demanded he be 'sent back to jail'."],
+        notes: ["CCN, 27 Jan 2026; Crypto Times, Jan 2026."],
+      },
+      {
+        title: "Two readings of CZ.",
+        body: ["Supporters: he holds no role at Binance, paid his penalty, users were repaid after each incident, and he can't control what strangers launch. Critics: as the biggest shareholder he still shapes Binance; his posts move coins he says he doesn't trade; and in November 2026 OKX's CEO again blamed him and Binance for two years of crashes — which CZ denies."],
+        notes: ["Protos; Blockzeit; Our Crypto Talk, Nov 2026."],
       },
     ],
   },
@@ -384,7 +446,7 @@ export const chaptersEn: Chapter[] = [
   {
     label: "Reality check",
     title: "Reality check",
-    question: "Strengths, risks — and what this means for BNB.",
+    question: "Strengths, risks — and how BNB compares with Bitcoin and Ethereum.",
     figure: "A balance beam: strengths on one side, risks on the other, with BNB's last twelve months of price beneath.",
     takeaway: "Binance is the biggest, most liquid exchange and has repaid users after every major incident. It is also a convicted company with a pardoned founder, open allegations and the record hack. BNB carries all of that.",
     beats: [
@@ -404,6 +466,19 @@ export const chaptersEn: Chapter[] = [
           "BNB hit a record near $1,375 in October 2025 and was near $600 in mid-November 2026 — down more than half. If you hold BNB, you are betting on Binance itself: its business, its legal fights and its security.",
         ],
         notes: ["AMBCrypto (record high); ad-hoc-news, 14 Nov 2026."],
+      },
+      {
+        title: "Bitcoin vs Ethereum vs BNB.",
+        body: ["Bitcoin has no company behind it. Ethereum is steered by a non-profit foundation and many independent teams. BNB was created by Binance, and its chain still depends on Binance's world."],
+      },
+      {
+        title: "Different rules, different speeds.",
+        body: ["Bitcoin's supply stops at 21 million; Ethereum has no fixed cap; BNB burns toward 100 million. A Bitcoin block takes about 10 minutes, Ethereum's 12 seconds, BNB Chain's under half a second — speed bought with far fewer validators."],
+      },
+      {
+        title: "Size.",
+        body: ["In mid-November 2026 Bitcoin was worth about $1.4 trillion, Ethereum about $240 billion and BNB about $77 billion. The table below sums up the differences."],
+        notes: ["Fortune (13 Nov 2026); CryptoTicker/CoinGecko (14 Nov 2026); supply from Coin Metrics and BNB Chain."],
       },
     ],
   },
@@ -577,9 +652,9 @@ export const chaptersVi: Chapter[] = [
   {
     label: "BNB: đồng coin của sàn",
     title: "BNB: đồng coin của sàn",
-    question: "BNB dùng để làm gì, và vì sao nguồn cung ngày càng ít?",
+    question: "BNB dùng để làm gì, vì sao nguồn cung ngày càng ít — và vì sao meme coin làm nó dao động?",
     figure: "Các công dụng của BNB xoay quanh đồng coin — giảm phí, gas trên BNB Chain, mở bán token — trong khi thanh nguồn cung cháy dần từ 200 triệu về mục tiêu 100 triệu.",
-    takeaway: "BNB cho giảm phí và trả phí trên BNB Chain, và mỗi quý một phần nguồn cung bị đốt. Điều đó khiến BNB gắn chặt bất thường với vận mệnh của một công ty.",
+    takeaway: "BNB cho giảm phí và trả phí trên BNB Chain, và mỗi quý một phần nguồn cung bị đốt. Điều đó khiến BNB gắn chặt bất thường với vận mệnh của một công ty — và, vào mùa meme, với từng bài đăng của một nhà sáng lập.",
     beats: [
       {
         title: "Ba công việc chính.",
@@ -594,14 +669,30 @@ export const chaptersVi: Chapter[] = [
         title: "Điểm mấu chốt: một công ty đứng giữa.",
         body: ["Khác bitcoin hay ether, BNB do một công ty tạo ra và bán để tự gọi vốn, giữ 40% cho đội ngũ và vẫn là bên tạo ra phần lớn nhu cầu sử dụng. Tin tốt cho Binance thường đẩy BNB lên; tin xấu đánh thẳng vào nó."],
       },
+      {
+        title: "Meme coin: sòng bạc trên BNB Chain.",
+        body: ["Ai cũng có thể phát hành token trên BNB Chain với vài đô la qua các nền tảng như Four.meme. Tháng 2/2025, CZ đăng ảnh chú chó của mình và tên nó — Broccoli. Chỉ trong vài giờ, hàng trăm token 'Broccoli' nhái xuất hiện — ít nhất 300 trên Four.meme và hơn 480 trên Solana. CZ nói ông không tự phát hành coin nào: việc đó \"tuỳ cộng đồng\"."],
+        notes: ["The Block; Cointelegraph, 13/2/2025."],
+        deep: ["Một tuần trước đó, TST — token 'thử nghiệm' do nhân viên BNB Chain tạo cho video hướng dẫn — đã biến thành một meme coin thật."],
+      },
+      {
+        title: "Tháng 10/2025: \"mùa meme BNB\".",
+        body: ["Khi BNB lập kỷ lục trên 1.300 USD, CZ đăng \"#BNB meme szn!\". Dẫn đầu là token tên '4' — theo thói quen trả lời chỉ trích bằng con số '4' của ông, nghĩa là 'bỏ qua FUD' — vượt 240 triệu USD vốn hoá. Các token tên tiếng Trung như 币安人生 ('Binance Life') tăng hàng nghìn phần trăm, và Four.meme có lúc thu phí nhiều hơn Pump.fun của Solana."],
+        notes: ["Decrypt; Forklog; Cointelegraph, 10/2025."],
+      },
+      {
+        title: "Ai thật sự thắng?",
+        body: ["Kịch bản lặp lại: ví sớm mua rẻ, cơn sốt lan ra, người đến muộn mua gần đỉnh, người trong cuộc bán ra. Theo tin đưa, người tạo một token Broccoli đã bán sạch trong 20 phút, thu khoảng 6,5 triệu USD. Tháng 10, một nhà phân tích on-chain cho rằng có lúc một ví nắm khoảng 39% PALU, 23% 'Binance Life' và 14% '4' — chưa được kiểm chứng — và nhiều coin này giảm khoảng 30% chỉ sau vài ngày."],
+        notes: ["KuCoin News; Cointelegraph (10/2025)."],
+      },
     ],
   },
   {
     label: "BNB Chain: nhanh, nhưng ít người",
     title: "BNB Chain: nhanh, nhưng ít người",
-    question: "BNB Chain có phi tập trung không?",
+    question: "BNB Chain có phi tập trung không — và người ta làm gì trên đó?",
     figure: "Bốn mươi lăm validator của BNB Chain cạnh đám đông validator của Ethereum; các khối bay qua mỗi 0,45 giây; năm 2022 các validator được liên hệ từng người một và chuỗi dừng lại.",
-    takeaway: "BNB Chain nhanh và rẻ vì chỉ một nhóm nhỏ validator vận hành. Chính sự nhỏ đó giúp nó dừng được trong vài giờ năm 2022 — hữu ích khi khủng hoảng, và là lý do chính khiến giới phê bình gọi nó là tập trung.",
+    takeaway: "BNB Chain nhanh và rẻ vì chỉ một nhóm nhỏ validator vận hành. Chính sự nhỏ đó giúp nó dừng được trong vài giờ năm 2022 — hữu ích khi khủng hoảng, và là lý do chính khiến giới phê bình gọi nó là tập trung. Trên đó chạy các ứng dụng hoán đổi, cho vay, hợp đồng tương lai: rẻ và nhanh, ít tiền hơn Ethereum nhiều, và đầy bot cùng lừa đảo.",
     beats: [
       {
         title: "Bản sao của Ethereum, chỉnh cho nhanh.",
@@ -616,6 +707,22 @@ export const chaptersVi: Chapter[] = [
         title: "Hai cách nhìn.",
         body: ["Phía ủng hộ: nhanh, rẻ, và bảo vệ được người dùng khi khẩn cấp. Phía phê bình: chỉ vài bên — nhiều bên thân với Binance — có thể phối hợp đổi hoặc dừng chuỗi. Một phân tích ước tính chỉ cần khoảng 7 bên để làm tê liệt chuỗi, so với khoảng 30 của Ethereum. BNB Chain khẳng định Binance không kiểm soát BNB hay chuỗi."],
         notes: ["Blockworks (2022); QuickNode về mức tập trung validator."],
+      },
+      {
+        title: "DeFi: ứng dụng giống ngân hàng nhưng không có ngân hàng.",
+        body: ["Phần lớn hoạt động trên BNB Chain là 'DeFi' — tài chính chạy bằng code. Trên PancakeSwap, ứng dụng lớn nhất, không có người bán ở phía bên kia: Minh giao dịch với một bể chứa hai loại token, và giá thay đổi theo tỷ lệ trong bể. Venus cho gửi coin làm tài sản thế chấp để vay; Aster cho giao dịch hợp đồng tương lai với đòn bẩy cao."],
+        notes: ["Messari, Q4/2025: PancakeSwap, Lista DAO và Venus là các ứng dụng lớn nhất."],
+      },
+      {
+        title: "Đông vui, nhưng nhỏ hơn vẻ ngoài.",
+        body: ["DefiLlama ghi nhận khoảng 4,9 tỷ USD gửi trong các ứng dụng BNB Chain ngày 12/11/2026 — ngang Solana, nhưng chỉ khoảng một phần mười so với ~50 tỷ USD trên Ethereum. BNB Chain thường dẫn đầu về số người dùng và giao dịch mỗi ngày vì phí rất rẻ."],
+        notes: ["DefiLlama; CryptoBriefing (2026)."],
+        deep: ["Tháng 10/2025, DefiLlama ngừng hiển thị khối lượng hợp đồng tương lai của Aster, nói nó gần như trùng khớp 1:1 với Binance và không thể kiểm tra giao dịch giả (wash trading). Phía ủng hộ nói đơn giản là thanh khoản Binance đã chuyển lên chuỗi. Aster có CZ làm cố vấn và được YZi Labs (trước là Binance Labs) rót vốn."],
+      },
+      {
+        title: "Mặt tối của giao dịch giá rẻ.",
+        body: ["Bot rình các lệnh swap đang chờ, mua ngay trước và bán ngay sau — một 'cú kẹp sandwich' khiến nạn nhân trả giá cao hơn. Cuối 2024, kỷ lục hơn một phần ba số khối của BNB Chain có kiểu tấn công này. BNB Chain nói một liên minh validator lập năm 2025 đã cắt giảm khoảng 95%, dù sau đó vẫn có đợt quay lại. Immunefi thống kê khoảng 1,6 tỷ USD mất vì hack và lừa đảo 'rug pull' trên chuỗi này kể từ 2017; HashDit đếm được 61 triệu USD qua 120 sự cố trong năm 2025."],
+        notes: ["Decrypt; BNB Chain; Immunefi; HashDit."],
       },
     ],
   },
@@ -669,11 +776,11 @@ export const chaptersVi: Chapter[] = [
     ],
   },
   {
-    label: "Các cáo buộc đang mở",
-    title: "Các cáo buộc đang mở",
-    question: "Hiện nay Binance bị cáo buộc điều gì — và họ nói gì?",
+    label: "Cáo buộc & nghi vấn thị trường",
+    title: "Cáo buộc & nghi vấn thị trường",
+    question: "Binance đang bị cáo buộc gì — kể cả chuyện làm giá — và họ nói gì?",
     figure: "Hai vụ việc đặt cạnh nhau. Cú sập 10/10: giá trên Binance vỡ trong chốc lát, rồi 283 triệu USD được hoàn trả. Tin về dòng tiền liên quan Iran năm 2026: một bài báo, thư của Thượng viện, một cuộc điều tra của Bộ Tư pháp theo báo chí — và lời phủ nhận cùng vụ kiện của Binance.",
-    takeaway: "Đây là cáo buộc, chưa phải kết luận. Binance phủ nhận các tin về dòng tiền Iran và đang kiện Wall Street Journal; tờ báo giữ nguyên bài viết. Hãy theo dõi các cuộc điều tra và vụ kiện kết thúc ra sao.",
+    takeaway: "Đây là cáo buộc, chưa phải kết luận. Binance phủ nhận các tin về dòng tiền Iran và đang kiện Wall Street Journal; tờ báo giữ nguyên bài viết. Hãy theo dõi các cuộc điều tra và vụ kiện kết thúc ra sao. Về lạm dụng thị trường, có vụ chính Binance xác nhận và xử lý; có vụ bị rút, bị phủ nhận hoặc vẫn tranh cãi. Chưa toà nào kết luận Binance phạm tội thao túng thị trường.",
     beats: [
       {
         title: "10/10/2025: ngày thanh lý lớn nhất lịch sử.",
@@ -689,6 +796,21 @@ export const chaptersVi: Chapter[] = [
         title: "Binance đáp: \"phỉ báng\".",
         body: ["Binance trả lời Thượng viện rằng rà soát không thấy tài khoản nào giao dịch trực tiếp với thực thể Iran, khẳng định không sa thải nhân viên vì nêu lo ngại, và ngày 11/3/2026 kiện công ty chủ quản của tờ báo tội phỉ báng. Wall Street Journal giữ nguyên bài viết và đã đề nghị toà bác đơn. Chưa có toà nào phán quyết về sự thật."],
         notes: ["The Block; Courthouse News qua Talking Biz News (8/2026)."],
+      },
+      {
+        title: "'Thao túng' nghĩa là gì?",
+        body: ["Wash trading: tự mua bán với chính mình để coin trông sôi động. Front-running: mua trước khi tin mình biết trước được công bố. Xả hàng (dump): người nắm nhiều bán vào lệnh mua của người khác. Trên thị trường chứng khoán đây là tội; trong crypto, luật lệ còn chắp vá.", "Vụ kiện năm 2023 của SEC cáo buộc Sigma Chain — công ty do CZ kiểm soát — wash trading trên Binance.US, và tiền khách hàng bị trộn lẫn tại Merit Peak, một công ty khác của CZ. Binance phủ nhận. SEC rút vụ kiện năm 2025, nên chưa toà nào phán quyết các cáo buộc này."],
+        notes: ["Thông cáo SEC 2023-101; Reuters."],
+      },
+      {
+        title: "Những vụ chính Binance xác nhận.",
+        body: ["Tháng 3/2025, Binance cấm một nhà tạo lập thị trường đã bán khoảng 66 triệu token MOVE ngay ngày sau khi niêm yết, gần như không đặt lệnh mua, lãi 38 triệu USD; sàn phong toả số tiền này. Cùng tháng đó và một lần nữa vào tháng 12/2025, Binance đình chỉ nhân viên vì giao dịch dựa trên thông tin nội bộ về việc ra mắt token."],
+        notes: ["Cointelegraph; The Block; thông báo của Binance."],
+      },
+      {
+        title: "Những cáo buộc Binance bác bỏ.",
+        body: ["Năm 2024, một chủ quỹ nói Binance đòi một dự án 15% số token để được niêm yết; đồng sáng lập Yi He phủ nhận, nói phí niêm yết là khoản quyên góp tự nguyện cho từ thiện. Sau cú sập 10/10, giới phê bình — kể cả CEO sàn đối thủ OKX — đổ lỗi cho hệ thống định giá và các chương trình khuyến mãi của Binance. Binance thừa nhận lỗi nguồn giá và đền bù người dùng; CZ gọi việc cho rằng Binance gây ra cú sập là \"quá xa vời\"."],
+        notes: ["The Defiant; Cointelegraph; Bloomberg qua Yahoo Finance."],
       },
     ],
   },
@@ -718,7 +840,7 @@ export const chaptersVi: Chapter[] = [
   {
     label: "Những người đứng đầu",
     title: "Những người đứng đầu",
-    question: "Ai đang điều hành Binance — và ai vẫn định hình nó?",
+    question: "Ai đang điều hành Binance — và vì sao CZ chia rẽ giới crypto?",
     figure: "Ba thẻ hồ sơ: nhà sáng lập, đồng sáng lập kiêm đồng CEO, và đồng CEO từng là nhà quản lý — mỗi thẻ có vai trò, mốc thời gian và lời phê bình chính.",
     takeaway: "Binance do một cựu nhà quản lý và một đồng sáng lập điều hành, còn nhà sáng lập đã được ân xá vẫn là tiếng nói có ảnh hưởng nhất. Giới phê bình cho rằng nhóm thân cận nhà sáng lập vẫn nắm quyền thật; Binance nói mô hình hai CEO kết hợp tuân thủ và đổi mới.",
     beats: [
@@ -734,6 +856,21 @@ export const chaptersVi: Chapter[] = [
       {
         title: "Richard Teng — cựu nhà quản lý.",
         body: ["Từng là quan chức quản lý tài chính ở Singapore và Abu Dhabi, CEO từ tháng 11/2023, nay là đồng CEO. Ông là gương mặt của nỗ lực tuân thủ — và là người trả lời các bức thư của Thượng viện năm 2026, dẫn dắt việc ứng phó vụ hack."],
+      },
+      {
+        title: "CZ: từ người hùng thành tâm bão.",
+        body: ["Năm 2019, sau một vụ hack, ông trấn an rằng tiền vẫn 'SAFU' (an toàn) — Binance bù lỗ và câu nói thành meme. Năm 2022, việc ông công khai bán token của FTX góp phần gây ra làn sóng rút tiền làm lộ vụ gian lận của FTX; FTX sau đó cáo buộc Binance đẩy nhanh sự sụp đổ. Rồi đến bản nhận tội 2023 và bốn tháng tù. Bức ảnh ông giơ bốn ngón tay — '4' nghĩa là 'bỏ qua FUD' — cũng thành meme."],
+        notes: ["Cointelegraph; Yahoo Finance."],
+      },
+      {
+        title: "2025–2026: làn sóng phản đối.",
+        body: ["Sau lệnh ân xá, CZ đăng bài liên tục — ảnh chó cưng, 'mùa meme', dự đoán 'siêu chu kỳ'. Mỗi bài đăng đều làm coin biến động. Tháng 1/2026, giới trader quay lưng với ông và Binance vì các dự án niêm yết trên 'Alpha': dữ liệu cộng đồng tổng hợp cho thấy hơn 90% trong 221 dự án niêm yết năm 2025–26 giao dịch thấp hơn nhiều so với đỉnh sau niêm yết. Có bài viral đòi 'tống ông vào tù lại'."],
+        notes: ["CCN, 27/1/2026; Crypto Times, 1/2026."],
+      },
+      {
+        title: "Hai cách nhìn về CZ.",
+        body: ["Phía ủng hộ: ông không còn giữ vai trò ở Binance, đã chịu phạt, người dùng được bù sau mỗi sự cố, và ông không kiểm soát được người lạ phát hành gì. Phía phê bình: là cổ đông lớn nhất, ông vẫn định hướng Binance; bài đăng của ông làm giá những coin ông nói mình không giao dịch; và tháng 11/2026, CEO của OKX lại đổ lỗi cho ông và Binance về hai năm sập giá — điều CZ phủ nhận."],
+        notes: ["Protos; Blockzeit; Our Crypto Talk, 11/2026."],
       },
     ],
   },
@@ -757,7 +894,7 @@ export const chaptersVi: Chapter[] = [
   {
     label: "Nhìn thẳng thực tế",
     title: "Nhìn thẳng thực tế",
-    question: "Điểm mạnh, rủi ro — và điều đó có ý nghĩa gì với BNB.",
+    question: "Điểm mạnh, rủi ro — và BNB so với Bitcoin, Ethereum thế nào.",
     figure: "Một thanh cân: điểm mạnh một bên, rủi ro một bên, với giá BNB 12 tháng qua bên dưới.",
     takeaway: "Binance là sàn lớn nhất, thanh khoản nhất, và đã hoàn trả người dùng sau mọi sự cố lớn. Nó cũng là công ty từng bị kết tội, có nhà sáng lập được ân xá, các cáo buộc đang mở và vụ hack kỷ lục. BNB gánh tất cả những điều đó.",
     beats: [
@@ -773,6 +910,19 @@ export const chaptersVi: Chapter[] = [
         title: "Cả hai điều cùng đúng.",
         body: ["BNB lập đỉnh gần 1.375 USD vào tháng 10/2025 và quanh 600 USD giữa tháng 11/2026 — giảm hơn một nửa. Nếu giữ BNB, bạn đang đặt cược vào chính Binance: việc kinh doanh, các cuộc chiến pháp lý và khả năng bảo mật của nó."],
         notes: ["AMBCrypto (đỉnh kỷ lục); ad-hoc-news, 14/11/2026."],
+      },
+      {
+        title: "Bitcoin vs Ethereum vs BNB.",
+        body: ["Bitcoin không có công ty nào đứng sau. Ethereum được định hướng bởi một quỹ phi lợi nhuận và nhiều nhóm độc lập. BNB do Binance tạo ra, và blockchain của nó vẫn phụ thuộc vào hệ sinh thái Binance."],
+      },
+      {
+        title: "Luật khác nhau, tốc độ khác nhau.",
+        body: ["Nguồn cung Bitcoin dừng ở 21 triệu; Ethereum không có trần cố định; BNB đốt dần về 100 triệu. Một khối Bitcoin mất khoảng 10 phút, Ethereum 12 giây, BNB Chain chưa tới nửa giây — tốc độ đổi lấy số validator ít hơn nhiều."],
+      },
+      {
+        title: "Quy mô.",
+        body: ["Giữa tháng 11/2026, Bitcoin trị giá khoảng 1.400 tỷ USD, Ethereum khoảng 240 tỷ USD và BNB khoảng 77 tỷ USD. Bảng dưới đây tóm tắt các khác biệt."],
+        notes: ["Fortune (13/11/2026); CryptoTicker/CoinGecko (14/11/2026); nguồn cung từ Coin Metrics và BNB Chain."],
       },
     ],
   },

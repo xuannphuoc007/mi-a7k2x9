@@ -3,6 +3,7 @@
  * stage's CSS variables so a scene can flip to the dark technical theme. */
 import type { ReactNode, SVGProps } from "react";
 import { clamp, lerp } from "@/lib/store";
+import { asset } from "@/lib/asset";
 export type Pt = { x: number; y: number };
 
 export const C = {
@@ -108,6 +109,9 @@ export function Defs() {
       <pattern id="hatch-accent" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
         <line x1="0" y1="0" x2="0" y2="5" stroke="var(--s-accent)" strokeWidth="1" opacity="0.5" />
       </pattern>
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 Z" fill="#1e2026" />
+      </marker>
       <radialGradient id="glow">
         <stop offset="0%" stopColor="var(--s-accent)" stopOpacity="0.55" />
         <stop offset="100%" stopColor="var(--s-accent)" stopOpacity="0" />
@@ -193,15 +197,11 @@ export function Flame({ x, y, s = 1, t = 0, opacity = 1 }: { x: number; y: numbe
 }
 
 /** An original BNB coin glyph (not the trademark logo): a gold disc with a ring and the ticker. */
-export function BnbGlyph({ x, y, s = 1, opacity = 1, label = "BNB" }: { x: number; y: number; s?: number; opacity?: number; label?: string }) {
+export function BnbGlyph({ x, y, s = 1, opacity = 1 }: { x: number; y: number; s?: number; opacity?: number; label?: string }) {
   if (opacity <= 0.01) return null;
   return (
     <g transform={`translate(${x},${y}) scale(${s})`} opacity={opacity}>
-      <circle r={34} fill="#f0b90b" />
-      <circle r={27} fill="none" stroke="#c99400" strokeWidth={2.5} />
-      <text x={0} y={7} textAnchor="middle" fill="#1e2026" style={{ fontFamily: "var(--font-sans)", fontSize: 19, fontWeight: 800, letterSpacing: "0.02em" }}>
-        {label}
-      </text>
+      <image href={asset("/img/bnb-coin.png")} x={-34} y={-34} width={68} height={68} />
     </g>
   );
 }
@@ -212,6 +212,7 @@ export function Exchange({ x, y, s = 1, opacity = 1, label }: { x: number; y: nu
   return (
     <g transform={`translate(${x},${y}) scale(${s})`} opacity={opacity}>
       <path d="M-120,-70 L0,-130 L120,-70 Z" fill="#1e2026" />
+      <image href={asset("/img/binance-logo.png")} x={-28} y={-106} width={56} height={31} />
       <rect x={-110} y={-70} width={220} height={170} fill="#ffffff" stroke="#1e2026" strokeWidth={2} />
       {[-80, -40, 40, 80].map((cx) => (
         <rect key={cx} x={cx - 9} y={-56} width={18} height={140} fill="#f0b90b" opacity={0.45} />
@@ -222,10 +223,26 @@ export function Exchange({ x, y, s = 1, opacity = 1, label }: { x: number; y: nu
         <line key={i} x1={0} y1={18} x2={Math.cos((i * Math.PI) / 3) * 26} y2={18 + Math.sin((i * Math.PI) / 3) * 26} stroke="#1e2026" strokeWidth={2} />
       ))}
       {label && (
-        <text x={0} y={-82} textAnchor="middle" fill="#f0b90b" style={{ fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.14em" }}>
+        <text x={0} y={128} textAnchor="middle" fill="#1e2026" style={{ fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.14em" }}>
           {label}
         </text>
       )}
+    </g>
+  );
+}
+
+/** A photo or drawing cropped to a circle (used for images supplied by the site owner). */
+export function Portrait({ x, y, r, href, id, opacity = 1, fy = 0.38 }: { x: number; y: number; r: number; href: string; id: string; opacity?: number; fy?: number }) {
+  if (opacity <= 0.01) return null;
+  return (
+    <g opacity={opacity}>
+      <defs>
+        <clipPath id={id}>
+          <circle cx={x} cy={y} r={r} />
+        </clipPath>
+      </defs>
+      <image href={href} x={x - r * 1.15} y={y - r * 2 * fy * 1.6} width={r * 2.3} height={r * 3.07} preserveAspectRatio="xMidYMin slice" clipPath={`url(#${id})`} />
+      <circle cx={x} cy={y} r={r} fill="none" stroke="#1e2026" strokeWidth={2} />
     </g>
   );
 }

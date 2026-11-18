@@ -21,6 +21,11 @@ import ExchangeScene from "./scenes/ExchangeScene";
 import ReservesScene from "./scenes/ReservesScene";
 import BnbScene from "./scenes/BnbScene";
 import ChainScene from "./scenes/ChainScene";
+import DefiScene from "./scenes/DefiScene";
+import MemeScene from "./scenes/MemeScene";
+import ManipScene from "./scenes/ManipScene";
+import CzScene from "./scenes/CzScene";
+import VersusScene from "./scenes/VersusScene";
 import PleaScene from "./scenes/PleaScene";
 import PardonScene from "./scenes/PardonScene";
 import ProbesScene from "./scenes/ProbesScene";
@@ -115,11 +120,16 @@ export default function Stage({ mobile }: { mobile: boolean }) {
           <ReservesScene />
           <BnbScene />
           <ChainScene />
+          <DefiScene />
+          <MemeScene />
           <PleaScene />
           <PardonScene />
           <ProbesScene />
+          <ManipScene />
           <HackScene />
           <TeamScene />
+          <CzScene />
+          <VersusScene />
           <CustodyScene />
           <RealityScene />
           <FinaleScene />

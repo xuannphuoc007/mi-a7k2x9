@@ -5,11 +5,12 @@
  * and the main criticism. The card the reader is on is highlighted.
  */
 import { chapterIndex } from "@/data/coins/bnb/chapters";
-import { useSceneTimeline } from "@/hooks/useSceneTimeline";
+import { useSegmentTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
-import { C, Label } from "../svg";
+import { C, Label, Portrait } from "../svg";
+import { asset } from "@/lib/asset";
 import { Initials } from "./PleaScene";
 
 const IDX = chapterIndex("team");
@@ -20,8 +21,10 @@ export default function TeamScene() {
   const L = t.scenes.team;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const v = useSceneTimeline(
+  const v = useSegmentTimeline(
     IDX,
+    0,
+    0.45,
     { vis: 0, cards: 0, focus: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))
@@ -48,7 +51,11 @@ export default function TeamScene() {
         return (
           <g key={p.name} opacity={q * lerp(0.45, 1, active)} transform={`translate(0,${(1 - q) * 30})`}>
             <rect x={x} y={y} width={w} height={240} rx={12} fill={C.paper} stroke={active > 0.5 ? C.yellow : C.line} strokeWidth={active > 0.5 ? 3 : 1.5} />
-            <Initials x={x + 70} y={y + 74} text={p.initials} color={COLORS[i]} s={lerp(0.9, 1.1, active)} />
+            {i === 0 ? (
+              <Portrait x={x + 70} y={y + 74} r={40 * lerp(0.9, 1.1, active)} href={asset("/img/cz-portrait.jpg")} id="team-cz" />
+            ) : (
+              <Initials x={x + 70} y={y + 74} text={p.initials} color={COLORS[i]} s={lerp(0.9, 1.1, active)} />
+            )}
             <text x={x + 140} y={y + 58} fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: fs(19), fontWeight: 600 }}>
               {p.name}
             </text>

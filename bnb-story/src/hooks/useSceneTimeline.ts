@@ -45,3 +45,24 @@ export function useSceneTimeline<V extends Record<string, number>>(
 
   return state;
 }
+
+/**
+ * Like useSceneTimeline, but the scene lives in a segment [s, e] of its
+ * chapter: the builder writes positions and durations in segment-local units
+ * (0 → 1 across the segment), exactly as a whole-chapter scene would.
+ */
+export function useSegmentTimeline<V extends Record<string, number>>(
+  index: number,
+  s: number,
+  e: number,
+  initial: V,
+  build: SceneBuilder<V>,
+): V {
+  return useSceneTimeline(index, initial, (tl, v, at) => {
+    const pad = 0.2;
+    const sub = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+    build(sub, v, (p) => p + pad);
+    sub.timeScale(1 / (e - s));
+    tl.add(sub, at(s) - pad * (e - s));
+  });
+}

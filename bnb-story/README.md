@@ -6,7 +6,7 @@ A scroll-driven, beginner-first story of Binance — the world's biggest crypto 
 
 > Educational only. Not affiliated with Binance, BNB Chain or anyone named. Not financial, investment or legal advice. Minh is fictional.
 >
-> **Editorial choices:** the coin is an original illustration (a yellow "BNB" disc), not Binance's trademark logo; people are shown as initials, never portraits. Allegations are labelled by status — *court finding* (2023 guilty pleas), *dropped* (SEC case, 2025), *pardoned* (CZ, 2025), *alleged & denied* (2026 Iran-flow reports) — and each comes with the response of those accused.
+> **Images:** Binance and BNB logos (trademarks of their owners, used for identification), a CZ portrait illustration, a meme illustration and the "4" photo were supplied by the site owner and are credited on screen where the source is known. Allegations are labelled by status — *court finding* (2023 guilty pleas), *dropped* (SEC case, 2025), *pardoned* (CZ, 2025), *alleged & denied* (2026 Iran-flow reports) — and each comes with the response of those accused.
 
 ## Story
 1. **The problem** — Minh, an exchange as marketplace + vault, the promise behind an app balance
@@ -14,15 +14,15 @@ A scroll-driven, beginner-first story of Binance — the world's biggest crypto 
 3. **The journey** — BNB price 2017–2026 with hacks, legal events and peaks
 4. **How an exchange works** — order book, matching, fees, hot vs cold wallets, a row in a database
 5. **Proof of reserves** — FTX, Merkle tree, what a snapshot can't show
-6. **What BNB is for** — uses, quarterly burns towards 100M, BNB tied to Binance's news
-7. **BNB Chain** — 45 validators, fast blocks, the 2022 halt, Nakamoto coefficient
+6. **What BNB is for** — uses, quarterly burns towards 100M, BNB tied to Binance's news; meme coins (Broccoli, '4', meme season) and who wins
+7. **BNB Chain** — 45 validators, fast blocks, the 2022 halt, Nakamoto coefficient; DeFi (PancakeSwap, Venus, Aster), deposits vs Ethereum, sandwich bots and scams
 8. **The guilty plea (2023)** — three charges, $4.3B, the monitor, CZ's four months
 9. **2025: SEC dropped, pardon, USD1** — supporters vs critics
-10. **New questions** — the 10/10 crash and repayments; 2026 Iran-flow allegations, denials and the WSJ lawsuit
+10. **Open allegations & market questions** — 10/10 crash; Iran-flow allegations and the WSJ lawsuit; wash trading, market-maker dumping, insider front-running, listing fees — each labelled by status
 11. **The $6.3B hack (Oct 2026)** — hot wallets drained, ~$3B frozen, withdrawals paused, losses covered
-12. **The team** — CZ, Yi He, Richard Teng: roles, facts, criticism
+12. **The team** — CZ, Yi He, Richard Teng; how CZ lost the community's trust, the Alpha-listing backlash, two readings
 13. **Exchange or your own wallet?** — side-by-side table
-14. **Reality check** — strengths vs risks, the last 12 months of BNB
+14. **Reality check** — strengths vs risks, the last 12 months of BNB; Bitcoin vs Ethereum vs BNB with a comparison table
 15. **Finale** — what Minh does with his $100
 
 ## Stack

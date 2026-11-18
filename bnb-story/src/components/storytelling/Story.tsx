@@ -14,7 +14,8 @@ import ComparePanel from "@/components/interactive/ComparePanel";
 import { useIsMobile, useReducedMotion } from "@/hooks/useMedia";
 
 const PANELS: Record<PanelKind, () => React.ReactElement> = {
-  compare: ComparePanel,
+  compare: () => <ComparePanel which="compare" />,
+  versus: () => <ComparePanel which="versus" />,
 };
 
 export default function Story() {

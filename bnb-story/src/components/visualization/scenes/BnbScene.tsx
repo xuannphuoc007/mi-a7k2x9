@@ -5,7 +5,7 @@
  * burns, endpoints from BNB Chain); then one company sits in the middle of it all.
  */
 import { chapterIndex } from "@/data/coins/bnb/chapters";
-import { useSceneTimeline } from "@/hooks/useSceneTimeline";
+import { useSegmentTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useClock } from "@/hooks/useTween";
 import { useI18n } from "@/lib/i18n";
@@ -23,8 +23,10 @@ export default function BnbScene() {
   const L = t.scenes.bnb;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const v = useSceneTimeline(
+  const v = useSegmentTimeline(
     IDX,
+    0,
+    0.55,
     { vis: 0, uses: 0, spin: 0, burn: 0, middle: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))

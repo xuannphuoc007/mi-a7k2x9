@@ -7,7 +7,7 @@
  */
 import { useMemo } from "react";
 import { chapterIndex } from "@/data/coins/bnb/chapters";
-import { useSceneTimeline } from "@/hooks/useSceneTimeline";
+import { useSegmentTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
 import { clamp, mulberry32, smooth } from "@/lib/store";
@@ -26,8 +26,10 @@ export default function ChainScene() {
     return Array.from({ length: 900 }, () => ({ x: 90 + r() * 330, y: 250 + r() * 330 }));
   }, []);
   const bnbNodes = useMemo(() => Array.from({ length: NV }, (_, i) => ({ x: 600 + (i % 9) * 36, y: 290 + Math.floor(i / 9) * 60 })), []);
-  const v = useSceneTimeline(
+  const v = useSegmentTimeline(
     IDX,
+    0,
+    0.5,
     { vis: 0, compare: 0, blocks: 0, hack: 0, calls: 0, nak: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.06))
