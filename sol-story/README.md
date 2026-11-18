@@ -9,21 +9,21 @@ A scroll-driven, beginner-first story of Solana and SOL, told through Minh, a st
 > **Images:** the Solana, Pump.fun, Raydium and Jupiter logos (trademarks of their owners, used for identification) and illustrated portraits of Anatoly Yakovenko, Raj Gokal and Lily Liu were supplied by the site owner. The coin face is built from the supplied Solana mark. Lawsuit claims are labelled as allegations with the defendants' denials.
 
 ## Story
-1. **Why are blockchains slow?** — Bitcoin, Ethereum and Solana as three roads for a $2 coffee; ≈100M user transactions a day
-2. **Origin** — Anatoly Yakovenko, Proof of History (2017), Loom → Solana, sale prices, the first 500M SOL
-3. **The journey** — SOL price 2020–2026 (estimated) with outages, FTX, meme records, ETFs and upgrades
-4. **A clock everyone can trust** — Proof of History, leader schedule, Alpenglow (Oct 2026)
-5. **Many checkouts at once** — parallel execution, local fee markets, fees, 400 → 200 ms
-6. **Who runs the network?** — validators, staking, Nakamoto coefficient, inflation and the 2026 vote
-7. **When the network stopped** — outages 2021–2024, 1,000 days without a halt, Firedancer
-8. **The FTX winter** — Sam coins, Wormhole, the crash to $8, the estate sale at $64
-9. **The meme-coin casino** — Pump.fun, TRUMP, LIBRA, the RICO class action (alleged · denied)
-10. **Money apps on Solana** — Jupiter/Raydium swaps, stablecoins, tokenised assets, DTCC
-11. **Security, fund or neither?** — SEC 2023, cases dropped 2025, spot SOL ETFs
-12. **The people behind it** — Anatoly Yakovenko, Raj Gokal, Lily Liu; Anza and Jump
-13. **Bitcoin vs Ethereum vs Solana** — scene + comparison table
-14. **Reality check** — strengths vs risks, the last 12 months
-15. **Minh's coffee, paid** — draggable 3D SOL coin
+Plain language first — almost no jargon.
+1. **Why Solana?** — Bitcoin, Ethereum and Solana as three roads for a $2 coffee
+2. **Milestone 1 · Speed and cost** — Anatoly Yakovenko, a shared clock, many checkouts, fees
+3. **Milestone 2 · NFTs (2021–2022)** — Magic Eden, "Solana summer", one weekend of two failures
+4. **Milestone 3 · FTX collapses (2022)** — Sam coins, the crash to $8, "Solana is dead?"
+5. **Milestone 4 · The comeback (2023)** — BONK, the Pyth/Jito airdrops, +900%
+6. **Milestone 5 · Meme coins & Pump.fun (2024–2025)** — TRUMP, LIBRA, the lawsuit (alleged)
+7. **Six years in one picture** — SOL price 2020–2026 (estimated) with numbered pins
+8. **Solana today** — digital dollars, tokenised assets, U.S. funds, 1,000 days without an outage
+9. **The people behind it** — Anatoly Yakovenko, Raj Gokal, Lily Liu; Anza and Jump
+10. **Bitcoin vs Ethereum vs Solana** — scene + comparison table
+11. **Strengths** — five cards
+12. **Weaknesses** — five cards
+13. **Weighing it up** — the balance and the last 12 months
+14. **Conclusion** — what it means for users and investors; draggable 3D SOL coin
 
 ## Data
 - Price line: Coin Metrics community `CapMrktEstUSD` ÷ a circulating supply calibrated so each month-end matches Coinlore's monthly close (to 23 May 2026); then monthly closes and dated reports (dashed). Labelled as an estimate on the page.

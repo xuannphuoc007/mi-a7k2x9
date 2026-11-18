@@ -1,34 +1,34 @@
 "use client";
 /**
- * Act 3 · Speed. Transactions run side by side on separate cores; only those
- * touching the same account (a hot token mint) queue. Then the base fee splits
- * — half burned, half to the block maker — and block time halves to 200 ms.
+ * Milestone 1 · Speed and cost. Anatoly Yakovenko and the 2020 launch; then the
+ * two tricks in plain pictures — a shared clock that stamps the order of
+ * payments, and many checkout lanes working at once — and finally the fee:
+ * a busy Ethereum day versus Solana.
  */
 import { chapterIndex } from "@/data/coins/sol/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
 import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
-import { C, Flame, Label } from "../svg";
+import { C, Label, Portrait } from "../svg";
 
 const IDX = chapterIndex("speed");
-const LX0 = 250;
-const LX1 = 880;
-const LY = [300, 395, 490, 585];
-/** lane, account, delay; the hot mint queues in lane 0 */
-const TXS: { lane: number; acc: string; d: number; hot?: boolean; coffee?: boolean }[] = [
-  { lane: 0, acc: "HOT", d: 0, hot: true },
-  { lane: 0, acc: "HOT", d: 0.22, hot: true },
-  { lane: 0, acc: "HOT", d: 0.44, hot: true },
-  { lane: 0, acc: "HOT", d: 0.66, hot: true },
-  { lane: 1, acc: "A", d: 0 },
-  { lane: 1, acc: "D", d: 0.3 },
-  { lane: 1, acc: "F", d: 0.6 },
-  { lane: 2, acc: "☕", d: 0.05, coffee: true },
-  { lane: 2, acc: "E", d: 0.4 },
-  { lane: 3, acc: "B", d: 0.1 },
-  { lane: 3, acc: "C", d: 0.45 },
-  { lane: 3, acc: "G", d: 0.75 },
+const CORNERS = [
+  { x: 200, y: 290 },
+  { x: 800, y: 290 },
+  { x: 200, y: 680 },
+  { x: 800, y: 680 },
+];
+const LY = [330, 425, 520, 615];
+const CARDS = [
+  { lane: 0, d: 0 },
+  { lane: 0, d: 0.45 },
+  { lane: 1, d: 0.1 },
+  { lane: 1, d: 0.55 },
+  { lane: 2, d: 0.05 },
+  { lane: 2, d: 0.5 },
+  { lane: 3, d: 0.2 },
+  { lane: 3, d: 0.62 },
 ];
 
 export default function SpeedScene() {
@@ -36,152 +36,174 @@ export default function SpeedScene() {
   const L = t.scenes.speed;
   const k = useFontK();
   const fs = (s: number) => s * k;
-  const mobile = k >= 1.5;
+  const big = (s: number, cap: number) => Math.min(fs(s), cap);
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, lanes: 0, flow: 0, focus: 0, fee: 0, split: 0, slot: 0, half: 0, exit: 0 },
+    { vis: 0, who: 0, pills: 0, ask: 0, clock: 0, tick: 0, lanes: 0, flow: 0, fee: 0, bars: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.04))
-        .to(v, { lanes: 1, duration: 0.08 }, at(0.0))
-        .to(v, { flow: 1, duration: 0.44, ease: "none" }, at(0.06))
-        .to(v, { focus: 1, duration: 0.08 }, at(0.28))
-        .to(v, { fee: 1, duration: 0.08 }, at(0.5))
-        .to(v, { split: 1, duration: 0.12 }, at(0.56))
-        .to(v, { slot: 1, duration: 0.08 }, at(0.72))
-        .to(v, { half: 1, duration: 0.12 }, at(0.78))
+        .to(v, { who: 1, duration: 0.08 }, at(-0.02))
+        .to(v, { pills: 1, duration: 0.14, ease: "none" }, at(0.06))
+        .to(v, { ask: 1, duration: 0.06 }, at(0.25))
+        .to(v, { clock: 1, duration: 0.08 }, at(0.33))
+        .to(v, { tick: 1, duration: 0.14, ease: "none" }, at(0.34))
+        .to(v, { lanes: 1, duration: 0.06 }, at(0.5))
+        .to(v, { flow: 1, duration: 0.2, ease: "none" }, at(0.52))
+        .to(v, { fee: 1, duration: 0.06 }, at(0.72))
+        .to(v, { bars: 1, duration: 0.12 }, at(0.76))
         .to(v, { exit: 1, duration: 0.07 }, at(0.93))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
   );
   if (v.vis <= 0.001) return null;
   const ex = smooth(v.exit);
+  const ask = smooth(v.ask);
+  const clock = smooth(v.clock);
+  const lanes = smooth(v.lanes);
   const fee = smooth(v.fee);
-  const lanesO = smooth(v.lanes) * (1 - fee);
-  const focus = smooth(v.focus);
-  const split = smooth(v.split);
-  const slot = smooth(v.slot);
-  const feeO = fee * (1 - slot);
-  const half = smooth(v.half);
+  const whoO = smooth(v.who) * (1 - ask);
+  const askO = ask * (1 - clock);
+  const clockO = clock * (1 - lanes);
+  const lanesO = lanes * (1 - fee);
+  const bars = smooth(v.bars);
+  const ang = v.tick * 720 - 90;
 
   return (
     <g opacity={v.vis * (1 - ex)}>
-      {/* parallel lanes */}
-      {lanesO > 0.01 && (
-        <g opacity={lanesO}>
-          {LY.map((y, i) => (
-            <g key={i}>
-              <rect x={LX0} y={y - 30} width={LX1 - LX0} height={60} rx={30} fill={i === 0 ? `rgba(217,48,79,${0.08 * focus})` : "#fff"} stroke={C.line} strokeWidth={2} />
-              <Label x={LX0 - 18} y={y + 5} anchor="end" size={fs(9.5)}>
-                {L.cores[i]}
-              </Label>
-            </g>
-          ))}
-          {TXS.map((tx, i) => {
-            // hot ones advance one at a time; others glide freely
-            const speed = tx.hot ? 0.75 : 1.6;
-            const raw = clamp((v.flow - tx.d * (tx.hot ? 1.1 : 0.5)) * speed);
-            const q = raw;
-            const x = lerp(LX0 + 40, LX1 - 40, clamp(q));
-            const col = tx.hot ? C.warn : tx.coffee ? "#14b07c" : "#9945ff";
+      {/* who + when */}
+      {whoO > 0.01 && (
+        <g opacity={whoO}>
+          <Portrait x={290} y={420} r={130} href="/img/anatoly.png" />
+          <text x={290} y={600} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(20, 38), fontWeight: 600 }}>
+            {L.who}
+          </text>
+          <Label x={290} y={630 + fs(3)} anchor="middle" size={big(10, 20)} upper={false} spacing="0.02em">
+            {L.role}
+          </Label>
+          <line x1={560} x2={560} y1={330} y2={lerp(330, 520, clamp(v.pills * 1.4))} stroke={C.accent} strokeWidth={2} />
+          {[L.idea, L.launch].map((s, i) => {
+            const q = smooth(clamp(v.pills * 2.2 - i * 1.1));
+            const y = 330 + i * 190;
             return (
-              <g key={i} transform={`translate(${x},${LY[tx.lane]})`} opacity={clamp(q * 8) * (q >= 1 ? 0.35 : 1)}>
-                <rect x={-30} y={-19} width={60} height={38} rx={10} fill={col} />
-                <text y={5} textAnchor="middle" fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700 }}>
-                  {tx.acc}
+              <g key={s} opacity={q} transform={`translate(${(1 - q) * 20},0)`}>
+                <circle cx={560} cy={y} r={i ? 14 : 10} fill={i ? C.accent : "#fff"} stroke={C.accent} strokeWidth={3} />
+                <text x={594} y={y + 8} fill={i ? C.accent : C.ink} style={{ fontFamily: "var(--font-sans)", fontSize: big(15, 26), fontWeight: 700 }}>
+                  {s}
                 </text>
               </g>
             );
           })}
-          <g opacity={focus}>
-            <Label x={LX1} y={LY[0] - 44} anchor="end" size={fs(10)} color={C.warn}>
-              {`${L.hot} · ${L.wait}`}
-            </Label>
-            <Label x={LX1} y={LY[2] - 44} anchor="end" size={fs(10)} color="#14b07c">
-              {mobile ? L.coffee : `${L.coffee} · ${L.free}`}
-            </Label>
-          </g>
+        </g>
+      )}
+
+      {/* computers asking each other */}
+      {askO > 0.01 && (
+        <g opacity={askO}>
+          {CORNERS.map((c, i) => (
+            <g key={i}>
+              <rect x={c.x - 40} y={c.y - 28} width={80} height={56} rx={8} fill="#fff" stroke={C.ink} strokeWidth={2} />
+              <rect x={c.x - 28} y={c.y - 18} width={56} height={34} rx={4} fill={C.lilac} opacity={0.35} />
+              {i < 3 && (
+                <g>
+                  <rect x={c.x - 110} y={c.y + (c.y < 500 ? -100 : 50)} width={220} height={50} rx={25} fill="#fff" stroke={C.line} strokeWidth={2} />
+                  <text x={c.x} y={c.y + (c.y < 500 ? -68 : 82)} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-sans)", fontSize: big(13, 24), fontStyle: "italic" }}>
+                    {L.askers[i]}
+                  </text>
+                </g>
+              )}
+            </g>
+          ))}
+          {CORNERS.map((a, i) =>
+            CORNERS.slice(i + 1).map((b, j) => <line key={`${i}${j}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={C.mute} strokeOpacity={0.35} strokeDasharray="5 7" />),
+          )}
+        </g>
+      )}
+
+      {/* the shared clock */}
+      {clockO > 0.01 && (
+        <g opacity={clockO}>
+          <circle cx={500} cy={440} r={170} fill="#fff" stroke={C.accent} strokeWidth={6} />
+          {Array.from({ length: 12 }, (_, i) => {
+            const a = (i / 12) * Math.PI * 2;
+            return <line key={i} x1={500 + Math.cos(a) * 150} y1={440 + Math.sin(a) * 150} x2={500 + Math.cos(a) * 162} y2={440 + Math.sin(a) * 162} stroke={C.accent} strokeWidth={i % 3 ? 2 : 5} />;
+          })}
+          <line x1={500} y1={440} x2={500 + Math.cos((ang * Math.PI) / 180) * 125} y2={440 + Math.sin((ang * Math.PI) / 180) * 125} stroke={C.ink} strokeWidth={6} strokeLinecap="round" />
+          <circle cx={500} cy={440} r={10} fill={C.ink} />
+          {[0, 1, 2].map((i) => {
+            const q = smooth(clamp(v.tick * 3.2 - i * 0.9));
+            const x = 360 + i * 140;
+            return (
+              <g key={i} opacity={q} transform={`translate(${x},${lerp(560, 700, q)})`}>
+                <rect x={-50} y={-30} width={100} height={60} rx={12} fill={["#9945ff", "#19b3c9", "#14b07c"][i]} />
+                <text y={9} textAnchor="middle" fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: 24, fontWeight: 700 }}>
+                  #{i + 1}
+                </text>
+              </g>
+            );
+          })}
+          <text x={500} y={210} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(24, 42), fontWeight: 600 }}>
+            {L.clock}
+          </text>
+          <Label x={500} y={790} anchor="middle" size={big(11, 21)} upper={false} spacing="0.02em" color={C.accent}>
+            {L.clockSub}
+          </Label>
+          <Label x={500} y={830} anchor="middle" size={big(9, 17)} upper={false} spacing="0.02em">
+            {L.later}
+          </Label>
+        </g>
+      )}
+
+      {/* many checkouts */}
+      {lanesO > 0.01 && (
+        <g opacity={lanesO}>
+          <text x={500} y={230} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(24, 42), fontWeight: 600 }}>
+            {L.lanes}
+          </text>
+          {LY.map((y, i) => (
+            <g key={i}>
+              <rect x={150} y={y - 32} width={700} height={64} rx={32} fill="#fff" stroke={C.line} strokeWidth={2} />
+              <rect x={812} y={y - 22} width={30} height={44} rx={6} fill={C.accent} opacity={0.8} />
+            </g>
+          ))}
+          {CARDS.map((c, i) => {
+            const q = clamp(v.flow * 1.6 - c.d);
+            if (q <= 0 || q >= 1) return null;
+            return (
+              <rect key={i} x={lerp(170, 760, q)} y={LY[c.lane] - 20} width={52} height={40} rx={9} fill={["#9945ff", "#19b3c9", "#14b07c", "#e0662f"][c.lane]} />
+            );
+          })}
+          <Label x={500} y={720} anchor="middle" size={big(11, 21)} upper={false} spacing="0.02em" color={C.accent}>
+            {L.lanesSub}
+          </Label>
         </g>
       )}
 
       {/* the fee */}
-      {feeO > 0.01 && (
-        <g opacity={feeO}>
-          <Label x={500} y={250} anchor="middle" size={fs(11)} color={C.ink}>
+      {fee > 0.01 && (
+        <g opacity={fee}>
+          <text x={150} y={260} fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(24, 42), fontWeight: 600 }}>
             {L.feeTitle}
-          </Label>
-          <text x={500} y={330} textAnchor="middle" fill={C.accent} style={{ fontFamily: "var(--font-serif)", fontSize: Math.min(fs(46), 78), fontWeight: 600 }}>
-            {L.fee}
           </text>
-          <Label x={500} y={368} anchor="middle" size={fs(11)}>
-            {L.feeUsd}
-          </Label>
-          {[0, 1].map((s) => {
-            const tx = lerp(500, s ? 700 : 300, split);
-            const ty = lerp(420, 560, split);
+          {[
+            { lab: L.eth, val: L.ethVal, w: 640, col: C.warn },
+            { lab: L.sol, val: L.solVal, w: 8, col: "#14b07c" },
+          ].map((b, i) => {
+            const y = 380 + i * 190;
+            const w = Math.max(8, b.w * bars);
             return (
-              <g key={s}>
-                <circle cx={tx} cy={ty} r={30} fill={s ? "#9945ff" : C.warn} opacity={0.9} />
-                <text x={tx} y={ty + 5} textAnchor="middle" fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700 }}>
-                  50%
+              <g key={b.lab}>
+                <text x={150} y={y - 22} fill={C.ink} style={{ fontFamily: "var(--font-sans)", fontSize: big(15, 28), fontWeight: 600 }}>
+                  {b.lab}
+                </text>
+                <rect x={150} y={y} width={w} height={64} rx={14} fill={b.col} opacity={i ? 1 : 0.85} />
+                <text x={i ? 150 + w + 18 : 150 + w - 18} y={y + 43} textAnchor={i ? "start" : "end"} fill={i ? b.col : "#fff"} style={{ fontFamily: "var(--font-mono)", fontSize: big(22, 40), fontWeight: 700 }}>
+                  {b.val}
                 </text>
               </g>
             );
           })}
-          <g opacity={split}>
-            <Flame x={300} y={680} s={1.1} t={v.split * 3} />
-            <Label x={300} y={760} anchor="middle" size={fs(10.5)} color={C.warn}>
-              {L.burned}
-            </Label>
-            <g transform="translate(700,680)">
-              <rect x={-44} y={-40} width={88} height={70} rx={10} fill="#fff" stroke={C.ink} strokeWidth={2} />
-              {[0, 1, 2].map((r) => (
-                <rect key={r} x={-32} y={-28 + r * 18} width={64} height={10} rx={3} fill={C.lilac} opacity={0.5} />
-              ))}
-            </g>
-            <Label x={700} y={760} anchor="middle" size={fs(10.5)} color={C.accent}>
-              {L.leader}
-            </Label>
-            <Label x={500} y={840} anchor="middle" size={fs(10)} upper={false} spacing="0.02em">
-              {L.priority}
-            </Label>
-          </g>
-        </g>
-      )}
-
-      {/* block time halves */}
-      {slot > 0.01 && (
-        <g opacity={slot}>
-          <Label x={140} y={330} size={fs(11)} color={C.ink}>
-            {L.slot}
-          </Label>
-          {[0, 1].map((row) => {
-            const n = row ? 10 : 5;
-            const y = 420 + row * 170;
-            const shown = row ? half : 1;
-            return (
-              <g key={row} opacity={row ? half : 1}>
-                <text x={140} y={y - 16} fill={row ? "#14b07c" : C.mute} style={{ fontFamily: "var(--font-serif)", fontSize: fs(22), fontWeight: 600 }}>
-                  {row ? L.ms200 : L.ms400}
-                </text>
-                {row === 1 && (
-                  <Label x={860} y={y - 18} anchor="end" size={fs(9.5)} color="#14b07c">
-                    {L.date}
-                  </Label>
-                )}
-                {Array.from({ length: n }, (_, i) => {
-                  const w = 720 / n;
-                  const q = smooth(clamp(shown * n - i));
-                  return <rect key={i} x={140 + i * w + 3} y={y} width={(w - 6) * q} height={60} rx={10} fill={row ? "#14c98a" : "#b9b3cf"} />;
-                })}
-              </g>
-            );
-          })}
-          <line x1={140} x2={860} y1={760} y2={760} stroke={C.ink} strokeOpacity={0.3} />
-          <Label x={140} y={790} size={fs(9.5)}>
-            0 s
-          </Label>
-          <Label x={860} y={790} anchor="end" size={fs(9.5)}>
-            2 s
+          <Label x={150} y={760} size={big(12, 22)} color="#14b07c" opacity={bars}>
+            {L.time}
           </Label>
         </g>
       )}

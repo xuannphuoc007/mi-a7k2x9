@@ -1,9 +1,9 @@
 "use client";
 /**
- * Act 5 · Money apps. Minh swaps SOL for USDC: Jupiter splits the order across
- * Raydium, Orca and others. Then three stat tiles — stablecoins, tokenised
- * real-world assets, monthly DEX trades — with the big names building on
- * Solana, and a reminder that faster is not safer.
+ * Solana today. Minh swaps SOL for USDC: Jupiter splits the order across
+ * Raydium, Orca and others. Then three tiles — digital dollars, tokenised
+ * shares and funds, days without an outage — with the big names building on
+ * Solana, and the price note.
  */
 import { chapterIndex } from "@/data/coins/sol/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
@@ -12,7 +12,7 @@ import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
 import { C, Chip, Label, Logo, Person } from "../svg";
 
-const IDX = chapterIndex("defi");
+const IDX = chapterIndex("today");
 const M = { x: 110, y: 470 };
 const J = { x: 350, y: 470 };
 const V = [
@@ -120,7 +120,7 @@ export default function DefiScene() {
         const q = tiles[i];
         if (q <= 0.01) return null;
         const y = 210 + i * 175;
-        const col = ["#2775ca", "#14b07c", "#9945ff"][i];
+        const col = ["#2775ca", "#9945ff", "#14b07c"][i];
         return (
           <g key={b.label} opacity={q} transform={`translate(${(1 - q) * 30},0)`}>
             <rect x={120} y={y} width={760} height={140} rx={22} fill="#fff" stroke={C.line} strokeWidth={2} />
@@ -145,16 +145,17 @@ export default function DefiScene() {
             const q = smooth(clamp(v.names * 4 - i * 0.8)) * (1 - risk * 0.4);
             if (q <= 0.01) return null;
             const show = i < 3 || v.t2 > 0.5;
+            if (i >= 5) return null;
             if (!show) return null;
             const x = 220 + (i % 2) * 380;
-            const y = 780 + Math.floor(i / 2) * 64;
+            const y = 760 + Math.floor(i / 2) * 60;
             return <Chip key={n} x={x} y={y} text={n} color={i === 3 ? C.ink : C.lilac} k={Math.min(k, 1.5)} opacity={q} />;
           })}
         </g>
       )}
       {risk > 0.01 && (
-        <g opacity={risk} transform="translate(720,140) rotate(-6)">
-          <rect x={-200} y={-32} width={400} height={64} rx={32} fill="#fff" stroke={C.warn} strokeWidth={3} />
+        <g opacity={risk} transform="translate(640,150) rotate(-4)">
+          <rect x={-240} y={-32} width={480} height={64} rx={32} fill="#fff" stroke={C.warn} strokeWidth={3} />
           <Label x={0} y={7} anchor="middle" size={Math.min(fs(13), 20)} color={C.warn}>
             {L.risk}
           </Label>

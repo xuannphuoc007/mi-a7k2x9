@@ -11,11 +11,10 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { asset } from "@/lib/asset";
 import { engine, subscribeG } from "@/animations/scrollController";
-import { chapterIndex, FINALE } from "@/data/coins/sol/chapters";
+import { FINALE } from "@/data/coins/sol/chapters";
 import { clamp, createStore, lerp, range, smooth } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 
-const ORIGIN = chapterIndex("origin");
 const R = 1.25;
 const WEDGES = 8;
 
@@ -63,7 +62,7 @@ export const coin = createStore({ yaw: 0, pitch: 0 });
 
 function pose(g: number) {
   const hero = 1 - smooth(range(g, 0.08, 0.18));
-  const origin = smooth(range(g, ORIGIN + 0.7, ORIGIN + 0.78)) * (1 - smooth(range(g, ORIGIN + 0.94, ORIGIN + 1.02)));
+  const origin = 0; // no mid-story coin in this edition
   const fin = smooth(range(g, FINALE + 0.16, FINALE + 0.28));
   const assemble = smooth(range(g, FINALE + 0.2, FINALE + 0.45));
   const vis = Math.max(hero, origin, fin);

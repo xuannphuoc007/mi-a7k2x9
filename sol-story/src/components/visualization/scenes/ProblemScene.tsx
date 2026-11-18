@@ -2,7 +2,7 @@
 /**
  * Act 0 · The Problem. Minh wants to pay a friend $2 for coffee. Three roads:
  * Bitcoin crawls, Ethereum charges a toll, Solana's many-lane highway delivers
- * in a blink. Then the scale (≈100M user transactions a day) and four headlines.
+ * in a blink. Then the five milestones that made Solana famous.
  */
 import { chapterIndex } from "@/data/coins/sol/chapters";
 import { useSceneTimeline } from "@/hooks/useSceneTimeline";
@@ -11,7 +11,7 @@ import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
 import { C, Chip, Label, Person } from "../svg";
 
-const IDX = chapterIndex("problem");
+const IDX = chapterIndex("intro");
 const X0 = 200;
 const X1 = 860;
 const LANE_Y = [320, 480, 650];
@@ -29,12 +29,12 @@ export default function ProblemScene() {
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(0.02))
         .to(v, { minh: 1, duration: 0.1 }, at(0.05))
-        .to(v, { lanes: 1, duration: 0.1 }, at(0.2))
-        .to(v, { run: 1, duration: 0.46, ease: "none" }, at(0.26))
-        .to(v, { sol: 1, duration: 0.08 }, at(0.46))
-        .to(v, { solRun: 1, duration: 0.08, ease: "power1.in" }, at(0.53))
-        .to(v, { scale: 1, duration: 0.12 }, at(0.7))
-        .to(v, { heads: 1, duration: 0.16, ease: "none" }, at(0.76))
+        .to(v, { lanes: 1, duration: 0.1 }, at(0.14))
+        .to(v, { run: 1, duration: 0.42, ease: "none" }, at(0.2))
+        .to(v, { sol: 1, duration: 0.08 }, at(0.34))
+        .to(v, { solRun: 1, duration: 0.08, ease: "power1.in" }, at(0.42))
+        .to(v, { scale: 1, duration: 0.1 }, at(0.6))
+        .to(v, { heads: 1, duration: 0.2, ease: "none" }, at(0.64))
         .to(v, { exit: 1, duration: 0.08 }, at(0.92))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -51,12 +51,6 @@ export default function ProblemScene() {
   const prog = [smooth(clamp(run)) * 0.16, run * 0.6, smooth(v.solRun)];
   const laneO = [lanes, lanes, sol];
 
-  const hp = [
-    { x: 260, y: 220 },
-    { x: 745, y: 205 },
-    { x: 255, y: 790 },
-    { x: 750, y: 805 },
-  ];
 
   return (
     <g opacity={v.vis * (1 - ex)}>
@@ -121,34 +115,31 @@ export default function ProblemScene() {
         })}
       </g>
 
-      {/* scale */}
+      {/* the five milestones */}
       {scale > 0.01 && (
-        <g opacity={scale * (1 - smooth(clamp(v.heads * 2)) * 0.25)}>
-          <text x={500} y={505} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: fs(66), fontWeight: 600 }}>
-            ≈ {Math.round(100 * clamp(scale * 1.05))}M
-          </text>
-          <Label x={500} y={548} anchor="middle" size={fs(11)} color={C.accent}>
+        <g opacity={scale}>
+          <text x={500} y={215} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: Math.min(fs(26), 44), fontWeight: 600 }}>
             {L.perDay}
-          </Label>
+          </text>
+          {L.headlines.map((h, i) => {
+            const q = smooth(clamp(v.heads * 5 - i * 0.8));
+            const y = 300 + i * 112;
+            const col = ["#9945ff", "#19b3c9", C.warn, "#14b07c", "#e0662f"][i];
+            return (
+              <g key={h} opacity={q} transform={`translate(${(1 - q) * -30},0)`}>
+                <rect x={220} y={y - 40} width={560} height={80} rx={40} fill="#fff" stroke={col} strokeWidth={2.5} />
+                <circle cx={262} cy={y} r={28} fill={col} />
+                <text x={262} y={y + 9} textAnchor="middle" fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: 24, fontWeight: 700 }}>
+                  {i + 1}
+                </text>
+                <text x={310} y={y + Math.min(fs(15), 28) * 0.36} fill={C.ink} style={{ fontFamily: "var(--font-sans)", fontSize: Math.min(fs(15), 28), fontWeight: 600 }}>
+                  {h.replace(/^\d · /, "")}
+                </text>
+              </g>
+            );
+          })}
         </g>
       )}
-
-      {v.heads > 0.01 &&
-        L.headlines.map((h, i) => {
-          const q = smooth(clamp(v.heads * 4 - i * 0.75));
-          if (q <= 0.01) return null;
-          const p = mobile ? { x: 500, y: [170, 255, 760, 845][i] } : hp[i];
-          const bad = i < 2;
-          const w = Math.min(mobile ? 940 : 420, h.length * fs(11) * 0.64 + 44);
-          return (
-            <g key={h} opacity={q} transform={`translate(${p.x},${p.y + (1 - q) * 18})`}>
-              <rect x={-w / 2} y={-28} width={w} height={56} rx={28} fill="#fff" stroke={bad ? C.warn : C.accent} strokeWidth={2} />
-              <Label x={0} y={5} anchor="middle" color={bad ? C.warn : C.accent} size={fs(11)}>
-                {h}
-              </Label>
-            </g>
-          );
-        })}
     </g>
   );
 }

@@ -11,7 +11,7 @@ import { clamp, lerp, smooth } from "@/lib/store";
 import { LAST_T, priceAt, usd } from "@/lib/solSeries";
 import { C, Label } from "../svg";
 
-const IDX = chapterIndex("reality");
+const IDX = chapterIndex("balance");
 const PIV = { x: 500, y: 300 };
 const ARM = 270;
 const T_A = LAST_T - 1;
@@ -38,8 +38,8 @@ export default function RealityScene() {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.04))
         .to(v, { beam: 1, duration: 0.08 }, at(-0.02))
         .to(v, { good: 1, duration: 0.16, ease: "none" }, at(0.04))
-        .to(v, { bad: 1, duration: 0.16, ease: "none" }, at(0.26))
-        .to(v, { chart: 1, duration: 0.2 }, at(0.46))
+        .to(v, { bad: 1, duration: 0.18, ease: "none" }, at(0.3))
+        .to(v, { chart: 1, duration: 0.2 }, at(0.58))
         .to(v, { exit: 1, duration: 0.07 }, at(0.93))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -48,7 +48,8 @@ export default function RealityScene() {
   const ex = smooth(v.exit);
   const beam = smooth(v.beam);
   const chart = smooth(v.chart);
-  const balO = beam * (1 - chart);
+  const balO = beam * (1 - clamp(chart * 2.5));
+  const chartO = clamp(chart * 1.6 - 0.6);
   // the beam tips toward strengths, then back to level as risks pile up
   const tilt = (v.good * 5 - v.bad * 5) * 1;
   const rad = (tilt * Math.PI) / 180;
@@ -92,8 +93,8 @@ export default function RealityScene() {
         </g>
       )}
 
-      {chart > 0.01 && (
-        <g opacity={chart}>
+      {chartO > 0.01 && (
+        <g opacity={chartO}>
           <Label x={SX0} y={250} size={fs(11)} color={C.ink}>
             {L.year}
           </Label>

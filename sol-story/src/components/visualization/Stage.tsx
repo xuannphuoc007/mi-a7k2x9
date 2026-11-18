@@ -15,18 +15,16 @@ import { ui } from "@/animations/scrollController";
 import { stageStore } from "@/lib/simStores";
 import { Defs } from "./svg";
 import ProblemScene from "./scenes/ProblemScene";
-import OriginScene from "./scenes/OriginScene";
-import JourneyScene from "./scenes/JourneyScene";
-import PohScene from "./scenes/PohScene";
 import SpeedScene from "./scenes/SpeedScene";
-import ValidatorsScene from "./scenes/ValidatorsScene";
-import OutagesScene from "./scenes/OutagesScene";
+import NftScene from "./scenes/NftScene";
 import FtxScene from "./scenes/FtxScene";
+import RevivalScene from "./scenes/RevivalScene";
 import MemesScene from "./scenes/MemesScene";
+import JourneyScene from "./scenes/JourneyScene";
 import DefiScene from "./scenes/DefiScene";
-import LegalScene from "./scenes/LegalScene";
 import TeamScene from "./scenes/TeamScene";
 import VersusScene from "./scenes/VersusScene";
+import { StrengthsScene, WeaknessesScene } from "./scenes/CardsScene";
 import RealityScene from "./scenes/RealityScene";
 import FinaleScene from "./scenes/FinaleScene";
 
@@ -109,18 +107,17 @@ export default function Stage({ mobile }: { mobile: boolean }) {
         <svg ref={svgRef} viewBox="0 0 1000 1000" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid meet" style={{ overflow: "visible" }}>
           <Defs />
           <ProblemScene />
-          <OriginScene />
-          <JourneyScene />
-          <PohScene />
           <SpeedScene />
-          <ValidatorsScene />
-          <OutagesScene />
+          <NftScene />
           <FtxScene />
+          <RevivalScene />
           <MemesScene />
+          <JourneyScene />
           <DefiScene />
-          <LegalScene />
           <TeamScene />
           <VersusScene />
+          <StrengthsScene />
+          <WeaknessesScene />
           <RealityScene />
           <FinaleScene />
         </svg>
