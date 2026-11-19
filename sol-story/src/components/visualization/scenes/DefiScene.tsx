@@ -74,7 +74,8 @@ export default function DefiScene() {
             {mobile ? "Jupiter" : L.route}
           </Label>
           <Logo x={V[0].x} y={V[0].y} w={86} h={98} href="/img/raydium.png" />
-          {[1, 2].map((i) => (
+          <Logo x={V[1].x} y={V[1].y} w={92} h={92} href="/img/orca.png" />
+          {[2].map((i) => (
             <g key={i}>
               <circle cx={V[i].x} cy={V[i].y} r={44} fill="#fff" stroke="#19b3c9" strokeWidth={3} />
               <text x={V[i].x} y={V[i].y + 5} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-mono)", fontSize: Math.min(fs(11), 16), fontWeight: 600 }}>
@@ -104,10 +105,7 @@ export default function DefiScene() {
             return <circle key={j} cx={x} cy={y} r={9} fill={q < 0.5 ? "#9945ff" : "#2775ca"} />;
           })}
           <g opacity={smooth(clamp(flow * 1.5 - 0.5))}>
-            <circle cx={U.x} cy={U.y} r={46} fill="#2775ca" />
-            <text x={U.x} y={U.y + 6} textAnchor="middle" fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700 }}>
-              USDC
-            </text>
+            <Logo x={U.x} y={U.y} w={96} h={96} href="/img/usdc.png" />
             <Label x={U.x} y={U.y + 80} anchor="middle" size={fs(10)} color={C.ink}>
               {L.got}
             </Label>

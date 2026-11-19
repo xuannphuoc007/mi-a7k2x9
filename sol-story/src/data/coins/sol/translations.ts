@@ -32,7 +32,7 @@ export const en = {
     dragHint: "Drag to rotate the coin",
     disclaimerTitle: "Editorial & educational note",
     disclaimer:
-      "Independent educational explainer, not affiliated with Solana Labs, the Solana Foundation, Anza, Jump or anyone named. The Solana, Pump.fun, Raydium and Jupiter logos are trademarks of their owners and appear only to identify them; portraits of Anatoly Yakovenko, Raj Gokal and Lily Liu are illustrations supplied by the site owner. Lawsuit claims are labelled as allegations and include the responses of those named; no court has ruled on them. The price line before 24 May 2026 is an estimate (Coin Metrics market cap ÷ calibrated supply). Minh is fictional. Not financial, investment or legal advice. Figures carry dates and may be out of date.",
+      "Independent educational explainer, not affiliated with Solana Labs, the Solana Foundation, Anza, Jump or anyone named. The Solana, Pump.fun, Raydium, Jupiter, Orca, USDC, BONK, Pyth, Jito and TRUMP logos are trademarks of their owners and appear only to identify them; the two NFT pictures are illustrations supplied by the site owner; portraits of Anatoly Yakovenko, Raj Gokal and Lily Liu are illustrations supplied by the site owner. Lawsuit claims are labelled as allegations and include the responses of those named; no court has ruled on them. The price line before 24 May 2026 is an estimate (Coin Metrics market cap ÷ calibrated supply). Minh is fictional. Not financial, investment or legal advice. Figures carry dates and may be out of date.",
     reducedMotion: "Reduced motion is on: animations jump between states.",
     backToTop: "Back to the top",
     credits: "Design & illustration: original work. Sources listed below.",
@@ -249,7 +249,7 @@ export const vi: Dict = {
     dragHint: "Kéo để xoay đồng coin",
     disclaimerTitle: "Lưu ý biên tập & giáo dục",
     disclaimer:
-      "Bài giải thích giáo dục độc lập, không liên kết với Solana Labs, Solana Foundation, Anza, Jump hay bất kỳ ai được nhắc tên. Logo Solana, Pump.fun, Raydium và Jupiter là thương hiệu của chủ sở hữu, chỉ dùng để nhận diện; chân dung Anatoly Yakovenko, Raj Gokal và Lily Liu là tranh minh hoạ do chủ trang cung cấp. Các nội dung trong vụ kiện được ghi rõ là cáo buộc, kèm phản hồi của bên bị nêu tên; toà chưa phán quyết. Đường giá trước 24/5/2026 là ước tính (vốn hoá Coin Metrics ÷ nguồn cung đã hiệu chỉnh). Minh là nhân vật hư cấu. Không phải lời khuyên tài chính, đầu tư hay pháp lý. Số liệu có ghi ngày và có thể đã cũ.",
+      "Bài giải thích giáo dục độc lập, không liên kết với Solana Labs, Solana Foundation, Anza, Jump hay bất kỳ ai được nhắc tên. Logo Solana, Pump.fun, Raydium, Jupiter, Orca, USDC, BONK, Pyth, Jito và TRUMP là thương hiệu của chủ sở hữu, chỉ dùng để nhận diện; hai hình NFT là tranh minh hoạ do chủ trang cung cấp; chân dung Anatoly Yakovenko, Raj Gokal và Lily Liu là tranh minh hoạ do chủ trang cung cấp. Các nội dung trong vụ kiện được ghi rõ là cáo buộc, kèm phản hồi của bên bị nêu tên; toà chưa phán quyết. Đường giá trước 24/5/2026 là ước tính (vốn hoá Coin Metrics ÷ nguồn cung đã hiệu chỉnh). Minh là nhân vật hư cấu. Không phải lời khuyên tài chính, đầu tư hay pháp lý. Số liệu có ghi ngày và có thể đã cũ.",
     reducedMotion: "Đang bật giảm chuyển động: hiệu ứng chuyển thẳng giữa các trạng thái.",
     backToTop: "Lên đầu trang",
     credits: "Thiết kế & minh hoạ: tác phẩm gốc. Nguồn liệt kê bên dưới.",

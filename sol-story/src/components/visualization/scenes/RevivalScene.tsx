@@ -10,7 +10,7 @@ import { useFontK } from "@/hooks/useFontK";
 import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
 import { priceAt, usd } from "@/lib/solSeries";
-import { C, Label } from "../svg";
+import { C, Label, Logo } from "../svg";
 
 const IDX = chapterIndex("revival");
 const T0 = 2022.92, T1 = 2024.0;
@@ -110,12 +110,7 @@ export default function RevivalScene() {
       {/* BONK gift */}
       <g opacity={box}>
         <Gift x={bx} y={by} s={bs} open={open} col={GIFT_COL[0]} />
-        <g opacity={open * (1 - chart * 0.2)}>
-          <circle cx={bx} cy={by - 60 * bs - open * 30 * bs} r={22 * bs} fill="#f7b731" stroke="#e0662f" strokeWidth={2} />
-          <text x={bx} y={by - 60 * bs - open * 30 * bs + 6 * bs} textAnchor="middle" fill="#7a3d0a" style={{ fontFamily: "var(--font-mono)", fontSize: 13 * bs, fontWeight: 800 }}>
-            BONK
-          </text>
-        </g>
+        <Logo x={bx} y={by - 66 * bs - open * 30 * bs} w={56 * bs} h={56 * bs} href="/img/bonk.png" opacity={open} />
         <g opacity={open * (1 - chart)}>
           <Label x={500} y={740} anchor="middle" size={big(12, 22)} color={C.ink}>
             {`${L.gifts[0].d} · ${L.gifts[0].s}`}
@@ -139,6 +134,7 @@ export default function RevivalScene() {
           <g key={g.t} opacity={q}>
             <line x1={x} y1={y + 30} x2={g0[i].x} y2={g0[i].y} stroke={GIFT_COL[i]} strokeDasharray="3 4" />
             <Gift x={x} y={y} s={0.75} open={q} col={GIFT_COL[i]} />
+            <Logo x={x} y={y - 62 - q * 14} w={58} h={58} href={i === 1 ? "/img/pyth.png" : "/img/jito.png"} opacity={q} />
             <text x={x - 50} y={y + 6} opacity={1 - gain} textAnchor="end" fill={GIFT_COL[i]} style={{ fontFamily: "var(--font-sans)", fontSize: big(13, 24), fontWeight: 700 }}>
               {g.t}
             </text>

@@ -12,6 +12,7 @@ import { useI18n } from "@/lib/i18n";
 import { clamp, lerp, smooth } from "@/lib/store";
 import { priceAt, usd } from "@/lib/solSeries";
 import { C, Label } from "../svg";
+import { asset } from "@/lib/asset";
 
 const IDX = chapterIndex("nft");
 const ART = ["#9945ff", "#19b3c9", "#14c98a", "#f7931a", "#e0662f", "#6b7bd6"];
@@ -91,7 +92,10 @@ export default function NftScene() {
                 {c.name}
               </text>
               <rect x={c.x - 130} y={290} width={260} height={300} rx={22} fill="#fff" stroke={C.line} strokeWidth={2} />
-              <Art x={c.x} y={420} s={1.9} seed={i + 1} />
+              <clipPath id={`nftcard${i}`}>
+                <rect x={c.x - 116} y={304} width={232} height={272} rx={14} />
+              </clipPath>
+              <image href={asset(i === 0 ? "/img/nft-eth.jpg" : "/img/nft-sol.jpg")} x={c.x - 136} y={304} width={272} height={272} preserveAspectRatio="xMidYMid slice" clipPath={`url(#nftcard${i})`} />
               <rect x={c.x - 120} y={640} width={240} height={70} rx={35} fill={c.bad ? C.warn : "#14b07c"} />
               <text x={c.x} y={685} textAnchor="middle" fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: big(20, 34), fontWeight: 700 }}>
                 {c.bad ? c.fee : L.solFee.replace(/^[^<]*/, "")}
