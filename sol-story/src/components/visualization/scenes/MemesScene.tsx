@@ -143,7 +143,7 @@ export default function MemesScene() {
             { d: LIBRA_D, name: "LIBRA", note: L.libraNote, x: 690 },
           ].map((c) => (
             <g key={c.name}>
-              {c.name === "TRUMP" && <Logo x={c.x} y={mobile ? 182 : 200} w={86} h={86} href="/img/trump.png" />}
+              <Logo x={c.x} y={mobile ? 182 : 200} w={86} h={86} href={c.name === "TRUMP" ? "/img/trump.png" : "/img/libra.png"} />
               <text x={c.x} y={280} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: fs(24), fontWeight: 600 }}>
                 {c.name}
               </text>
