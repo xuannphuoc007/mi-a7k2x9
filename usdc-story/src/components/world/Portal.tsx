@@ -41,7 +41,7 @@ function Platform({ at, sides, color, matRef }: { at: THREE.Vector3; sides: numb
 }
 
 /** grass ring and a few simple trees so the plazas read as real places */
-function Garden({ at }: { at: THREE.Vector3 }) {
+export function Garden({ at }: { at: THREE.Vector3 }) {
   const trees = useMemo(
     () =>
       Array.from({ length: 14 }, (_, i) => {

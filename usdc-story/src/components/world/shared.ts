@@ -121,3 +121,18 @@ export function loadSampler(src: string): Promise<(u: number, v: number) => THRE
     img.src = src;
   });
 }
+
+/** the system map takes over once the journey is complete */
+export const isMap = (u: number) => u > START.end + 0.25 * LEN.end;
+
+/** extra world anchors for the full journey */
+export const MINT = { floor: -24, z: -18 };
+export const MARKET = new THREE.Vector3(100, -64, -200);
+export const CONTROL = new THREE.Vector3(150, -64, -250);
+export const SVB = new THREE.Vector3(138, -64, -196);
+export const CHAINS = {
+  base: new THREE.Vector3(-40, -64, -88),
+  arb: new THREE.Vector3(40, -64, -86),
+  poly: new THREE.Vector3(-46, -64, -140),
+  avax: new THREE.Vector3(50, -64, -132),
+};

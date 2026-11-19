@@ -11,67 +11,24 @@ export type Beat = {
   insight?: string;
   chip?: Chip;
 };
-export type Scene = { id: "s01" | "s03" | "s05"; num: string; kicker: string; title: string; beats: Beat[] };
+export type SceneKey = "s01" | "s02" | "s03" | "s04" | "s05" | "s06" | "s07" | "s08" | "s09";
+export type Scene = { id: SceneKey; num: string; kicker: string; title: string; beats: Beat[] };
 
+type Pair = [string, string];
 type Dict = {
   meta: { title: string };
-  ui: {
-    project: string;
-    subtitle: string;
-    question: string;
-    scroll: string;
-    cinematic: string;
-    system: string;
-    viewHint: string;
-    l2: string;
-    deep: string;
-    insight: string;
-    data: string;
-    sim: string;
-    metaphor: string;
-    preview: string;
-    previewBody: string;
-    next: string;
-    replay: string;
-    sources: string;
-    disclaimer: string;
-    credits: string;
-    nowebgl: string;
-  };
+  ui: Record<"project" | "subtitle" | "scroll" | "cinematic" | "system" | "l2" | "deep" | "insight" | "data" | "sim" | "metaphor" | "replay" | "sources" | "disclaimer" | "credits" | "nowebgl", string>;
   scenes: Scene[];
-  upcoming: { num: string; title: string }[];
-  hud: {
-    eth: string;
-    sol: string;
-    flight: string;
-    total: string;
-    burned: string;
-    attested: string;
-    minted: string;
-    change: string;
-    route: string;
-    confirm: string;
-  };
-  vault: {
-    cover: string;
-    reserves: string;
-    usdc: string;
-    normal: string;
-    stress: string;
-    stressNote: string;
-    liquid: string;
-  };
-  compare: {
-    title: string;
-    cctp: string;
-    bridge: string;
-    cctpSteps: string[];
-    bridgeSteps: string[];
-    cctpRisk: string;
-    bridgeRisk: string;
-  };
+  hud: Record<string, string>;
+  mint: { title: string; steps: string[]; presets: string; rule: string; exchange: string; usd: string; usdc: string };
+  peg: { scen: string[]; price: string; gap: string; cost: string; status: string[]; costv: string[] };
+  svb: { days: string[]; note: string; price: string };
+  redeem: { title: string; steps: string[] };
+  vault: Record<string, string>;
+  compare: { title: string; cctp: string; bridge: string; cctpSteps: string[]; bridgeSteps: string[]; cctpRisk: string; bridgeRisk: string };
+  map: { title: string; hint: string; overview: string; go: string; parts: Record<string, Pair> };
   labels: Record<string, string>;
-  sys: Record<string, [string, string]>;
+  sys: Record<string, Pair>;
 };
 
 const sources = [
@@ -80,12 +37,28 @@ const sources = [
   "Circle Internet Group — Form S-1/A and 424B4, SEC 2025 (Circle Reserve Fund, sole shareholder, Rule 2a-7)",
   "CoinDesk — Circle Q3 2026 earnings data (USDC minted / redeemed, circulation)",
   "sec-api.io — Circle Q3 2026 10-Q analysis (reserve income $657.6M, 76% of revenue)",
+  "CryptoSlate — Circle Mint fee schedule from 19 Oct 2026 (institutions only; Standard no fee, Express 0.05%)",
+  "Stablecoin Insider — How to open a Circle Mint account (333B+ USDC minted via Circle Mint)",
+  "Eco — What is Circle Mint (KYB, wire, 1:1, no per-transaction issuance fee)",
+  "USDC.com — What is USDC (native on 30 blockchains as of 6 Feb 2026)",
+  "Stocktwits / DeFiLlama — Ethereum ≈ 66.5% of USDC supply, Apr 2026",
+  "Coin Metrics — Solana leads USDC transfer count, Base leads transfer volume",
+  "Eco — USDC.e vs native USDC; Arbitrum native USDC since June 2023",
+  "Datawallet — Circle's Bridged USDC Standard (World Chain upgrade, June 2025)",
   "Circle Developer Docs — CCTP finality thresholds and fees (Fast Transfer fee by chain)",
   "Eco — CCTP transfer times by chain (Fast ≈ 20 s, Standard ≈ 15–19 min from Ethereum)",
   "Eco — What is Circle's CCTP (V2 launch Mar 2025, Solana V2 Oct 2025, burn-attest-mint)",
-  "USDC.com — What is USDC (native on 30 blockchains as of 6 Feb 2026)",
   "Yahoo Finance — Circle Q4 2025 earnings call (CCTP volume > $41B in 2025, 3.7×)",
-  "Cointelegraph / CryptoCompare — March 2023: $3.3B of ~$40B reserves at SVB; low ≈ $0.87",
+  "Nansen — USDC depeg analysis (redemptions restricted over the weekend; arbitrage mechanism)",
+  "Circle stablecoin-evm docs — FiatToken roles: owner, masterMinter, pauser, blacklister, admin",
+  "Stablecoin Insider — USDC blacklist (Terms updated 15 Oct 2026; balance visible but not spendable)",
+  "AMLBot — Stablecoin freezes 2023–2025 (USDC ≈ 372 addresses / $109M; USDT 7,268 / $3.29B)",
+  "The Block / AMLBot — Circle froze 16 business wallets (23 Mar 2026), one later unfrozen",
+  "Cointelegraph / CryptoCompare — March 2023: $3.3B of ~$40B at SVB; low ≈ $0.87",
+  "Circle press release, 12 Mar 2023 — $3.3B fully available when banks open",
+  "Cointelegraph — Circle redeemed $3.8B and minted $0.8B, 13–15 Mar 2023",
+  "The Block — USDC market cap fell ≈ $10B in two weeks (30 Mar 2023)",
+  "Stablecoin Insider — What backs USDC (reserve changes after 2023)",
 ];
 
 export const en: Dict = {
@@ -93,24 +66,19 @@ export const en: Dict = {
   ui: {
     project: "The Journey of a Digital Dollar",
     subtitle: "Follow the money. Discover what happens behind every USDC.",
-    question: "How does a dollar move from the banking system into the blockchain economy — and back?",
     scroll: "Scroll to follow the dollar",
     cinematic: "Cinematic",
     system: "System",
-    viewHint: "X-RAY: switch to System view to see the real entities and mechanisms",
     l2: "How it works",
     deep: "Deep dive",
     insight: "Worth knowing",
     data: "Reported",
     sim: "Illustration",
-    metaphor: "The glowing object is a metaphor. USDC is fungible: no token is a particular banknote, and no single dollar physically travels through the system. We follow one unit of value to make the machinery visible.",
-    preview: "Preview build · 3 flagship scenes",
-    previewBody: "You just watched scenes 01, 03 and 05 — the morphing dollar, the reserve vault and the cross-chain portal. The remaining six scenes will slot in between, using the same camera system.",
-    next: "Coming in the full journey",
+    metaphor: "The coin is a metaphor. USDC is fungible: no token is a particular banknote, and no single dollar physically travels through the system. We follow one unit of value to make the machinery visible.",
     replay: "Replay from the start",
     sources: "Sources",
     disclaimer: "Educational illustration, not financial advice. Simulated values are labelled. No real transfers are executed. Reserve figures are as reported for 12 Nov 2026 and change every week.",
-    credits: "USDC logo © Circle Internet Group; Ethereum and Solana logos belong to their projects, used for identification. Banknote, certificates and buildings are original stylised illustrations, not real designs.",
+    credits: "USDC logo © Circle Internet Group; Ethereum and Solana logos belong to their projects, used for identification. Banknote, certificates, buildings and signs are original stylised illustrations, not real designs.",
     nowebgl: "Your browser can't show the 3D world, so you're seeing the simplified version.",
   },
   scenes: [
@@ -149,8 +117,45 @@ export const en: Dict = {
           t: 0.8,
           side: "c",
           head: "Follow the dollar.",
-          l1: "Into the vault that backs it, then across the portal between blockchains.",
+          l1: "Down to the floor where it is minted, into the vault that backs it, across the blockchains — and back.",
         },
+      ],
+    },
+    {
+      id: "s02",
+      num: "02",
+      kicker: "The minting machine",
+      title: "How does a dollar become USDC?",
+      beats: [
+        {
+          t: 0.08,
+          side: "l",
+          l1: "A business sends real dollars to Circle by bank wire.",
+          l2: "Only approved institutions — exchanges, banks, wallet providers, trading firms — can mint directly. They pass a business identity check (KYB) and wire US dollars from their own bank.",
+          chip: { kind: "data", text: "Circle Mint: institutions only, not individuals · Oct 2026" },
+        },
+        {
+          t: 0.3,
+          side: "r",
+          head: "The press runs only when dollars arrive.",
+          l1: "When the wire lands, Circle creates exactly the same number of new USDC: $1,000 in, 1,000 USDC out.",
+          l2: "The new tokens are written onto the blockchain the customer picks. Circle Mint charges no spread and no per-transaction fee to issue.",
+        },
+        {
+          t: 0.48,
+          side: "l",
+          head: "1 : 1, whatever the amount.",
+          l1: "$100, $1,000 or $10,000 — the rule never changes.",
+          insight: "Circle says more than 333 billion USDC have been minted through Circle Mint since it opened in 2018 — nearly five times all the USDC that exists today. Most of it has already been redeemed and destroyed again.",
+        },
+        {
+          t: 0.66,
+          side: "r",
+          head: "Buying on an exchange is different.",
+          l1: "When you buy USDC on an exchange, nothing is printed: someone else’s USDC simply changes hands.",
+          l2: "This is how most people get USDC. Only the exchange — or another institution — deals with Circle directly.",
+        },
+        { t: 0.84, side: "c", head: "One floor down: the vault.", l1: "Every dollar that came in has to be kept somewhere." },
       ],
     },
     {
@@ -214,6 +219,52 @@ export const en: Dict = {
       ],
     },
     {
+      id: "s04",
+      num: "04",
+      kicker: "The internet of dollars",
+      title: "One dollar. Many blockchains.",
+      beats: [
+        {
+          t: 0.08,
+          side: "l",
+          l1: "USDC doesn’t live on one blockchain. Circle issues it directly on dozens — each one like a different town, with its own roads and tolls.",
+          chip: { kind: "data", text: "Native on 30 blockchains · 6 Feb 2026" },
+        },
+        {
+          t: 0.26,
+          side: "r",
+          head: "Base",
+          l1: "Coinbase’s network: cheap and busy. Here, as on Ethereum, USDC is a standard ERC-20 token.",
+          insight: "Most USDC sits on Ethereum — about two-thirds of the supply in April 2026. But the busiest roads are elsewhere: Solana carries the most transfers, Base the most dollars moved.",
+        },
+        {
+          t: 0.4,
+          side: "l",
+          head: "Arbitrum",
+          l1: "Until June 2023, USDC here was a copy carried over a bridge. Now Circle issues it on Arbitrum directly.",
+        },
+        {
+          t: 0.56,
+          side: "r",
+          head: "Native vs bridged",
+          l1: "A bridge locks real USDC in its own vault and hands out a look-alike: USDC.e.",
+          l2: "USDC.e is a claim on the bridge, not on Circle. If the bridge fails or is hacked, the copy can lose its backing — and Circle does not redeem it.",
+          deep: [
+            "The “.e” means “bridged from Ethereum”. It appeared on Avalanche, Arbitrum, Optimism and Polygon before Circle arrived there natively.",
+            "Circle’s Bridged USDC Standard lets a new chain start with a bridged token that Circle can later upgrade in place to native USDC. World Chain did this in June 2025.",
+          ],
+        },
+        {
+          t: 0.78,
+          side: "l",
+          head: "Polygon · Avalanche",
+          l1: "Different speeds, different fees. Fees change minute by minute, so we don’t show a fixed number.",
+          l2: "Each chain charges fees in its own token, set by traffic. How quickly a payment becomes final also differs: seconds on some chains, minutes on Ethereum and the networks built on it.",
+        },
+        { t: 0.86, side: "c", head: "So how does USDC travel between towns?", l1: "Not over a bridge. It is burned on one side and issued on the other." },
+      ],
+    },
+    {
       id: "s05",
       num: "05",
       kicker: "The cross-chain portal",
@@ -259,21 +310,161 @@ export const en: Dict = {
           ],
         },
         {
-          t: 0.95,
+          t: 0.86,
           side: "c",
           head: "Burn-and-mint vs lock-and-mint",
           l1: "Why it matters which road your USDC took.",
         },
       ],
     },
-  ],
-  upcoming: [
-    { num: "02", title: "The minting machine" },
-    { num: "04", title: "The internet of dollars" },
-    { num: "06", title: "The one-dollar question" },
-    { num: "07", title: "X-ray: the hidden control layer" },
-    { num: "08", title: "When the peg breaks" },
-    { num: "09", title: "Back to the real world" },
+    {
+      id: "s06",
+      num: "06",
+      kicker: "The one-dollar question",
+      title: "Why doesn’t USDC always trade at exactly $1?",
+      beats: [
+        {
+          t: 0.08,
+          side: "l",
+          l1: "On exchanges USDC is bought and sold like anything else, so its price can wobble.",
+          l2: "Two worlds meet here: the market, where anyone trades, and Circle’s counter, where approved institutions swap 1 : 1 for dollars.",
+          chip: { kind: "sim", text: "Price paths in this chapter are simulations" },
+        },
+        {
+          t: 0.24,
+          side: "r",
+          head: "Normal day",
+          l1: "If USDC slips to $0.999, a trader buys it cheap and redeems it at Circle for $1. Above $1, they mint and sell. Those trades pull the price back.",
+          l2: "It only pays when the gap is bigger than the costs: Circle’s fee (Standard redemption has none, Express is 0.05%), bank transfer time and network fees.",
+        },
+        {
+          t: 0.44,
+          side: "l",
+          head: "Liquidity shortage",
+          l1: "When many sell at once and few buyers are around, the price dips further — until enough arbitrage arrives.",
+        },
+        {
+          t: 0.66,
+          side: "r",
+          head: "Counter closed",
+          l1: "If redemptions stop — a weekend, a bank problem — the pull disappears. Nothing forces the price back to $1.",
+          l2: "In March 2023 redemptions were restricted over the weekend because Circle’s partner banks were closed.",
+          insight: "Arbitrage is a rubber band, not a guarantee. It needs an open counter, working banks and traders willing to wait for their money.",
+        },
+        { t: 0.84, side: "c", head: "Who can stop a USDC?", l1: "Look underneath the token." },
+      ],
+    },
+    {
+      id: "s07",
+      num: "07",
+      kicker: "X-ray: the hidden control layer",
+      title: "Digital money has rules.",
+      beats: [
+        {
+          t: 0.08,
+          side: "l",
+          l1: "Behind every USDC is a smart contract with special keys — and Circle holds all of them.",
+          l2: "The contract has an owner, a master minter who decides who may create tokens, a pauser, a blacklister and an admin who can upgrade the code.",
+        },
+        {
+          t: 0.26,
+          side: "r",
+          head: "Freeze",
+          l1: "Circle can put an address on a blacklist. The balance stays visible but can no longer be sent or received.",
+          l2: "Circle’s USDC Terms (updated 15 Oct 2026) reserve the right to block addresses Circle believes are linked to illegal activity.",
+          chip: { kind: "data", text: "≈ 372 addresses · ≈ $109M frozen · 2023–2025" },
+        },
+        {
+          t: 0.46,
+          side: "l",
+          head: "The transfer bounces.",
+          l1: "Any new transfer to or from that address fails. Past transfers are not undone — the blockchain record stays as it was.",
+        },
+        {
+          t: 0.66,
+          side: "r",
+          head: "The bigger switches",
+          l1: "The pauser can stop every transfer at once; the admin can replace the contract’s code. Rarely used — but they exist.",
+          insight: "USDC freezes far less than USDT: about 372 addresses and $109M in 2023–2025, against 7,268 addresses and $3.29B for Tether. Yet in March 2026 Circle froze 16 business wallets at once in a sealed civil case — and unfroze one after public backlash.",
+        },
+        { t: 0.84, side: "c", head: "Rules matter most when trust breaks.", l1: "March 2023 was that test." },
+      ],
+    },
+    {
+      id: "s08",
+      num: "08",
+      kicker: "When the peg breaks",
+      title: "What happens when trust is tested?",
+      beats: [
+        {
+          t: 0.1,
+          side: "l",
+          head: "Friday, 10 March 2023",
+          l1: "US regulators close Silicon Valley Bank. Circle’s wires to move cash out have not gone through.",
+          l2: "$3.3B of USDC’s ≈ $40B reserve is stuck there — about 8%.",
+          chip: { kind: "data", text: "Historical · 10–16 March 2023" },
+        },
+        {
+          t: 0.3,
+          side: "r",
+          head: "Saturday: $0.87",
+          l1: "Holders rush to sell on exchanges. With banks shut for the weekend, nobody can redeem at Circle, and USDC falls to about $0.87.",
+        },
+        {
+          t: 0.5,
+          side: "l",
+          head: "Sunday: a promise",
+          l1: "The US Treasury, Fed and FDIC say every SVB depositor will be made whole. Circle says the $3.3B will be available when banks open.",
+        },
+        {
+          t: 0.7,
+          side: "r",
+          head: "Monday: the counter reopens",
+          l1: "Redemptions restart. From 13 to 15 March Circle redeems $3.8B and mints $0.8B. USDC is back above $0.99.",
+        },
+        {
+          t: 0.86,
+          side: "l",
+          head: "The peg came back. Some trust didn’t.",
+          l1: "Over the next two weeks USDC’s market value fell by about $10B.",
+          insight: "USDC never lacked assets — 92% of the reserve was untouched. It broke because 8% sat in one bank over a weekend. The vault changed afterwards: most of the reserve now sits in a government money-market fund rather than in bank deposits.",
+        },
+      ],
+    },
+    {
+      id: "s09",
+      num: "09",
+      kicker: "Back to the real world",
+      title: "Can the digital dollar become a dollar again?",
+      beats: [
+        {
+          t: 0.06,
+          side: "l",
+          l1: "An approved institution sends USDC back to Circle.",
+          l2: "Direct redemption is for Circle Mint customers only — exchanges, banks, fintechs, trading firms. Individuals usually sell their USDC on an exchange or in an app instead.",
+          chip: { kind: "data", text: "Standard: no Circle fee · Express: 0.05% · from 19 Oct 2026" },
+        },
+        { t: 0.2, side: "r", head: "Burn", l1: "The returned USDC is destroyed, and the matching dollars leave the reserve." },
+        {
+          t: 0.34,
+          side: "l",
+          head: "Wire",
+          l1: "The dollars travel to the customer’s bank by wire — on banking days, at bank speed.",
+          l2: "Settlement time depends on the banks and payment rails involved; Express is faster, for a fee.",
+          deep: [
+            "Who you depend on: Circle and its terms; its partner banks and the reserve fund; the blockchain your USDC sits on; and, if you are not a Circle Mint customer, the exchange or app you sell through.",
+          ],
+        },
+        { t: 0.6, side: "r", head: "All the way back.", l1: "From the counter, over the chains and the vault, up to the table where it started." },
+        {
+          t: 0.86,
+          side: "c",
+          head: "One dollar again.",
+          l1: "USDC works because, at the end of the road, someone hands you a dollar. Every part of the machine exists to keep that promise.",
+          insight: "The real question about USDC is not “is it backed?” — on 12 Nov 2026 it was, slightly over 100%. It is “how fast, for whom, and on which days can it become a dollar?”",
+        },
+      ],
+    },
   ],
   hud: {
     eth: "Ethereum",
@@ -287,6 +478,25 @@ export const en: Dict = {
     route: "Ethereum → Solana · CCTP",
     confirm: "Transfer complete",
   },
+  mint: {
+    title: "Circle Mint · example",
+    steps: ["KYB approved", "Wire received", "USDC minted"],
+    presets: "Deposit",
+    rule: "always 1 : 1",
+    exchange: "Exchange purchase · 0 new USDC created",
+    usd: "USD in",
+    usdc: "USDC out",
+  },
+  peg: {
+    scen: ["Normal day", "Liquidity shortage", "Redemptions paused"],
+    price: "Simulated price",
+    gap: "Gap from $1",
+    cost: "Cost to arbitrage",
+    status: ["Gap smaller than costs · nobody trades", "Arbitrage pulls the price back", "Counter closed · nothing pulls it back"],
+    costv: ["≈ 5–10 bps", "≈ 5–10 bps", "blocked"],
+  },
+  svb: { days: ["Fri 10", "Sat 11", "Sun 12", "Mon 13", "Thu 16"], note: "Sourced points; line between them interpolated", price: "USDC price" },
+  redeem: { title: "Redemption · example", steps: ["USDC sent to Circle", "USDC burned", "USD wired to bank"] },
   vault: {
     cover: "Coverage",
     reserves: "Reserves",
@@ -304,6 +514,21 @@ export const en: Dict = {
     bridgeSteps: ["USDC locked in a bridge vault", "Bridge mints an IOU", "Wrapped token (e.g. USDC.e) on chain B"],
     cctpRisk: "You hold real USDC on both sides. Trust: Circle's attestation key.",
     bridgeRisk: "You hold an IOU on the bridge's vault. If the vault is hacked, the IOU can lose its value.",
+  },
+  map: {
+    title: "The whole system",
+    hint: "Tap a part to fly there. Every piece you visited is still running.",
+    overview: "Overview",
+    go: "Open chapter",
+    parts: {
+      issuance: ["Issuance", "Dollars in, USDC out · 1 : 1"],
+      reserves: ["Reserves", "Overnight repo, T-bills, bank cash"],
+      chains: ["Blockchains", "Native on 30+ networks"],
+      cctp: ["CCTP", "Burn, attest, mint"],
+      markets: ["Markets", "Price near $1 via arbitrage"],
+      controls: ["Controls", "Blacklist, pause, upgrade"],
+      redemption: ["Redemption", "USDC out, dollars back"],
+    },
   },
   labels: {
     note: "ONE DOLLAR · ILLUSTRATIVE",
@@ -323,6 +548,17 @@ export const en: Dict = {
     dest: "Destination · Solana",
     gate: "Attestation",
     vault: "Reserve vault",
+    mintBank: "Customer's bank",
+    press: "Mint · new USDC",
+    ledger: "Recorded on-chain",
+    booth: "Exchange · existing USDC",
+    bridgeTag: "Third-party bridge",
+    board: "Market price",
+    counter: "Circle · redeem 1:1",
+    yourBank: "Customer's bank",
+    frozen: "Blacklisted address",
+    roles: "Privileged roles",
+    scen: "NORMAL|SHORTAGE|PAUSED",
   },
   sys: {
     issuer: ["ISSUER", "Circle Internet Group · NYSE: CRCL"],
@@ -341,6 +577,19 @@ export const en: Dict = {
     mint: ["DESTINATION CALL", "MessageTransmitter.receiveMessage()"],
     fast: ["MODE", "Fast: sign at block inclusion · fee 1 bps"],
     std: ["MODE", "Standard: sign at hard finality · ~15–19 min from Ethereum"],
+    kyb: ["ONBOARDING", "Circle Mint · KYB-approved institutions only"],
+    minter: ["MINT", "Circle-controlled minter → FiatToken.mint()"],
+    chainmint: ["SETTLEMENT", "New supply on the chain the customer picks"],
+    secondary: ["SECONDARY MARKET", "Existing USDC changes owner · supply unchanged"],
+    bridged: ["BRIDGED", "USDC.e = claim on the bridge's locked USDC · no Circle redemption"],
+    native: ["NATIVE", "Issued by Circle on this chain · redeemable via Circle Mint"],
+    erc20: ["TOKEN TYPE", "ERC-20 on EVM chains · SPL token on Solana"],
+    redeemer: ["PRIMARY MARKET", "Circle Mint redemption · Standard no fee / Express 0.05%"],
+    banking: ["DEPENDENCY", "Fiat leg settles on banking days"],
+    blacklist: ["BLACKLISTER", "blacklist(address) → transfers to / from revert"],
+    pause: ["PAUSER", "pause() halts all transfers, minting and burning"],
+    upgrade: ["ADMIN", "Proxy can point to new contract code"],
+    terms: ["TERMS", "USDC Terms, updated 15 Oct 2026 · right to block addresses"],
   },
 };
 
@@ -349,24 +598,19 @@ export const vi: Dict = {
   ui: {
     project: "Hành trình của một đồng đô số",
     subtitle: "Đi theo dòng tiền. Xem điều gì diễn ra phía sau mỗi đồng USDC.",
-    question: "Một đồng đô đi từ ngân hàng vào thế giới blockchain — rồi quay về — như thế nào?",
     scroll: "Cuộn để đi theo đồng đô",
     cinematic: "Điện ảnh",
     system: "Hệ thống",
-    viewHint: "X-RAY: chuyển sang chế độ Hệ thống để thấy các đơn vị và cơ chế thật",
     l2: "Cách nó vận hành",
     deep: "Đào sâu",
     insight: "Đáng chú ý",
     data: "Số liệu công bố",
     sim: "Minh hoạ",
-    metaphor: "Vật thể phát sáng chỉ là hình ảnh ẩn dụ. USDC có thể thay thế cho nhau: không đồng nào gắn với một tờ tiền cụ thể, và không có đồng đô nào thật sự “đi” xuyên hệ thống. Ta theo một đơn vị giá trị để nhìn thấy cỗ máy.",
-    preview: "Bản duyệt · 3 cảnh chính",
-    previewBody: "Bạn vừa xem cảnh 01, 03 và 05 — đồng đô biến hình, két dự trữ và cổng xuyên chuỗi. Sáu cảnh còn lại sẽ được chèn vào giữa, dùng cùng hệ thống camera.",
-    next: "Sẽ có trong bản đầy đủ",
+    metaphor: "Đồng xu chỉ là hình ảnh ẩn dụ. USDC có thể thay thế cho nhau: không đồng nào gắn với một tờ tiền cụ thể, và không có đồng đô nào thật sự “đi” xuyên hệ thống. Ta theo một đơn vị giá trị để nhìn thấy cỗ máy.",
     replay: "Xem lại từ đầu",
     sources: "Nguồn",
     disclaimer: "Nội dung giáo dục, không phải lời khuyên tài chính. Số liệu mô phỏng đều được ghi rõ. Không có giao dịch thật nào được thực hiện. Số liệu dự trữ theo báo cáo ngày 12/11/2026 và thay đổi hằng tuần.",
-    credits: "Logo USDC © Circle Internet Group; logo Ethereum và Solana thuộc về các dự án, dùng để nhận diện. Tờ tiền, chứng chỉ và toà nhà là hình minh hoạ tự vẽ, không phải mẫu thật.",
+    credits: "Logo USDC © Circle Internet Group; logo Ethereum và Solana thuộc về các dự án, dùng để nhận diện. Tờ tiền, chứng chỉ, toà nhà và biển hiệu là hình minh hoạ tự vẽ, không phải mẫu thật.",
     nowebgl: "Trình duyệt của bạn không hiển thị được thế giới 3D, nên đây là bản rút gọn.",
   },
   scenes: [
@@ -405,8 +649,45 @@ export const vi: Dict = {
           t: 0.8,
           side: "c",
           head: "Đi theo đồng đô.",
-          l1: "Xuống chiếc két đang bảo chứng cho nó, rồi qua cánh cổng giữa các blockchain.",
+          l1: "Xuống tầng nơi nó được đúc, vào chiếc két bảo chứng cho nó, qua các blockchain — rồi quay về.",
         },
+      ],
+    },
+    {
+      id: "s02",
+      num: "02",
+      kicker: "Cỗ máy đúc tiền",
+      title: "Một đồng đô trở thành USDC như thế nào?",
+      beats: [
+        {
+          t: 0.08,
+          side: "l",
+          l1: "Một doanh nghiệp chuyển đô la thật cho Circle bằng điện chuyển tiền ngân hàng.",
+          l2: "Chỉ các tổ chức được duyệt — sàn giao dịch, ngân hàng, ví, công ty giao dịch — mới được đúc trực tiếp. Họ phải qua kiểm tra danh tính doanh nghiệp (KYB) và chuyển đô từ ngân hàng của mình.",
+          chip: { kind: "data", text: "Circle Mint: chỉ dành cho tổ chức, không cho cá nhân · 10/2026" },
+        },
+        {
+          t: 0.3,
+          side: "r",
+          head: "Máy chỉ chạy khi có đô la đến.",
+          l1: "Khi tiền về, Circle tạo ra đúng bấy nhiêu USDC mới: vào 1.000 đô, ra 1.000 USDC.",
+          l2: "Token mới được ghi lên blockchain mà khách chọn. Circle Mint không lấy chênh lệch và không thu phí phát hành cho mỗi giao dịch.",
+        },
+        {
+          t: 0.48,
+          side: "l",
+          head: "Luôn 1 : 1, bao nhiêu cũng vậy.",
+          l1: "100, 1.000 hay 10.000 đô — quy tắc không đổi.",
+          insight: "Circle cho biết đã có hơn 333 tỷ USDC được đúc qua Circle Mint từ năm 2018 — gần gấp năm lần toàn bộ lượng USDC đang tồn tại. Phần lớn đã được đổi lại và huỷ đi.",
+        },
+        {
+          t: 0.66,
+          side: "r",
+          head: "Mua trên sàn thì khác.",
+          l1: "Khi bạn mua USDC trên sàn, không có đồng nào được in ra: USDC của người khác chỉ đổi chủ.",
+          l2: "Đa số mọi người có USDC theo cách này. Chỉ sàn — hoặc một tổ chức khác — làm việc trực tiếp với Circle.",
+        },
+        { t: 0.84, side: "c", head: "Xuống thêm một tầng: chiếc két.", l1: "Mỗi đô la vừa chuyển vào phải được cất ở đâu đó." },
       ],
     },
     {
@@ -466,6 +747,52 @@ export const vi: Dict = {
       ],
     },
     {
+      id: "s04",
+      num: "04",
+      kicker: "Internet của đồng đô",
+      title: "Một đồng đô. Nhiều blockchain.",
+      beats: [
+        {
+          t: 0.08,
+          side: "l",
+          l1: "USDC không chỉ sống trên một blockchain. Circle phát hành trực tiếp trên hàng chục mạng — mỗi mạng như một thị trấn riêng, có đường và trạm thu phí riêng.",
+          chip: { kind: "data", text: "USDC gốc trên 30 blockchain · 6/2/2026" },
+        },
+        {
+          t: 0.26,
+          side: "r",
+          head: "Base",
+          l1: "Mạng của Coinbase: rẻ và đông. Ở đây, cũng như trên Ethereum, USDC là một token ERC-20 tiêu chuẩn.",
+          insight: "Phần lớn USDC nằm trên Ethereum — khoảng hai phần ba lượng cung vào tháng 4/2026. Nhưng những con đường đông nhất lại ở nơi khác: Solana có nhiều lượt chuyển nhất, Base có nhiều tiền đi qua nhất.",
+        },
+        {
+          t: 0.4,
+          side: "l",
+          head: "Arbitrum",
+          l1: "Trước tháng 6/2023, USDC ở đây là bản sao được mang qua cầu nối. Giờ Circle phát hành trực tiếp trên Arbitrum.",
+        },
+        {
+          t: 0.56,
+          side: "r",
+          head: "Hàng gốc và hàng qua cầu",
+          l1: "Cầu nối khoá USDC thật trong két của nó, rồi phát ra một bản trông giống: USDC.e.",
+          l2: "USDC.e là quyền đòi đối với cầu nối, không phải với Circle. Nếu cầu hỏng hoặc bị hack, bản sao có thể mất chỗ dựa — và Circle không đổi lại nó.",
+          deep: [
+            "“.e” nghĩa là “mang sang từ Ethereum”. Nó xuất hiện trên Avalanche, Arbitrum, Optimism và Polygon trước khi Circle có mặt trực tiếp ở đó.",
+            "Chuẩn Bridged USDC của Circle cho phép chuỗi mới khởi đầu bằng token qua cầu, rồi Circle nâng cấp tại chỗ thành USDC gốc. World Chain đã làm vậy vào tháng 6/2025.",
+          ],
+        },
+        {
+          t: 0.78,
+          side: "l",
+          head: "Polygon · Avalanche",
+          l1: "Tốc độ khác nhau, phí khác nhau. Phí thay đổi từng phút, nên ở đây không ghi một con số cố định.",
+          l2: "Mỗi chuỗi thu phí bằng token riêng, tuỳ lượng người dùng. Thời gian để giao dịch chốt hẳn cũng khác: vài giây ở một số chuỗi, vài phút ở Ethereum và các mạng xây trên nó.",
+        },
+        { t: 0.86, side: "c", head: "Vậy USDC đi giữa các thị trấn bằng cách nào?", l1: "Không qua cầu. Nó bị đốt ở bên này và được phát hành ở bên kia." },
+      ],
+    },
+    {
       id: "s05",
       num: "05",
       kicker: "Cổng xuyên chuỗi",
@@ -511,21 +838,161 @@ export const vi: Dict = {
           ],
         },
         {
-          t: 0.95,
+          t: 0.86,
           side: "c",
           head: "Đốt-rồi-tạo và khoá-rồi-tạo",
           l1: "Vì sao USDC của bạn đi đường nào lại quan trọng.",
         },
       ],
     },
-  ],
-  upcoming: [
-    { num: "02", title: "Cỗ máy đúc tiền" },
-    { num: "04", title: "Internet của đồng đô" },
-    { num: "06", title: "Câu hỏi một đô la" },
-    { num: "07", title: "X-ray: lớp kiểm soát ẩn" },
-    { num: "08", title: "Khi neo giá bị gãy" },
-    { num: "09", title: "Trở về thế giới thật" },
+    {
+      id: "s06",
+      num: "06",
+      kicker: "Câu hỏi một đô la",
+      title: "Vì sao USDC không phải lúc nào cũng đúng 1 đô?",
+      beats: [
+        {
+          t: 0.08,
+          side: "l",
+          l1: "Trên sàn, USDC được mua bán như mọi thứ khác, nên giá có thể lệch một chút.",
+          l2: "Hai thế giới gặp nhau ở đây: thị trường, nơi ai cũng giao dịch được, và quầy của Circle, nơi tổ chức được duyệt đổi 1 : 1 lấy đô.",
+          chip: { kind: "sim", text: "Đường giá trong chương này là mô phỏng" },
+        },
+        {
+          t: 0.24,
+          side: "r",
+          head: "Ngày bình thường",
+          l1: "Nếu USDC tụt xuống 0,999 đô, người giao dịch mua rẻ rồi đổi ở Circle lấy 1 đô. Trên 1 đô thì họ đúc mới rồi bán. Những giao dịch đó kéo giá về.",
+          l2: "Chỉ có lời khi khoảng chênh lớn hơn chi phí: phí của Circle (đổi Standard không mất phí, Express 0,05%), thời gian chuyển tiền ngân hàng và phí mạng.",
+        },
+        {
+          t: 0.44,
+          side: "l",
+          head: "Thiếu thanh khoản",
+          l1: "Khi nhiều người cùng bán mà ít người mua, giá tụt sâu hơn — cho tới khi đủ người vào ăn chênh lệch.",
+        },
+        {
+          t: 0.66,
+          side: "r",
+          head: "Quầy đóng cửa",
+          l1: "Nếu không đổi được nữa — cuối tuần, ngân hàng gặp sự cố — lực kéo biến mất. Không gì buộc giá phải về 1 đô.",
+          l2: "Tháng 3/2023, việc đổi USDC bị hạn chế suốt cuối tuần vì các ngân hàng đối tác của Circle đóng cửa.",
+          insight: "Ăn chênh lệch giống sợi dây thun, không phải lời bảo đảm. Nó cần quầy mở, ngân hàng hoạt động và người chịu chờ tiền về.",
+        },
+        { t: 0.84, side: "c", head: "Ai có thể chặn một đồng USDC?", l1: "Hãy nhìn xuống bên dưới token." },
+      ],
+    },
+    {
+      id: "s07",
+      num: "07",
+      kicker: "X-ray: lớp kiểm soát ẩn",
+      title: "Tiền số cũng có luật.",
+      beats: [
+        {
+          t: 0.08,
+          side: "l",
+          l1: "Phía sau mỗi USDC là một hợp đồng thông minh có những chìa khoá đặc biệt — và Circle giữ tất cả.",
+          l2: "Hợp đồng có chủ sở hữu, người quản lý việc đúc (quyết định ai được tạo token), người tạm dừng, người lập danh sách đen và quản trị viên có thể nâng cấp mã.",
+        },
+        {
+          t: 0.26,
+          side: "r",
+          head: "Đóng băng",
+          l1: "Circle có thể đưa một địa chỉ vào danh sách đen. Số dư vẫn hiện ra, nhưng không gửi đi hay nhận vào được nữa.",
+          l2: "Điều khoản USDC của Circle (cập nhật 15/10/2026) dành quyền chặn các địa chỉ mà Circle cho là liên quan đến hoạt động phi pháp.",
+          chip: { kind: "data", text: "≈ 372 địa chỉ · ≈ 109 triệu đô bị đóng băng · 2023–2025" },
+        },
+        {
+          t: 0.46,
+          side: "l",
+          head: "Lệnh chuyển bị bật lại.",
+          l1: "Mọi lệnh chuyển mới tới hoặc từ địa chỉ đó đều thất bại. Các giao dịch cũ không bị đảo ngược — sổ cái blockchain vẫn giữ nguyên.",
+        },
+        {
+          t: 0.66,
+          side: "r",
+          head: "Những công tắc lớn hơn",
+          l1: "Người tạm dừng có thể chặn mọi lệnh chuyển cùng lúc; quản trị viên có thể thay mã của hợp đồng. Hiếm khi dùng — nhưng có thật.",
+          insight: "USDC đóng băng ít hơn USDT rất nhiều: khoảng 372 địa chỉ và 109 triệu đô trong 2023–2025, so với 7.268 địa chỉ và 3,29 tỷ đô của Tether. Nhưng tháng 3/2026, Circle đóng băng cùng lúc 16 ví doanh nghiệp trong một vụ kiện dân sự được giữ kín — rồi mở lại một ví sau phản ứng của công chúng.",
+        },
+        { t: 0.84, side: "c", head: "Luật quan trọng nhất khi niềm tin lung lay.", l1: "Tháng 3/2023 là lần thử thách đó." },
+      ],
+    },
+    {
+      id: "s08",
+      num: "08",
+      kicker: "Khi neo giá bị gãy",
+      title: "Chuyện gì xảy ra khi niềm tin bị thử thách?",
+      beats: [
+        {
+          t: 0.1,
+          side: "l",
+          head: "Thứ Sáu, 10/3/2023",
+          l1: "Cơ quan quản lý Mỹ đóng cửa ngân hàng Silicon Valley Bank. Lệnh chuyển tiền ra của Circle chưa kịp đi.",
+          l2: "3,3 tỷ trong khoảng 40 tỷ đô dự trữ của USDC bị kẹt ở đó — khoảng 8%.",
+          chip: { kind: "data", text: "Sự kiện thật · 10–16/3/2023" },
+        },
+        {
+          t: 0.3,
+          side: "r",
+          head: "Thứ Bảy: 0,87 đô",
+          l1: "Người giữ đổ xô bán trên sàn. Ngân hàng nghỉ cuối tuần nên không ai đổi được ở Circle, và USDC rơi xuống khoảng 0,87 đô.",
+        },
+        {
+          t: 0.5,
+          side: "l",
+          head: "Chủ nhật: một lời hứa",
+          l1: "Bộ Tài chính, Fed và FDIC tuyên bố mọi người gửi tiền ở SVB sẽ được trả đủ. Circle nói 3,3 tỷ sẽ sẵn sàng khi ngân hàng mở cửa.",
+        },
+        {
+          t: 0.7,
+          side: "r",
+          head: "Thứ Hai: quầy mở lại",
+          l1: "Việc đổi tiền chạy lại. Từ 13 đến 15/3, Circle đổi trả 3,8 tỷ USDC và đúc mới 0,8 tỷ. USDC trở lại trên 0,99 đô.",
+        },
+        {
+          t: 0.86,
+          side: "l",
+          head: "Giá đã về. Một phần niềm tin thì không.",
+          l1: "Trong hai tuần sau đó, giá trị thị trường của USDC giảm khoảng 10 tỷ đô.",
+          insight: "USDC chưa bao giờ thiếu tài sản — 92% dự trữ không hề hấn gì. Nó gãy vì 8% nằm ở một ngân hàng đúng dịp cuối tuần. Sau đó chiếc két đã thay đổi: phần lớn dự trữ giờ nằm trong một quỹ thị trường tiền tệ chính phủ thay vì tiền gửi ngân hàng.",
+        },
+      ],
+    },
+    {
+      id: "s09",
+      num: "09",
+      kicker: "Trở về thế giới thật",
+      title: "Đồng đô số có thể trở lại thành đô la không?",
+      beats: [
+        {
+          t: 0.06,
+          side: "l",
+          l1: "Một tổ chức được duyệt gửi USDC trả lại cho Circle.",
+          l2: "Đổi trực tiếp chỉ dành cho khách hàng Circle Mint — sàn, ngân hàng, công ty fintech, công ty giao dịch. Cá nhân thường bán USDC trên sàn hoặc trong ứng dụng.",
+          chip: { kind: "data", text: "Standard: không phí Circle · Express: 0,05% · từ 19/10/2026" },
+        },
+        { t: 0.2, side: "r", head: "Đốt", l1: "USDC được trả về bị huỷ, và số đô tương ứng rời khỏi quỹ dự trữ." },
+        {
+          t: 0.34,
+          side: "l",
+          head: "Chuyển khoản",
+          l1: "Đô la đi về ngân hàng của khách bằng điện chuyển tiền — vào ngày làm việc, với tốc độ của ngân hàng.",
+          l2: "Thời gian về tiền tuỳ ngân hàng và kênh thanh toán; Express nhanh hơn nhưng có phí.",
+          deep: [
+            "Bạn đang phụ thuộc vào: Circle và điều khoản của họ; ngân hàng đối tác và quỹ dự trữ; blockchain nơi USDC của bạn nằm; và nếu không phải khách Circle Mint, cả sàn hoặc ứng dụng bạn bán qua.",
+          ],
+        },
+        { t: 0.6, side: "r", head: "Quay về tận nơi bắt đầu.", l1: "Từ quầy đổi, bay qua các chuỗi và chiếc két, lên lại chiếc bàn nơi mọi thứ bắt đầu." },
+        {
+          t: 0.86,
+          side: "c",
+          head: "Lại là một đô la.",
+          l1: "USDC chạy được vì ở cuối con đường, có người trao lại cho bạn một đô la. Mọi bộ phận của cỗ máy đều để giữ lời hứa đó.",
+          insight: "Câu hỏi thật về USDC không phải “có tài sản đảm bảo không?” — ngày 12/11/2026 là có, hơn 100% một chút. Mà là “nhanh đến đâu, cho ai, và vào những ngày nào thì nó đổi lại được thành đô?”",
+        },
+      ],
+    },
   ],
   hud: {
     eth: "Ethereum",
@@ -539,6 +1006,25 @@ export const vi: Dict = {
     route: "Ethereum → Solana · CCTP",
     confirm: "Hoàn tất chuyển",
   },
+  mint: {
+    title: "Circle Mint · ví dụ",
+    steps: ["Đã duyệt KYB", "Đã nhận tiền", "Đã đúc USDC"],
+    presets: "Gửi vào",
+    rule: "luôn 1 : 1",
+    exchange: "Mua trên sàn · 0 USDC mới được tạo",
+    usd: "Đô vào",
+    usdc: "USDC ra",
+  },
+  peg: {
+    scen: ["Ngày bình thường", "Thiếu thanh khoản", "Tạm dừng đổi tiền"],
+    price: "Giá mô phỏng",
+    gap: "Chênh so với 1 đô",
+    cost: "Chi phí ăn chênh lệch",
+    status: ["Chênh nhỏ hơn chi phí · không ai giao dịch", "Ăn chênh lệch kéo giá về", "Quầy đóng · không gì kéo giá về"],
+    costv: ["≈ 0,05–0,1%", "≈ 0,05–0,1%", "bị chặn"],
+  },
+  svb: { days: ["T6 10", "T7 11", "CN 12", "T2 13", "T5 16"], note: "Các điểm có nguồn; đoạn nối giữa chúng là nội suy", price: "Giá USDC" },
+  redeem: { title: "Đổi lại · ví dụ", steps: ["Gửi USDC cho Circle", "Đốt USDC", "Chuyển đô về ngân hàng"] },
   vault: {
     cover: "Độ phủ",
     reserves: "Dự trữ",
@@ -556,6 +1042,21 @@ export const vi: Dict = {
     bridgeSteps: ["USDC bị khoá trong két của cầu", "Cầu tạo ra một giấy nợ", "Token bọc (vd. USDC.e) trên chuỗi B"],
     cctpRisk: "Bạn giữ USDC thật ở cả hai bên. Niềm tin đặt vào: khoá ký của Circle.",
     bridgeRisk: "Bạn giữ giấy nợ trên két của cầu. Nếu két bị hack, giấy nợ có thể mất giá trị.",
+  },
+  map: {
+    title: "Toàn bộ hệ thống",
+    hint: "Chạm vào một phần để bay tới đó. Mọi nơi bạn đã đi qua vẫn đang chạy.",
+    overview: "Toàn cảnh",
+    go: "Mở chương",
+    parts: {
+      issuance: ["Phát hành", "Đô vào, USDC ra · 1 : 1"],
+      reserves: ["Dự trữ", "Cho vay qua đêm, tín phiếu, tiền gửi"],
+      chains: ["Blockchain", "USDC gốc trên hơn 30 mạng"],
+      cctp: ["CCTP", "Đốt, xác nhận, tạo mới"],
+      markets: ["Thị trường", "Giá quanh 1 đô nhờ ăn chênh lệch"],
+      controls: ["Kiểm soát", "Danh sách đen, tạm dừng, nâng cấp"],
+      redemption: ["Đổi lại", "USDC ra, đô la về"],
+    },
   },
   labels: {
     note: "MỘT ĐÔ LA · MINH HOẠ",
@@ -575,6 +1076,17 @@ export const vi: Dict = {
     dest: "Đích · Solana",
     gate: "Xác nhận",
     vault: "Két dự trữ",
+    mintBank: "Ngân hàng của khách",
+    press: "Máy đúc · USDC mới",
+    ledger: "Ghi lên blockchain",
+    booth: "Sàn · USDC có sẵn",
+    bridgeTag: "Cầu nối bên thứ ba",
+    board: "Giá thị trường",
+    counter: "Circle · đổi 1:1",
+    yourBank: "Ngân hàng của khách",
+    frozen: "Địa chỉ bị đóng băng",
+    roles: "Các quyền đặc biệt",
+    scen: "BÌNH THƯỜNG|THIẾU THANH KHOẢN|TẠM DỪNG",
   },
   sys: {
     issuer: ["BÊN PHÁT HÀNH", "Circle Internet Group · NYSE: CRCL"],
@@ -593,6 +1105,19 @@ export const vi: Dict = {
     mint: ["LỆNH Ở CHUỖI ĐÍCH", "MessageTransmitter.receiveMessage()"],
     fast: ["CHẾ ĐỘ", "Fast: ký khi khối được ghi · phí 1 bps"],
     std: ["CHẾ ĐỘ", "Standard: ký khi chốt hẳn · ~15–19 phút từ Ethereum"],
+    kyb: ["MỞ TÀI KHOẢN", "Circle Mint · chỉ tổ chức đã duyệt KYB"],
+    minter: ["ĐÚC", "Minter do Circle kiểm soát → FiatToken.mint()"],
+    chainmint: ["GHI SỔ", "Nguồn cung mới trên chuỗi khách chọn"],
+    secondary: ["THỊ TRƯỜNG THỨ CẤP", "USDC có sẵn đổi chủ · tổng cung không đổi"],
+    bridged: ["QUA CẦU", "USDC.e = quyền đòi USDC bị khoá ở cầu · Circle không đổi lại"],
+    native: ["GỐC", "Circle phát hành trên chuỗi này · đổi được qua Circle Mint"],
+    erc20: ["LOẠI TOKEN", "ERC-20 trên chuỗi EVM · SPL token trên Solana"],
+    redeemer: ["THỊ TRƯỜNG SƠ CẤP", "Đổi qua Circle Mint · Standard không phí / Express 0,05%"],
+    banking: ["PHỤ THUỘC", "Phần tiền đô chỉ chạy vào ngày làm việc của ngân hàng"],
+    blacklist: ["BLACKLISTER", "blacklist(address) → mọi lệnh chuyển tới / từ đều bị huỷ"],
+    pause: ["PAUSER", "pause() dừng mọi lệnh chuyển, đúc và đốt"],
+    upgrade: ["ADMIN", "Proxy có thể trỏ sang mã hợp đồng mới"],
+    terms: ["ĐIỀU KHOẢN", "Điều khoản USDC cập nhật 15/10/2026 · quyền chặn địa chỉ"],
   },
 };
 

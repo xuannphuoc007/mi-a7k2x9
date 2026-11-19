@@ -4,7 +4,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { scrollState, local, ramp, smooth, band, lerp } from "@/lib/timeline";
 import { useI18n } from "@/lib/i18n";
-import { COL, VAULT, rnd, tmpM, tmpQ, tmpV, tmpS, clock, xr, g } from "./shared";
+import { COL, VAULT, rnd, tmpM, tmpQ, tmpV, tmpS, clock, xr, g, isMap } from "./shared";
 import { cashTex, cashSideTex, docTex, floorTex, lockerTex } from "./textures";
 import Tag from "./Tag";
 import { asset } from "@/lib/asset";
@@ -181,10 +181,10 @@ export default function Vault() {
 
   useFrame(() => {
     const u = scrollState.u;
-    const vis = u > g("s01", 0.8) && u < g("s05", 0.16);
+    const vis = (u > g("s01", 0.8) && u < g("s05", 0.16)) || isMap(u);
     if (group.current) group.current.visible = vis;
     if (!vis) return;
-    const tl = local("s03", u);
+    const tl = isMap(u) ? 0.86 : local("s03", u);
     const tm = clock.t;
     const x = xr.v;
 

@@ -179,3 +179,80 @@ export const lockerTex = () =>
     },
     [10, 3],
   );
+
+/** Plain painted sign */
+export const signTex = (text: string, bg: string, fg: string, w = 512, h = 128, font = "700 54px 'Space Grotesk', Arial") =>
+  make(`sign${text}${bg}${fg}`, w, h, (x) => {
+    x.fillStyle = bg;
+    x.fillRect(0, 0, w, h);
+    x.fillStyle = fg;
+    x.font = font;
+    x.textAlign = "center";
+    x.textBaseline = "middle";
+    x.fillText(text, w / 2, h / 2 + 2);
+  });
+
+/** Bank wire slip */
+export const wireTex = () =>
+  make("wire", 256, 160, (x, w, h) => {
+    x.fillStyle = "#f8f4e8";
+    x.fillRect(0, 0, w, h);
+    x.fillStyle = "#2b4c7e";
+    x.fillRect(0, 0, w, 30);
+    x.fillStyle = "#ffffff";
+    x.font = "700 16px monospace";
+    x.fillText("WIRE TRANSFER · USD", 12, 21);
+    x.fillStyle = "#2b4c7e";
+    x.font = "600 14px monospace";
+    x.fillText("TO: CIRCLE (ISSUER)", 12, 58);
+    x.fillText("REF: MINT USDC", 12, 82);
+    x.font = "700 26px Georgia";
+    x.fillText("$ 1,000.00", 12, 128);
+  });
+
+/** Asphalt road with a dashed centre line */
+export const roadTex = () =>
+  make(
+    "road",
+    64,
+    256,
+    (x, w, h) => {
+      x.fillStyle = "#b9c0c9";
+      x.fillRect(0, 0, w, h);
+      x.fillStyle = "#ffffff";
+      for (let y = 0; y < h; y += 64) x.fillRect(w / 2 - 2, y, 4, 34);
+      x.fillStyle = "#e8ecf0";
+      x.fillRect(0, 0, 3, h);
+      x.fillRect(w - 3, 0, 3, h);
+    },
+    [1, 1],
+  );
+
+/** Face of a bridged "USDC.e" IOU token (grey, deliberately different) */
+export const usdceTex = () =>
+  make("usdce", 256, 256, (x, w, h) => {
+    x.fillStyle = "#9aa4b1";
+    x.beginPath();
+    x.arc(w / 2, h / 2, w / 2, 0, Math.PI * 2);
+    x.fill();
+    x.strokeStyle = "#ffffff";
+    x.lineWidth = 10;
+    x.beginPath();
+    x.arc(w / 2, h / 2, w / 2 - 26, 0, Math.PI * 2);
+    x.stroke();
+    x.fillStyle = "#ffffff";
+    x.font = "700 52px 'Space Grotesk', Arial";
+    x.textAlign = "center";
+    x.textBaseline = "middle";
+    x.fillText("USDC.e", w / 2, h / 2);
+  });
+
+/** Big LED-style price board, redrawn by the scene when the value changes. */
+export function boardCanvas() {
+  const c = document.createElement("canvas");
+  c.width = 1024;
+  c.height = 512;
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return { c, t, x: c.getContext("2d")! };
+}

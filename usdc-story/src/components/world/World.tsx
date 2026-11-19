@@ -9,8 +9,13 @@ import Hero from "./Hero";
 import Vault from "./Vault";
 import Portal from "./Portal";
 import Shaft from "./Shaft";
+import Mint from "./Mint";
+import Network from "./Network";
+import Market from "./Market";
+import Control from "./Control";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { COL, clock, rnd, xr, LOOK } from "./shared";
+import { COL, clock, rnd, xr, LOOK, g } from "./shared";
+import { scrollState as SS } from "@/lib/timeline";
 
 /** One render loop drives clocks and the X-RAY blend; the scene graph never rebuilds on toggle. */
 function Driver() {
@@ -24,7 +29,13 @@ function Driver() {
     const k = reduced ? 1 : 1 - Math.exp(-dt * 6);
     xr.v += ((xray ? 1 : 0) - xr.v) * k;
     (scene.background as THREE.Color).copy(bg).lerp(bgX, xr.v);
-    if (scene.fog) (scene.fog as THREE.FogExp2).color.copy(scene.background as THREE.Color);
+    if (scene.fog) {
+      const f = scene.fog as THREE.FogExp2;
+      f.color.copy(scene.background as THREE.Color);
+      // thin the haze for the long flight home and the system map
+      const wide = SS.u > g("s09", 0.48) && SS.u < g("s09", 0.8) ? 1 : SS.u > g("end", 0.15) ? 1 : 0;
+      f.density += ((wide ? 0.0028 : 0.0085) - f.density) * k;
+    }
   });
   return null;
 }
@@ -136,6 +147,10 @@ export default function World() {
       <Shaft />
       <Vault />
       <Portal />
+      <Mint />
+      <Network />
+      <Market />
+      <Control />
     </Canvas>
   );
 }

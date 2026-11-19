@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { scrollState, local, ramp, smooth, band, lerp } from "@/lib/timeline";
 import { useI18n } from "@/lib/i18n";
-import { COL, coinPoints, loadSampler, rnd, tmpM, tmpQ, tmpV, tmpS, tmpC, clock, xr, g } from "./shared";
+import { COL, coinPoints, loadSampler, rnd, tmpM, tmpQ, tmpV, tmpS, tmpC, clock, xr, g, isMap } from "./shared";
 import { asset } from "@/lib/asset";
 import Tag from "./Tag";
 
@@ -168,23 +168,25 @@ export default function Hero() {
   useFrame(() => {
     if (!data || !inst.current || !group.current) return;
     const u = scrollState.u;
-    const vis = u < g("s03", 0.22);
+    const back = u > g("s09", 0.45);
+    const vis = u < g("s03", 0.22) || back;
     group.current.visible = vis;
     if (!vis) return;
-    const tl = local("s01", u);
-    const m = smooth(ramp(tl, 0.24, 0.5)); // morph paper → packet
+    const tl = back ? 0.4 : local("s01", u);
+    // morph paper → token; at the very end of the journey it runs in reverse
+    const m = back ? (isMap(u) ? 0 : 1 - smooth(ramp(local("s09", u), 0.84, 0.97))) : smooth(ramp(tl, 0.24, 0.5));
     const burst = Math.sin(Math.PI * m); // fragments scatter mid-morph
     const tm = clock.t;
 
     if (plane.current && planeMat.current) {
-      const po = 1 - ramp(tl, 0.22, 0.27);
+      const po = back ? (m < 0.002 ? 1 : 0) : 1 - ramp(tl, 0.22, 0.27);
       planeMat.current.opacity = po;
       plane.current.visible = po > 0.001;
       plane.current.position.y = Math.sin(tm * 0.6) * 0.06;
     }
-    inst.current.visible = tl > 0.215;
+    const shown = back ? m > 0.002 : tl > 0.215;
+    inst.current.visible = shown;
 
-    const shown = tl > 0.215;
     rotQ.setFromAxisAngle(Y, Math.sin(tm * 0.35) * 0.45);
     if (shown) {
       for (let i = 0; i < data.grid.length; i++) {

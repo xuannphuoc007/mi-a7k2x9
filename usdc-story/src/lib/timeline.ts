@@ -3,12 +3,18 @@
  * Scroll position is measured in "screens" (u = scrollY / viewportHeight).
  * Every 3D transform is a pure function of u, so scrolling back replays everything in reverse.
  */
-export type SceneId = "s01" | "s03" | "s05" | "end";
+export type SceneId = "s01" | "s02" | "s03" | "s04" | "s05" | "s06" | "s07" | "s08" | "s09" | "end";
 export const SECTIONS: { id: SceneId; screens: number }[] = [
   { id: "s01", screens: 4.6 },
+  { id: "s02", screens: 5.2 },
   { id: "s03", screens: 6.4 },
-  { id: "s05", screens: 6.4 },
-  { id: "end", screens: 2.4 },
+  { id: "s04", screens: 5.2 },
+  { id: "s05", screens: 7.0 },
+  { id: "s06", screens: 5.6 },
+  { id: "s07", screens: 5.0 },
+  { id: "s08", screens: 5.6 },
+  { id: "s09", screens: 5.6 },
+  { id: "end", screens: 3.2 },
 ];
 
 export const START: Record<SceneId, number> = (() => {

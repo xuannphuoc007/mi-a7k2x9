@@ -7,6 +7,7 @@ import { SECTIONS, START, TOTAL, scrollState, type SceneId } from "@/lib/timelin
 import { asset } from "@/lib/asset";
 import { sources, type Beat as BeatT } from "@/data/copy";
 import { PortalHud, Confirm, Coverage, Compare } from "./ui/Panels";
+import { MintHud, PegHud, SvbHud, RedeemHud, MapPanel } from "./ui/Huds";
 import { useGlobalU } from "./ui/useLocal";
 
 const World = dynamic(() => import("./world/World"), { ssr: false });
@@ -55,13 +56,13 @@ function hasWebGL() {
 }
 
 const NUMS = ["01", "02", "03", "04", "05", "06", "07", "08", "09"];
-const LIVE: Record<string, SceneId> = { "01": "s01", "03": "s03", "05": "s05" };
+const LIVE: Record<string, SceneId> = { "01": "s01", "02": "s02", "03": "s03", "04": "s04", "05": "s05", "06": "s06", "07": "s07", "08": "s08", "09": "s09" };
 
 function Header({ vh }: { vh: number }) {
   const { t, lang, setLang } = useI18n();
   const { xray, setXray } = useView();
   const u = useGlobalU(0.05);
-  const cur = u < START.s03 ? "01" : u < START.s05 ? "03" : u < START.end ? "05" : "";
+  const cur = u >= START.end ? "" : NUMS[SECTIONS.findIndex((x, i) => u >= START[x.id] && (i === SECTIONS.length - 1 || u < START[SECTIONS[i + 1].id]))] || "";
   const go = (id: SceneId) => window.scrollTo({ top: START[id] * vh + 2, behavior: useView.getState().reduced ? "auto" : "smooth" });
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex h-[52px] items-center justify-between gap-3 px-4 md:px-7" style={{ background: "linear-gradient(#eef2f7f2, #eef2f700)" }}>
@@ -196,7 +197,7 @@ function BeatBlock({ b, top }: { b: BeatT; top: number }) {
   );
 }
 
-function SceneSection({ idx, vh }: { idx: 0 | 1 | 2; vh: number }) {
+function SceneSection({ idx, vh }: { idx: number; vh: number }) {
   const { t } = useI18n();
   const sc = t.scenes[idx];
   const len = SECTIONS[idx].screens;
@@ -221,7 +222,7 @@ function SceneSection({ idx, vh }: { idx: 0 | 1 | 2; vh: number }) {
           <style>{`@keyframes drip{0%{transform:translateY(-12px)}100%{transform:translateY(32px)}}`}</style>
         </div>
       ) : (
-        <div className="absolute inset-x-0 px-5 md:px-[6vw]" style={{ top: (idx === 2 ? 0.3 : 0.12) * vh }}>
+        <div className="absolute inset-x-0 px-5 md:px-[6vw]" style={{ top: (idx === 0 ? 0.12 : 0.22) * vh }}>
           <div className="mono mb-3 text-[11px] uppercase tracking-[.22em] text-volt">
             {sc.num} · {sc.kicker}
           </div>
@@ -257,35 +258,27 @@ function SceneSection({ idx, vh }: { idx: 0 | 1 | 2; vh: number }) {
 function EndSection({ vh }: { vh: number }) {
   const { t } = useI18n();
   return (
-    <section className="relative" style={{ height: SECTIONS[3].screens * vh }}>
-      <div className="absolute inset-x-0 bottom-0 px-5 pb-16 md:px-[6vw]" style={{ background: "linear-gradient(#eef2f700, #eef2f7e6 22%, #eef2f7)" }}>
-        <div className="grid gap-10 pt-24 md:grid-cols-[1.1fr_1fr]">
-          <div>
-            <div className="mono mb-3 inline-flex rounded-full border border-dashed border-ice/50 px-3 py-1 text-[10.5px] uppercase tracking-[.14em] text-ice">{t.ui.preview}</div>
-            <p className="max-w-[34rem] text-[16px] leading-relaxed text-warm">{t.ui.previewBody}</p>
-            <div className="mono mt-6 mb-2 text-[10.5px] uppercase tracking-[.18em] text-volt">{t.ui.next}</div>
-            <ol className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
-              {t.upcoming.map((x) => (
-                <li key={x.num} className="text-[14px] text-mist">
-                  <span className="mono mr-2 text-black/30">{x.num}</span>
-                  {x.title}
-                </li>
-              ))}
-            </ol>
-            <button onClick={() => window.scrollTo({ top: 0, behavior: useView.getState().reduced ? "auto" : "smooth" })} className="mono mt-7 rounded-full border border-volt/60 px-4 py-2 text-[11px] uppercase tracking-[.16em] text-volt hover:bg-usdc hover:text-white">
+    <section id="map" className="relative" style={{ height: SECTIONS[SECTIONS.length - 1].screens * vh }}>
+      <div className="absolute inset-x-0 bottom-0 px-4 pb-6 md:px-[4vw]">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => window.scrollTo({ top: 0, behavior: useView.getState().reduced ? "auto" : "smooth" })} className="mono rounded-full border border-volt/60 bg-white/90 px-4 py-2 text-[11px] uppercase tracking-[.16em] text-volt hover:bg-usdc hover:text-white">
               ↺ {t.ui.replay}
             </button>
+            <details className="group relative">
+              <summary className="mono rounded-full border border-black/10 bg-white/90 px-4 py-2 text-[11px] uppercase tracking-[.16em] text-warm">
+                {t.ui.sources} ({sources.length})
+              </summary>
+              <ol className="absolute bottom-12 left-0 max-h-[52vh] w-[min(640px,92vw)] list-decimal space-y-1 overflow-auto rounded-xl border border-black/10 bg-white/95 py-3 pl-8 pr-4 text-[12px] leading-relaxed text-mist shadow-[0_10px_40px_rgba(15,35,64,.15)]">
+                {sources.map((x) => (
+                  <li key={x}>{x}</li>
+                ))}
+              </ol>
+            </details>
           </div>
-          <div>
-            <div className="mono mb-2 text-[10.5px] uppercase tracking-[.18em] text-volt">{t.ui.sources}</div>
-            <ol className="list-decimal space-y-1 pl-5 text-[12.5px] leading-relaxed text-mist">
-              {sources.map((s) => (
-                <li key={s}>{s}</li>
-              ))}
-            </ol>
-            <p className="mt-4 text-[12px] leading-relaxed text-mist/80">{t.ui.disclaimer}</p>
-            <p className="mt-2 text-[12px] leading-relaxed text-mist/60">{t.ui.credits}</p>
-          </div>
+          <p className="max-w-[560px] rounded-lg bg-white/80 px-3 py-2 text-[11px] leading-relaxed text-mist">
+            {t.ui.disclaimer} {t.ui.credits}
+          </p>
         </div>
       </div>
     </section>
@@ -317,13 +310,18 @@ function Inner() {
       <XrayVeil />
       <Header vh={vh} />
       <main className="relative z-10">
-        <SceneSection idx={0} vh={vh} />
-        <SceneSection idx={1} vh={vh} />
-        <SceneSection idx={2} vh={vh} />
+        {t.scenes.map((_, i) => (
+          <SceneSection key={i} idx={i} vh={vh} />
+        ))}
         <EndSection vh={vh} />
       </main>
       <PortalHud />
       <Confirm />
+      <MintHud />
+      <PegHud />
+      <SvbHud />
+      <RedeemHud />
+      <MapPanel vh={vh} />
       <Progress />
     </>
   );
