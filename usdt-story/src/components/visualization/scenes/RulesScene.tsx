@@ -60,7 +60,31 @@ export default function RulesScene() {
               </text>
             </g>
           ))}
-          <g opacity={usat} transform={`translate(${mobile ? 300 : 280},${mobile ? 700 : 690})`}>
+          {/* the countdown */}
+          <g opacity={smooth(clamp(v.us * 2 - 0.6))}>
+            <line x1={150} x2={850} y1={600} y2={600} stroke={C.line} strokeWidth={5} />
+            <line x1={150} x2={lerp(150, 850, smooth(v.usat))} y1={600} y2={600} stroke={C.warn} strokeWidth={5} />
+            {L.countdown.map((c, k) => {
+              const x = 150 + k * 350;
+              return (
+                <g key={c.d}>
+                  <circle cx={x} cy={600} r={14} fill={k === 2 ? C.warn : C.paper} stroke={k === 2 ? C.warn : C.ink} strokeWidth={4} />
+                  <text x={x} y={570} textAnchor={k === 0 ? "start" : k === 2 ? "end" : "middle"} fill={k === 2 ? C.warn : C.ink} style={{ fontFamily: "var(--font-mono)", fontSize: big(14, 22), fontWeight: 600 }} transform={k === 0 ? "translate(-14,0)" : k === 2 ? "translate(14,0)" : undefined}>
+                    {c.d}
+                  </text>
+                  <text x={x} y={640 + big(12, 19) * 0.4} textAnchor={k === 0 ? "start" : k === 2 ? "end" : "middle"} fill={C.mute} style={{ fontFamily: "var(--font-sans)", fontSize: big(12, 19) }} transform={k === 0 ? "translate(-14,0)" : k === 2 ? "translate(14,0)" : undefined}>
+                    {mobile && k === 2 ? c.t.split(" ").slice(0, 3).join(" ") : c.t}
+                  </text>
+                  {mobile && k === 2 && (
+                    <text x={x} y={640 + big(12, 19) * 1.8} textAnchor="end" fill={C.mute} style={{ fontFamily: "var(--font-sans)", fontSize: big(12, 19) }} transform="translate(14,0)">
+                      {c.t.split(" ").slice(3).join(" ")}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </g>
+          <g opacity={usat} transform={`translate(${mobile ? 300 : 280},${mobile ? 750 : 780})`}>
             <Logo x={0} y={0} w={150} h={150} href="/img/usat.png" />
             <text x={0} y={120} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-sans)", fontSize: fsz, fontWeight: 600 }}>
               {L.usat}
@@ -69,7 +93,7 @@ export default function RulesScene() {
               {L.usatSub}
             </text>
           </g>
-          <g opacity={usat} transform={`translate(${mobile ? 720 : 720},${mobile ? 700 : 690})`}>
+          <g opacity={usat} transform={`translate(${mobile ? 720 : 720},${mobile ? 750 : 780})`}>
             <Logo x={0} y={0} w={130} h={130} href="/img/tether.png" />
             <path d="M80,0 L180,-50" stroke={C.mute} strokeWidth={3} markerEnd="url(#arrow)" />
             <text x={0} y={120} textAnchor="middle" fill={C.mute} style={{ fontFamily: "var(--font-sans)", fontSize: big(13, 22) }}>
@@ -105,8 +129,8 @@ export default function RulesScene() {
             const y = 470 + (isT ? s * 240 : 0);
             return (
               <g key={n} opacity={isT ? 1 - s * 0.4 : 1} transform={`rotate(${isT ? s * 24 : 0},${x},${y})`}>
-                {isT ? <Token x={x} y={y} r={56} /> : <circle cx={x} cy={y} r={56} fill={n === "USDC" ? "#2775ca" : "#1f4fa3"} />}
-                {!isT && (
+                {isT ? <Token x={x} y={y} r={56} /> : n === "USDC" ? <Logo x={x} y={y} w={112} h={112} href="/img/usdc.png" /> : <circle cx={x} cy={y} r={56} fill="#1f4fa3" />}
+                {n === "EURC" && (
                   <text x={x} y={y + 8} textAnchor="middle" fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 600 }}>
                     {n}
                   </text>

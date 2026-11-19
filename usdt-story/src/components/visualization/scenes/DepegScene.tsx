@@ -15,26 +15,13 @@ const IDX = chapterIndex("depeg");
 // schematic intraday path: [x 0..1, price]
 const PATH: [number, number][] = [[0, 1.0], [0.2, 0.999], [0.32, 0.997], [0.4, 0.985], [0.47, 0.962], [0.52, 0.95], [0.56, 0.962], [0.62, 0.98], [0.7, 0.985], [0.8, 0.993], [0.9, 0.997], [1, 0.999]];
 
-function Anchor({ x, y, s = 1, color = C.ink }: { x: number; y: number; s?: number; color?: string }) {
-  return (
-    <g transform={`translate(${x},${y}) scale(${s})`} fill="none" stroke={color} strokeWidth={10} strokeLinecap="round">
-      <circle cx={0} cy={-80} r={18} />
-      <line x1={0} y1={-62} x2={0} y2={70} />
-      <line x1={-40} y1={-30} x2={40} y2={-30} />
-      <path d="M-70,20 C-60,70 -30,80 0,80 C30,80 60,70 70,20" />
-      <path d="M-82,32 L-70,18 L-56,30" />
-      <path d="M82,32 L70,18 L56,30" />
-    </g>
-  );
-}
-
 export default function DepegScene() {
   const { t, locale } = useI18n();
   const L = t.scenes.depeg;
   const { big, mobile } = useK();
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, sink: 0, chart: 0, draw: 0, bar: 0, shrink: 0, hold: 0, exit: 0 },
+    { vis: 0, sink: 0, chart: 0, draw: 0, bar: 0, shrink: 0, hold: 0, drain: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.04))
         .to(v, { sink: 1, duration: 0.2, ease: "power1.in" }, at(0.0))
@@ -42,7 +29,8 @@ export default function DepegScene() {
         .to(v, { draw: 1, duration: 0.18, ease: "none" }, at(0.28))
         .to(v, { bar: 1, duration: 0.06 }, at(0.48))
         .to(v, { shrink: 1, duration: 0.16, ease: "none" }, at(0.52))
-        .to(v, { hold: 1, duration: 0.1 }, at(0.71))
+        .to(v, { hold: 1, duration: 0.08 }, at(0.69))
+        .to(v, { drain: 1, duration: 0.16, ease: "none" }, at(0.74))
         .to(v, { exit: 1, duration: 0.07 }, at(0.93))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -160,19 +148,54 @@ export default function DepegScene() {
         </g>
       )}
 
-      {/* D: the anchor holds */}
+      {/* D: a bank run that killed a bank vs the one Tether survived */}
       {holdO > 0.01 && (
         <g opacity={holdO}>
-          <line x1={120} x2={880} y1={300} y2={300} stroke={C.gd} strokeWidth={4} />
-          <text x={120} y={280} fill={C.gd} style={{ fontFamily: "var(--font-mono)", fontSize: big(16, 26), fontWeight: 600 }}>
-            {L.peg}
-          </text>
-          <line x1={500} x2={500} y1={300} y2={480} stroke={C.ink} strokeWidth={4} strokeDasharray="14 8" />
-          <Anchor x={500} y={600} s={1.4} color={C.gd} />
-          <Token x={500} y={300} r={46} />
-          <text x={500} y={850} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(40, 60) }}>
-            {L.holds}
-          </text>
+          {[
+            { x: 290, name: L.svb, date: L.svbDate, run: L.svbRun, end: L.svbEnd, drop: 0.25, bad: true },
+            { x: 710, name: L.teth, date: L.tethDate, run: L.tethRun, end: L.tethEnd, drop: 0.09, bad: false },
+          ].map((b) => {
+            const W = 230, H = 380, top = 260;
+            const q = smooth(clamp(v.drain));
+            const level = 1 - b.drop * q;
+            const crack = b.bad ? smooth(clamp((v.drain - 0.85) * 6)) : 0;
+            const tilt = crack * 8;
+            const id = b.bad ? "tank-a" : "tank-b";
+            return (
+              <g key={b.name}>
+                <text x={b.x} y={top - 70} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(24, 34), fontWeight: 500 }}>
+                  {b.name}
+                </text>
+                <text x={b.x} y={top - 70 + big(13, 20) * 1.6} textAnchor="middle" fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: big(13, 20) }}>
+                  {b.date}
+                </text>
+                <g transform={`rotate(${tilt},${b.x},${top + H})`}>
+                  <rect x={b.x - W / 2} y={top} width={W} height={H} rx={18} fill="#fff" stroke={C.ink} strokeWidth={3} />
+                  <clipPath id={id}>
+                    <rect x={b.x - W / 2 + 6} y={top + 6} width={W - 12} height={H - 12} rx={14} />
+                  </clipPath>
+                  <g clipPath={`url(#${id})`}>
+                    <rect x={b.x - W / 2} y={top + H * (1 - level * 0.92)} width={W} height={H} fill={b.bad ? "#e7b0aa" : C.green} opacity={0.88} />
+                    <rect x={b.x - W / 2} y={top + H * 0.08} width={W} height={H * 0.92 * b.drop * q} fill="url(#hatch-warn)" opacity={0.6} />
+                  </g>
+                  {b.bad && crack > 0.01 && <path d={`M${b.x - 20},${top} l18,70 l-24,60 l30,80 l-14,70`} fill="none" stroke={C.ink} strokeWidth={4} opacity={crack} />}
+                </g>
+                {Array.from({ length: 6 }, (_, k) => {
+                  const ph = (v.drain * (b.bad ? 5 : 2) + k / 6) % 1;
+                  if (v.drain <= 0.02 || v.drain >= 0.99) return null;
+                  return <circle key={k} cx={b.x + W / 2 + 10 + ph * 60} cy={top + H - 20 + ph * ph * 90} r={7} fill={b.bad ? C.warn : C.green} opacity={1 - ph} />;
+                })}
+                <text x={b.x} y={top + H + 60} textAnchor="middle" fill={b.bad ? C.warn : C.gd} style={{ fontFamily: "var(--font-mono)", fontSize: big(16, 24), fontWeight: 600 }}>
+                  {b.run}
+                </text>
+                <g opacity={smooth(clamp((v.drain - 0.9) * 10))}>
+                  <text x={b.x} y={top + H + 60 + big(22, 32) * 1.6} textAnchor="middle" fill={b.bad ? C.warn : C.gd} style={{ fontFamily: "var(--font-serif)", fontSize: big(26, 36), fontWeight: 600 }}>
+                    {(b.bad ? "✕ " : "✓ ") + b.end}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
         </g>
       )}
     </g>

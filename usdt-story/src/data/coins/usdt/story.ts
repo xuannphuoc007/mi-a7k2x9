@@ -1,7 +1,7 @@
 /** Story copy for the USDT explainer, English and Vietnamese.
  * Plain language first: how the vault works, twelve years of history, USDT today, strengths, weaknesses and a conclusion.
  * Regulators' findings are reported as findings, with Tether's responses. */
-export type Beat = { title: string; body: string[]; notes?: string[]; deep?: string[] };
+export type Beat = { title: string; body: string[]; notes?: string[]; deep?: string[]; insight?: string };
 export type Chapter = { label: string; title: string; question: string; figure: string; takeaway?: string; beats: Beat[] };
 
 export const chaptersEn: Chapter[] = [
@@ -21,7 +21,7 @@ export const chaptersEn: Chapter[] = [
         body: [
           "A company called Tether holds dollars (and things almost as good as dollars). For every dollar it holds, it creates one USDT — a token that lives on a blockchain and can be sent anywhere in minutes.",
           "That is why its price stays at about $1: in principle, one USDT can always be handed back for one dollar.",
-        ],
+        ], insight: "About 184 billion USDT exist — a sum equal to more than a third of Vietnam's whole economy in 2025 (GDP ≈ $514 billion).",
       },
       {
         title: "So the whole story comes down to one question: is the money really in the vault?",
@@ -50,7 +50,7 @@ export const chaptersEn: Chapter[] = [
         body: [
           "When a customer returns 1 million USDT and asks for dollars, Tether pays the dollars and destroys (\"burns\") the tokens. Only verified customers, mostly companies, can do this directly with Tether.",
           "So the number of USDT should always match the dollars Tether owes.",
-        ],
+        ], insight: "Tether earns almost nothing from people sending USDT to each other. Its money comes from the dollars you hand it — which is the subject of chapter 3.",
       },
       {
         title: "Lan never meets Tether. So why is her USDT still worth $1?",
@@ -70,7 +70,7 @@ export const chaptersEn: Chapter[] = [
   },
   {
     label: "2 · Inside the vault",
-    title: "2 · Open the vault",
+    title: "2 · Open the vault: a company that lends more to America than Germany does",
     question: "What backs 183.5 billion promises?",
     figure: "A grid of 100 squares, each about $1.9 billion: 69 green (US Treasury bills and overnight loans backed by them), 10 gold, 4 orange (bitcoin), 17 grey (other). A bracket marks the 96 squares owed to holders; the last 4 are the cushion.",
     takeaway: "About seven tenths of the vault is short-term US government debt. The rest includes gold, bitcoin and loans — assets whose value can move — above a thin cushion of about 4%.",
@@ -87,14 +87,14 @@ export const chaptersEn: Chapter[] = [
         body: [
           "Most of the vault is US Treasury bills — short IOUs from the US government, repaid within about three months — plus overnight loans backed by them. Together, about $132 billion.",
           "These are among the safest and easiest assets to sell in finance, and they make Tether one of the biggest holders of US government debt.",
-        ],
+        ], insight: "If Tether were a country, it would be about the 17th-largest holder of US government debt — ahead of Germany, South Korea and Saudi Arabia.",
       },
       {
         title: "10 squares of gold, 4 of bitcoin.",
         body: [
           "Tether also keeps about $19.1 billion of physical gold and $8.4 billion of bitcoin. Their prices move — a lot, in bitcoin's case.",
           "When they rise, the vault grows. When they fall, the cushion shrinks.",
-        ],
+        ], insight: "Tether holds roughly 140 tonnes of gold in a Swiss vault — more than the national reserves of Australia, Qatar, South Korea or Greece. In 2025 only Poland's central bank bought more gold.",
       },
       {
         title: "17 squares: \"other\".",
@@ -103,11 +103,11 @@ export const chaptersEn: Chapter[] = [
         ],
       },
       {
-        title: "96 squares are owed; 4 are the cushion.",
+        title: "96 squares are owed; 4 are the cushion. Now shake the vault.",
         body: [
           "About $183.5 billion belongs, in effect, to USDT holders. The difference — about $7.95 billion — is Tether's cushion (\"excess reserves\"). It nearly doubled in the third quarter of 2026, mostly because bitcoin and gold rose.",
           "A cushion of about 4% is thin: one analyst calculated that a fall of about 15% in Tether's non-cash assets would wipe it out.",
-        ],
+        ], insight: "Stress test: if gold, bitcoin and loans lost about 15%, the four cushion squares would be gone — and USDT would no longer be fully backed on paper.",
         notes: ["Tether reserve report, 30 Sep 2026 (BDO). A report like this checks one day's figures; it is not a full audit."],
       },
     ],
@@ -134,18 +134,19 @@ export const chaptersEn: Chapter[] = [
         ],
       },
       {
-        title: "Where the profit goes.",
+        title: "One employee, the profit of hundreds of bankers.",
         body: [
-          "Tether keeps profits as its own capital and invests much of it: in bitcoin, gold and companies in fields such as mining, AI and media. By the end of 2025 that investment portfolio was worth more than $20 billion.",
-          "This makes Tether richer — and its finances harder to read.",
+          "In 2024 Tether made about $13 billion with roughly 150 employees. Tether keeps profits as its own capital and invests much of it — in bitcoin, gold and companies in mining, AI and media; that portfolio passed $20 billion by the end of 2025.",
         ],
+        insight: "≈ $85 million of profit per employee in 2024 — about 300 times Goldman Sachs. One Tether employee earns what a whole floor of bankers earns.",
       },
       {
-        title: "Why it matters for Lan.",
+        title: "Tether is a bet on US interest rates.",
         body: [
-          "Tether's business fits in one line: borrow at 0% from USDT holders, lend to the US government at market rates.",
+          "Tether's business fits in one line: borrow at 0% from USDT holders, lend to the US government at market rates. When rates fall, profit falls: 2025 profit was about 23% lower than 2024.",
           "It works as long as holders keep their trust. If too many want dollars back at once, Tether must sell quickly — easy for Treasury bills, harder for loans or gold.",
         ],
+        insight: "Simple maths: on about $132 billion of Treasury bills, every 1 percentage point cut in US rates takes roughly $1.3 billion a year out of Tether's income.",
       },
     ],
   },
@@ -174,7 +175,7 @@ export const chaptersEn: Chapter[] = [
         body: [
           "From the start Tether was tied to Bitfinex, a large crypto exchange, with the same owners and managers behind both. That link would cause most of the trouble later.",
           "Paolo Ardoino, Bitfinex's technology chief, became Tether's CEO at the end of 2023. Giancarlo Devasini, Bitfinex's finance chief, controls the company.",
-        ],
+        ], insight: "The world's biggest digital dollar was not created by a bank, but by the people running a crypto exchange — and it is still controlled by them.",
       },
       {
         title: "Small for years, then everywhere.",
@@ -209,7 +210,7 @@ export const chaptersEn: Chapter[] = [
         body: [
           "In February 2021 Tether and Bitfinex paid $18.5 million to settle with New York, without admitting wrongdoing, and agreed to publish reserve reports and stop serving New Yorkers.",
           "In October 2021 the US derivatives regulator (CFTC) fined Tether $41 million. It found that over 26 months in 2016–2018, Tether held enough dollars to back every USDT on only 27.6% of the days.",
-        ],
+        ], insight: "27.6% of 26 months means: in more than two years, the vault was full for only about seven months in total.",
       },
       {
         title: "Tether's answer.",
@@ -222,13 +223,13 @@ export const chaptersEn: Chapter[] = [
         body: [
           "In August 2026 Tether announced that KPMG had completed a full audit of its 2025 accounts with a \"clean\" opinion — the first in the company's history, about nine years after an audit was first promised.",
           "It does not change what happened in 2016–2018, but it answers the oldest criticism for the most recent year.",
-        ],
+        ], insight: "First promised: 2017. Delivered: 2026. Nine years in which the world's biggest stablecoin had no full audit.",
       },
     ],
   },
   {
     label: "6 · The anchor slips (May 2022)",
-    title: "6 · May 2022: the anchor slips",
+    title: "6 · May 2022: $7 billion out in 48 hours",
     question: "What happens when everyone wants their dollar back at once?",
     figure: "TerraUSD, a digital dollar without a real vault, sinks to cents; USDT dips to $0.95 for a few hours; Tether pays out billions and the supply shrinks from about 84 to about 73 billion; the price returns to $1.",
     takeaway: "When panic hit in May 2022, USDT briefly fell to $0.95, but Tether paid out billions at $1 and the price recovered. Having real assets in the vault made the difference with TerraUSD.",
@@ -254,11 +255,12 @@ export const chaptersEn: Chapter[] = [
         ],
       },
       {
-        title: "The anchor holds.",
+        title: "The anchor holds. A bank did not.",
         body: [
-          "Within days USDT was back near $1. The vault had paid out a large share quickly — the strongest argument Tether has ever had.",
-          "It also showed how fast trust can wobble.",
+          "Within days USDT was back near $1. Compare that with Silicon Valley Bank in March 2023: customers tried to pull $42 billion — a quarter of its deposits — in one day, and the bank collapsed the next morning.",
+          "SVB had locked its money in long-term bonds it could only sell at a loss. Tether's vault held far more short-term assets that could be turned into cash quickly.",
         ],
+        insight: "USDT survived a run of about 9% of its supply in two days; SVB died from a run of 25% in one. What matters is not how big the vault is, but how fast it can turn into cash.",
       },
     ],
   },
@@ -284,13 +286,13 @@ export const chaptersEn: Chapter[] = [
         title: "Where USDT lives.",
         body: [
           "USDT exists on several blockchains. Most of it sits on Tron — cheap and fast to send — and on Ethereum. On 1 October 2026: about $92 billion on Tron, $74 billion on Ethereum, and smaller amounts on BNB Chain and Solana.",
-        ],
+        ], insight: "Tron holds about half of all USDT, yet it carried roughly 73% of all stablecoin transfers in Q3 2026: it is where digital dollars actually move, especially in emerging markets.",
       },
       {
         title: "A dollar that can be frozen.",
         body: [
           "Unlike cash, Tether can freeze USDT in any wallet. It does so at the request of police and regulators: it says it has frozen more than $4.4 billion linked to scams, hacks and sanctions, working with over 340 agencies in 65 countries.",
-        ],
+        ], insight: "Once blacklisted, a wallet almost never comes back: of the addresses Tether blocked in 2025, only about 4 in 100 were ever released.",
       },
       {
         title: "A new home: El Salvador.",
@@ -300,14 +302,15 @@ export const chaptersEn: Chapter[] = [
   },
   {
     label: "8 · USDT in Vietnam",
-    title: "8 · USDT in Vietnam",
+    title: "8 · USDT in Vietnam: $220 billion a year",
     question: "Why does USDT often cost more than a dollar at the bank?",
     figure: "Lan buys USDT with dong by bank transfer from a seller on an exchange (P2P); a price board compares the bank dollar rate with the P2P USDT price; warning signs show frozen bank accounts and scams; a timeline runs from Resolution 05 to the first licences.",
     takeaway: "In Vietnam USDT is the main bridge between the dong and crypto, usually bought P2P at a small premium over the bank dollar. P2P carries real risks, and licensed local exchanges are on the way.",
     beats: [
       {
         title: "One of the busiest crypto countries.",
-        body: ["In Chainalysis' 2025 ranking of how widely people use crypto, Vietnam came 4th in the world. For most Vietnamese users, USDT is the door into crypto."],
+        body: ["In Chainalysis' 2025 ranking of how widely people use crypto, Vietnam came 4th in the world. In the 12 months to June 2025, about $220 billion of crypto flowed to Vietnamese users — and for most of them, USDT is the door in."],
+        insight: "$220 billion of crypto in a year is equal to about 43% of Vietnam's GDP in 2025 ($514 billion). It is a flow, not wealth — but it shows how much money already moves outside the banks.",
       },
       {
         title: "How Lan buys: P2P.",
@@ -320,7 +323,7 @@ export const chaptersEn: Chapter[] = [
         body: [
           "Buying dollars at a bank to invest is not simple, while demand for USDT is high — so sellers can ask a little more. In late August 2025 P2P USDT reached about 26,900 dong, while the bank rate was around 26,385 — about 2% higher.",
           "The gap moves: in September 2025, after new rules were announced, it shrank and USDT briefly traded below the official rate.",
-        ],
+        ], insight: "The premium works like a thermometer: when it is high, Vietnamese demand for dollars and crypto is running hot; when it turns negative, money is leaving crypto.",
       },
       {
         title: "The risks of P2P.",
@@ -349,7 +352,7 @@ export const chaptersEn: Chapter[] = [
         body: [
           "On 18 July 2025 the US signed its first federal law for stablecoins: issuers serving Americans need a licence, full reserves of safe assets and regular reports.",
           "USDT, run from El Salvador, is not built for those rules — so in January 2026 Tether launched a separate coin for the US, USAT, issued by Anchorage Digital Bank and led by Bo Hines, a former White House crypto adviser.",
-        ],
+        ], insight: "A countdown has started: from 18 July 2028, three years after the law was signed, US platforms may only offer approved stablecoins. Unless Tether gets USDT approved, it has less than two years left on American exchanges.",
       },
       {
         title: "Europe: off the shelves.",
@@ -404,7 +407,7 @@ export const chaptersEn: Chapter[] = [
       },
       {
         title: "But it is a promise from one private company.",
-        body: ["Tether decides what goes into the vault, can freeze any wallet, keeps all the interest, and spent years with a poor record on transparency — only now improving. Outside the US and Europe, few rules protect holders."],
+        body: ["Tether decides what goes into the vault, can freeze any wallet, keeps all the interest, and spent years with a poor record on transparency — only now improving. Outside the US and Europe, few rules protect holders."], insight: "The real question is not \"is USDT safe?\" but \"whose risk am I taking?\": a private company in El Salvador that keeps the interest, instead of a bank with deposit insurance.",
       },
       {
         title: "For Lan: a tool, not a savings account.",
@@ -434,7 +437,7 @@ export const chaptersVi: Chapter[] = [
         body: [
           "Một công ty tên Tether giữ đô la (và những thứ gần như đô la). Cứ mỗi đô la họ giữ, họ tạo ra một USDT — token nằm trên blockchain, gửi đi đâu cũng được trong vài phút.",
           "Vì vậy giá của nó đứng quanh 1 USD: về nguyên tắc, mỗi USDT luôn đổi lại được 1 đô la.",
-        ],
+        ], insight: "Đang có khoảng 184 tỷ USDT — bằng hơn một phần ba quy mô cả nền kinh tế Việt Nam năm 2025 (GDP ≈ 514 tỷ USD).",
       },
       {
         title: "Nên cả câu chuyện xoay quanh một câu hỏi: tiền có thật sự nằm trong két không?",
@@ -463,7 +466,7 @@ export const chaptersVi: Chapter[] = [
         body: [
           "Khi khách trả lại 1 triệu USDT để lấy đô la, Tether trả đô la và huỷ (\"đốt\") số token đó. Chỉ khách hàng đã xác minh, phần lớn là doanh nghiệp, mới làm việc trực tiếp với Tether được.",
           "Nhờ vậy số USDT luôn phải khớp với số đô la Tether đang nợ.",
-        ],
+        ], insight: "Tether gần như không kiếm tiền từ việc người dùng chuyển USDT cho nhau. Tiền của họ đến từ chính số đô la bạn gửi vào — chuyện của chương 3.",
       },
       {
         title: "Lan chẳng bao giờ gặp Tether. Vậy sao USDT của cô vẫn đáng 1 USD?",
@@ -483,7 +486,7 @@ export const chaptersVi: Chapter[] = [
   },
   {
     label: "2 · Bên trong két",
-    title: "2 · Mở két ra",
+    title: "2 · Mở két: một công ty cho Mỹ vay nhiều hơn cả nước Đức",
     question: "Thứ gì đứng sau 183,5 tỷ lời hứa?",
     figure: "Lưới 100 ô, mỗi ô khoảng 1,9 tỷ USD: 69 ô xanh (tín phiếu Kho bạc Mỹ và khoản cho vay qua đêm có tín phiếu bảo đảm), 10 ô vàng, 4 ô cam (bitcoin), 17 ô xám (khác). Một dấu ngoặc đánh dấu 96 ô phải trả người giữ; 4 ô cuối là phần đệm.",
     takeaway: "Khoảng bảy phần mười két là nợ ngắn hạn của chính phủ Mỹ. Phần còn lại gồm vàng, bitcoin và các khoản cho vay — những thứ có thể lên xuống giá — cộng một phần đệm mỏng khoảng 4%.",
@@ -500,14 +503,14 @@ export const chaptersVi: Chapter[] = [
         body: [
           "Phần lớn két là tín phiếu Kho bạc Mỹ — giấy nợ ngắn hạn của chính phủ Mỹ, trả lại trong khoảng ba tháng — cộng các khoản cho vay qua đêm có tín phiếu bảo đảm. Tổng cộng khoảng 132 tỷ USD.",
           "Đây là loại tài sản an toàn và dễ bán nhất trong tài chính, và khiến Tether trở thành một trong những chủ nợ lớn nhất của chính phủ Mỹ.",
-        ],
+        ], insight: "Nếu Tether là một quốc gia, nó sẽ là chủ nợ lớn khoảng thứ 17 của chính phủ Mỹ — xếp trên cả Đức, Hàn Quốc và Ả Rập Xê Út.",
       },
       {
         title: "10 ô vàng, 4 ô bitcoin.",
         body: [
           "Tether còn giữ khoảng 19,1 tỷ USD vàng thật và 8,4 tỷ USD bitcoin. Giá của chúng lên xuống — với bitcoin thì lên xuống rất mạnh.",
           "Khi giá tăng, két phình ra. Khi giá giảm, phần đệm mỏng đi.",
-        ],
+        ], insight: "Tether giữ khoảng 140 tấn vàng trong một hầm ở Thuỵ Sĩ — nhiều hơn dự trữ quốc gia của Úc, Qatar, Hàn Quốc hay Hy Lạp. Năm 2025, chỉ ngân hàng trung ương Ba Lan mua vàng nhiều hơn Tether.",
       },
       {
         title: "17 ô: \"khác\".",
@@ -516,11 +519,11 @@ export const chaptersVi: Chapter[] = [
         ],
       },
       {
-        title: "96 ô phải trả; 4 ô là phần đệm.",
+        title: "96 ô phải trả; 4 ô là phần đệm. Giờ thử lắc chiếc két.",
         body: [
           "Khoảng 183,5 tỷ USD thực chất thuộc về người giữ USDT. Phần chênh lệch — khoảng 7,95 tỷ USD — là phần đệm của Tether (\"dự trữ dư\"). Nó tăng gần gấp đôi trong quý 3/2026, chủ yếu nhờ bitcoin và vàng tăng giá.",
           "Phần đệm khoảng 4% là mỏng: một nhà phân tích tính rằng chỉ cần nhóm tài sản không phải tiền mặt của Tether giảm khoảng 15% là phần đệm biến mất.",
-        ],
+        ], insight: "Phép thử sức chịu: nếu vàng, bitcoin và các khoản cho vay mất khoảng 15% giá trị, 4 ô đệm biến mất — và trên giấy tờ, USDT không còn được bảo đảm đủ.",
         notes: ["Báo cáo dự trữ của Tether ngày 30/9/2026 (BDO). Loại báo cáo này kiểm tra số liệu của một ngày, không phải kiểm toán đầy đủ."],
       },
     ],
@@ -547,18 +550,19 @@ export const chaptersVi: Chapter[] = [
         ],
       },
       {
-        title: "Lợi nhuận đi đâu?",
+        title: "Một nhân viên, lợi nhuận bằng hàng trăm nhân viên ngân hàng.",
         body: [
-          "Tether giữ lợi nhuận làm vốn của mình và đem đầu tư phần lớn: vào bitcoin, vàng và các công ty về đào coin, AI, truyền thông… Đến cuối 2025, danh mục đầu tư này trị giá hơn 20 tỷ USD.",
-          "Tether giàu hơn — nhưng sổ sách của họ cũng khó đọc hơn.",
+          "Năm 2024 Tether lãi khoảng 13 tỷ USD với chừng 150 nhân viên. Lợi nhuận được giữ làm vốn và đem đầu tư — vào bitcoin, vàng và các công ty đào coin, AI, truyền thông; danh mục này vượt 20 tỷ USD vào cuối 2025.",
         ],
+        insight: "≈ 85 triệu USD lợi nhuận trên mỗi nhân viên năm 2024 — gấp khoảng 300 lần Goldman Sachs. Một nhân viên Tether làm ra lợi nhuận bằng cả một tầng nhân viên ngân hàng.",
       },
       {
-        title: "Chuyện này liên quan gì tới Lan?",
+        title: "Tether là một ván cược vào lãi suất Mỹ.",
         body: [
-          "Mô hình của Tether gói trong một câu: vay của người giữ USDT với lãi 0%, cho chính phủ Mỹ vay với lãi thị trường.",
+          "Mô hình của Tether gói trong một câu: vay của người giữ USDT với lãi 0%, cho chính phủ Mỹ vay với lãi thị trường. Lãi suất giảm thì lợi nhuận giảm: lợi nhuận 2025 thấp hơn 2024 khoảng 23%.",
           "Nó chạy tốt chừng nào người giữ còn tin. Nếu quá nhiều người cùng đòi đô la một lúc, Tether phải bán gấp — dễ với tín phiếu, khó hơn với khoản cho vay hay vàng.",
         ],
+        insight: "Phép tính đơn giản: với khoảng 132 tỷ USD tín phiếu, mỗi lần lãi suất Mỹ giảm 1 điểm phần trăm, Tether mất khoảng 1,3 tỷ USD thu nhập mỗi năm.",
       },
     ],
   },
@@ -587,7 +591,7 @@ export const chaptersVi: Chapter[] = [
         body: [
           "Ngay từ đầu Tether đã gắn với Bitfinex, một sàn crypto lớn, cùng một nhóm chủ và người điều hành. Mối liên hệ này về sau gây ra phần lớn rắc rối.",
           "Paolo Ardoino, giám đốc công nghệ của Bitfinex, trở thành CEO của Tether từ cuối năm 2023. Giancarlo Devasini, giám đốc tài chính của Bitfinex, là người nắm quyền kiểm soát công ty.",
-        ],
+        ], insight: "Đồng đô la số lớn nhất thế giới không do ngân hàng nào tạo ra, mà do những người điều hành một sàn crypto — và đến nay vẫn do họ nắm.",
       },
       {
         title: "Nhỏ bé nhiều năm, rồi ở khắp nơi.",
@@ -622,7 +626,7 @@ export const chaptersVi: Chapter[] = [
         body: [
           "Tháng 2/2021, Tether và Bitfinex trả 18,5 triệu USD để dàn xếp với New York, không thừa nhận sai phạm; họ đồng ý công bố báo cáo dự trữ và ngừng phục vụ người dân New York.",
           "Tháng 10/2021, cơ quan quản lý phái sinh Mỹ (CFTC) phạt Tether 41 triệu USD. CFTC kết luận trong 26 tháng giai đoạn 2016–2018, Tether chỉ đủ đô la bảo đảm cho mọi USDT vào 27,6% số ngày.",
-        ],
+        ], insight: "27,6% của 26 tháng nghĩa là: trong hơn hai năm, cộng lại chỉ khoảng 7 tháng chiếc két thật sự đủ tiền.",
       },
       {
         title: "Tether đáp lại.",
@@ -635,13 +639,13 @@ export const chaptersVi: Chapter[] = [
         body: [
           "Tháng 8/2026, Tether thông báo KPMG đã hoàn tất kiểm toán đầy đủ sổ sách năm 2025 với ý kiến \"chấp nhận toàn phần\" — lần đầu tiên trong lịch sử công ty, khoảng chín năm sau lời hứa đầu tiên.",
           "Nó không xoá được chuyện 2016–2018, nhưng trả lời lời chỉ trích lâu đời nhất cho năm gần nhất.",
-        ],
+        ], insight: "Hứa: 2017. Có kết quả: 2026. Chín năm đồng stablecoin lớn nhất thế giới không có một cuộc kiểm toán đầy đủ nào.",
       },
     ],
   },
   {
     label: "6 · Neo bị kéo lệch (5/2022)",
-    title: "6 · Tháng 5/2022: chiếc neo bị kéo lệch",
+    title: "6 · Tháng 5/2022: 7 tỷ đô bị rút trong 48 giờ",
     question: "Chuyện gì xảy ra khi ai cũng đòi lại đô la cùng một lúc?",
     figure: "TerraUSD, một đồng đô la số không có két tiền thật, chìm xuống vài xu; USDT tụt về 0,95 USD trong vài giờ; Tether trả hàng tỷ đô la và nguồn cung co lại từ khoảng 84 xuống khoảng 73 tỷ; giá quay về 1 USD.",
     takeaway: "Khi hoảng loạn ập tới tháng 5/2022, USDT có lúc tụt về 0,95 USD, nhưng Tether trả hàng tỷ đô theo giá 1 USD và giá hồi lại. Có tài sản thật trong két là khác biệt với TerraUSD.",
@@ -665,11 +669,12 @@ export const chaptersVi: Chapter[] = [
         ],
       },
       {
-        title: "Chiếc neo trụ vững.",
+        title: "Chiếc neo trụ vững. Một ngân hàng thì không.",
         body: [
-          "Chỉ vài ngày sau USDT đã về lại quanh 1 USD. Chiếc két đã trả ra một phần lớn rất nhanh — lý lẽ mạnh nhất Tether từng có.",
-          "Nó cũng cho thấy niềm tin có thể lung lay nhanh đến mức nào.",
+          "Chỉ vài ngày sau USDT đã về lại quanh 1 USD. So với ngân hàng Silicon Valley Bank (SVB) tháng 3/2023: khách đòi rút 42 tỷ USD — một phần tư tiền gửi — trong một ngày, và sáng hôm sau ngân hàng sụp.",
+          "SVB đã khoá tiền vào trái phiếu dài hạn, chỉ bán được khi chịu lỗ. Két của Tether giữ nhiều tài sản ngắn hạn hơn, đổi ra tiền mặt nhanh hơn.",
         ],
+        insight: "USDT chịu được đợt rút khoảng 9% nguồn cung trong hai ngày; SVB chết vì đợt rút 25% trong một ngày. Điều quyết định không phải két to bao nhiêu, mà là két đổi ra tiền mặt nhanh đến đâu.",
       },
     ],
   },
@@ -695,13 +700,13 @@ export const chaptersVi: Chapter[] = [
         title: "USDT sống ở đâu?",
         body: [
           "USDT có mặt trên nhiều blockchain. Phần lớn nằm trên Tron — gửi rẻ và nhanh — và Ethereum. Ngày 1/10/2026: khoảng 92 tỷ trên Tron, 74 tỷ trên Ethereum, phần nhỏ hơn trên BNB Chain và Solana.",
-        ],
+        ], insight: "Tron giữ khoảng một nửa số USDT, nhưng chuyên chở khoảng 73% toàn bộ lượng stablecoin được chuyển đi trong quý 3/2026: đó là nơi đô la số thật sự di chuyển, nhất là ở các nước mới nổi.",
       },
       {
         title: "Đồng đô la có thể bị đóng băng.",
         body: [
           "Khác tiền mặt, Tether có thể đóng băng USDT trong bất kỳ ví nào. Họ làm vậy theo yêu cầu của công an và cơ quan quản lý: Tether nói đã đóng băng hơn 4,4 tỷ USD liên quan lừa đảo, hack và lệnh trừng phạt, phối hợp với hơn 340 cơ quan ở 65 nước.",
-        ],
+        ], insight: "Một khi bị đưa vào danh sách đen, ví gần như không bao giờ được trả lại: trong số địa chỉ Tether khoá năm 2025, chỉ khoảng 4 trên 100 được gỡ ra.",
       },
       {
         title: "Nhà mới: El Salvador.",
@@ -711,14 +716,15 @@ export const chaptersVi: Chapter[] = [
   },
   {
     label: "8 · USDT ở Việt Nam",
-    title: "8 · USDT ở Việt Nam",
+    title: "8 · USDT ở Việt Nam: 220 tỷ đô mỗi năm",
     question: "Vì sao USDT thường đắt hơn đô la ở ngân hàng?",
     figure: "Lan mua USDT bằng tiền đồng, chuyển khoản cho người bán trên sàn (P2P); bảng giá so tỷ giá đô la ngân hàng với giá USDT P2P; biển cảnh báo tài khoản bị phong toả và lừa đảo; dòng thời gian từ Nghị quyết 05 tới những giấy phép đầu tiên.",
     takeaway: "Ở Việt Nam, USDT là cây cầu chính giữa tiền đồng và crypto, thường được mua qua P2P với giá nhỉnh hơn đô la ngân hàng. P2P có rủi ro thật, và sàn trong nước được cấp phép đang đến gần.",
     beats: [
       {
         title: "Một trong những nước dùng crypto sôi động nhất.",
-        body: ["Trong bảng xếp hạng mức độ dùng crypto năm 2025 của Chainalysis, Việt Nam đứng thứ 4 thế giới. Với đa số người dùng Việt, USDT là cánh cửa bước vào crypto."],
+        body: ["Trong bảng xếp hạng mức độ dùng crypto năm 2025 của Chainalysis, Việt Nam đứng thứ 4 thế giới. Trong 12 tháng đến 6/2025, khoảng 220 tỷ USD crypto đã chảy về ví người dùng Việt — và với đa số họ, USDT là cánh cửa bước vào."],
+        insight: "220 tỷ USD crypto mỗi năm bằng khoảng 43% GDP Việt Nam năm 2025 (514 tỷ USD). Đó là dòng tiền chứ không phải tài sản — nhưng cho thấy lượng tiền đang chảy ngoài hệ thống ngân hàng lớn đến mức nào.",
       },
       {
         title: "Lan mua thế nào: P2P.",
@@ -731,7 +737,7 @@ export const chaptersVi: Chapter[] = [
         body: [
           "Mua đô la ở ngân hàng để đầu tư không đơn giản, trong khi nhu cầu USDT lại cao — nên người bán có thể đòi giá nhỉnh hơn. Cuối tháng 8/2025, USDT trên P2P lên khoảng 26.900 đồng, trong khi tỷ giá ngân hàng quanh 26.385 đồng — cao hơn khoảng 2%.",
           "Mức chênh không cố định: tháng 9/2025, sau khi có quy định mới, chênh lệch thu hẹp và USDT có lúc còn thấp hơn tỷ giá chính thức.",
-        ],
+        ], insight: "Mức chênh giá giống một chiếc nhiệt kế: chênh cao là lúc người Việt đang \"khát\" đô la và crypto; chênh âm là lúc tiền đang rút khỏi crypto.",
       },
       {
         title: "Rủi ro của P2P.",
@@ -760,7 +766,7 @@ export const chaptersVi: Chapter[] = [
         body: [
           "Ngày 18/7/2025, Mỹ ký luật liên bang đầu tiên về stablecoin: ai phát hành cho người Mỹ phải có giấy phép, dự trữ đầy đủ bằng tài sản an toàn và báo cáo thường xuyên.",
           "USDT, điều hành từ El Salvador, không được thiết kế cho luật này — nên tháng 1/2026 Tether ra một đồng riêng cho Mỹ là USAT, do ngân hàng Anchorage Digital phát hành, đứng đầu là Bo Hines, cựu cố vấn crypto của Nhà Trắng.",
-        ],
+        ], insight: "Đồng hồ đã bắt đầu đếm ngược: từ 18/7/2028, đúng ba năm sau ngày ký luật, các nền tảng ở Mỹ chỉ được bán stablecoin được cấp phép. Nếu USDT không được duyệt, nó chỉ còn chưa tới hai năm trên các sàn Mỹ.",
       },
       {
         title: "Châu Âu: bị gỡ khỏi kệ.",
@@ -787,7 +793,7 @@ export const chaptersVi: Chapter[] = [
       { title: "2 · Lớn nhất và được dùng nhiều nhất.", body: ["Với khoảng 184 tỷ USD lưu hành, USDT là tài sản mã hoá lớn thứ ba và được giao dịch nhiều nhất: riêng tháng 11/2025 đã có 3.840 tỷ USD USDT đổi chủ."] },
       { title: "3 · Nhanh, rẻ, luôn mở cửa.", body: ["USDT qua biên giới bất kể giờ nào, thường chỉ vài phút, không cần ngân hàng đứng giữa. Vì thế nó là đồng đô la được chọn ở những nước ngân hàng chậm hoặc tiền mất giá."] },
       { title: "4 · Đã trả tiền khi bị thử thách.", body: ["Tháng 5/2022, Tether chi trả khoảng 7 tỷ USD trong 48 giờ với giá 1 USD mỗi token, trong khi TerraUSD — không có két tiền thật — sụp đổ."] },
-      { title: "5 · Lan bạch hơn trước.", body: ["Báo cáo dự trữ mỗi quý từ 2021, phần đệm khoảng 8 tỷ USD, và năm 2026 có cuộc kiểm toán đầy đủ đầu tiên của KPMG với ý kiến chấp nhận toàn phần."] },
+      { title: "5 · Minh bạch hơn trước.", body: ["Báo cáo dự trữ mỗi quý từ 2021, phần đệm khoảng 8 tỷ USD, và năm 2026 có cuộc kiểm toán đầy đủ đầu tiên của KPMG với ý kiến chấp nhận toàn phần."] },
     ],
   },
   {
@@ -815,7 +821,7 @@ export const chaptersVi: Chapter[] = [
       },
       {
         title: "Nhưng đó là lời hứa của một công ty tư nhân.",
-        body: ["Tether quyết định thứ gì nằm trong két, có thể đóng băng bất kỳ ví nào, giữ toàn bộ tiền lãi, và có nhiều năm minh bạch kém — giờ mới khá lên. Ngoài Mỹ và châu Âu, rất ít luật bảo vệ người giữ."],
+        body: ["Tether quyết định thứ gì nằm trong két, có thể đóng băng bất kỳ ví nào, giữ toàn bộ tiền lãi, và có nhiều năm minh bạch kém — giờ mới khá lên. Ngoài Mỹ và châu Âu, rất ít luật bảo vệ người giữ."], insight: "Câu hỏi đúng không phải \"USDT có an toàn không?\" mà là \"mình đang chịu rủi ro của ai?\": một công ty tư nhân ở El Salvador giữ toàn bộ tiền lãi, thay vì một ngân hàng có bảo hiểm tiền gửi.",
       },
       {
         title: "Với Lan: một công cụ, không phải sổ tiết kiệm.",

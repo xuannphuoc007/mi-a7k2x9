@@ -77,12 +77,13 @@ export default function IntroScene() {
   const { big, mobile } = useK();
   const v = useSceneTimeline(
     IDX,
-    { vis: 1, door: 0, spin: 0, flow: 0, q: 0, exit: 0 },
+    { vis: 1, door: 0, spin: 0, flow: 0, q: 0, open: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { door: 1, duration: 0.12 }, at(-0.2))
         .to(v, { spin: 140, duration: 0.9, ease: "none" }, at(0))
         .to(v, { flow: 1, duration: 0.12 }, at(0.24))
         .to(v, { q: 1, duration: 0.12 }, at(0.56))
+        .to(v, { open: 1, duration: 0.2, ease: "power2.inOut" }, at(0.7))
         .to(v, { exit: 1, duration: 0.07 }, at(0.93))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -98,7 +99,47 @@ export default function IntroScene() {
     <g opacity={v.vis * (1 - ex)}>
       <g opacity={door} transform={`translate(0,${(1 - door) * 20})`}>
         <rect x={cx - 310} y={cy - 310} width={620} height={620} rx={44} fill="#ebe9e0" stroke="#d6d3c6" strokeWidth={2} />
-        <VaultDoor cx={cx} cy={cy} R={262} spin={v.spin} idp="intro" />
+        {/* the vault interior, revealed as the door swings open */}
+        {v.open > 0.01 && (
+          <g>
+            <defs>
+              <radialGradient id="intro-in" cx="50%" cy="45%" r="60%">
+                <stop offset="0" stopColor="#fff6dc" />
+                <stop offset="1" stopColor="#d9c99c" />
+              </radialGradient>
+            </defs>
+            <circle cx={cx} cy={cy} r={262} fill="#b89a52" />
+            <circle cx={cx} cy={cy} r={244} fill="url(#intro-in)" />
+            {Array.from({ length: 4 }, (_, row) => (
+              <g key={row}>
+                <rect x={cx - 200} y={cy - 150 + row * 84 + 58} width={400} height={8} rx={3} fill="#a88b45" opacity={0.6} />
+                {Array.from({ length: 7 }, (_, i) => {
+                  const gold = row === 3 && i > 1;
+                  const w = gold ? 46 : 40;
+                  const x = cx - 180 + i * 56;
+                  const y = cy - 150 + row * 84;
+                  const q = Math.min(1, Math.max(0, v.open * 2.4 - 0.6 - (row * 7 + i) * 0.02));
+                  return gold ? (
+                    <path key={i} d={`M${x - w / 2 + 6},${y + 58} L${x + w / 2 - 6},${y + 58} L${x + w / 2},${y + 30} L${x - w / 2},${y + 30} Z`} fill={C.brass} stroke="#9c7425" strokeWidth={1.5} opacity={q} transform={`translate(0,${(1 - q) * 10})`} />
+                  ) : (
+                    <rect key={i} x={x - w / 2} y={y + 14 + (1 - q) * 10} width={w} height={44} rx={7} fill={row < 3 ? C.green : C.btc} opacity={q} />
+                  );
+                })}
+              </g>
+            ))}
+          </g>
+        )}
+        {(() => {
+          const th = smooth(v.open) * 1.25;
+          const hx = cx - 262;
+          const c = Math.cos(th), sn = Math.sin(th);
+          return (
+            <g transform={`translate(${hx},${cy}) matrix(${c},${sn * 0.32},0,1,0,0) translate(${-hx},${-cy})`}>
+              {v.open > 0.01 && <ellipse cx={cx} cy={cy} rx={262} ry={262} fill="#9c7425" transform={`translate(${-14 * sn},0)`} />}
+              <VaultDoor cx={cx} cy={cy} R={262} spin={v.spin + v.open * 90} idp="intro" />
+            </g>
+          );
+        })()}
       </g>
       {/* 1 USD ⇄ 1 USDT */}
       <g opacity={flow} transform={`translate(0,${(1 - flow) * 16})`}>

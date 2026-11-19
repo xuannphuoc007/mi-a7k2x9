@@ -63,6 +63,12 @@ export default function BirthScene() {
               </g>
             );
           })}
+          <g opacity={smooth(clamp(v.tl * 6))}>
+            <Logo x={160} y={420} w={64} h={64} href="/img/btc.svg" />
+            <text x={204} y={428} fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: big(12, 20) }}>
+              {L.onBtc}
+            </text>
+          </g>
           <g opacity={smooth(clamp((v.tl - 0.85) * 6))}>
             <Logo x={840} y={330} w={190} h={190} href="/img/tether.png" />
           </g>

@@ -98,55 +98,90 @@ export default function GrowthScene() {
         </text>
       </g>
 
-      {/* where it lives */}
+      {/* where it lives — and where it moves */}
       {chO > 0.01 && (
         <g opacity={chO}>
-          <text x={X0} y={by - 50} fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: tf, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            {L.chainsTitle}
-          </text>
           {(() => {
             const vals = [92.4, 73.6, 17.8];
             const total = 183.8;
             const cols = ["#eb0029", "#627eea", C.grey];
+            const logos = ["/img/tron.png", "/img/eth.svg", ""];
+            const y1 = 690, y2 = 830, h = 64;
             let x = X0;
-            return L.chains.map((c, i) => {
-              const w = ((X1 - X0) * vals[i]) / total * smooth(clamp(v.chains * 1.5 - i * 0.2));
-              const g = (
-                <g key={c.name}>
-                  <rect x={x} y={by} width={Math.max(0, w - 6)} height={90} rx={10} fill={cols[i]} />
-                  {w > 120 && (
-                    <>
-                      <text x={x + 18} y={by + 40} fill="#fff" style={{ fontFamily: "var(--font-sans)", fontSize: big(16, 24), fontWeight: 600 }}>
-                        {c.name}
-                      </text>
-                      <text x={x + 18} y={by + 72} fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: big(14, 22) }}>
-                        {c.val}
-                      </text>
-                    </>
+            const grow = (k: number) => smooth(clamp(v.chains * 1.5 - k * 0.2));
+            return (
+              <g>
+                <text x={X0} y={y1 - 16} fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: tf, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  {L.chainsTitle}
+                </text>
+                {L.chains.map((ch, k) => {
+                  const w = (((X1 - X0) * vals[k]) / total) * grow(k);
+                  const g = (
+                    <g key={ch.name}>
+                      <rect x={x} y={y1} width={Math.max(0, w - 6)} height={h} rx={10} fill={cols[k]} />
+                      {logos[k] && w > 90 && <Logo x={x + 34} y={y1 + h / 2} w={40} h={40} href={logos[k]} />}
+                      {w > 200 && (
+                        <text x={x + 64} y={y1 + h / 2 + 8} fill="#fff" style={{ fontFamily: "var(--font-mono)", fontSize: big(15, 22), fontWeight: 600 }}>
+                          {ch.val}
+                        </text>
+                      )}
+                      {k === 2 && w > 40 && (
+                        <g>
+                          <Logo x={x + w / 2 - 22} y={y1 + h + 30} w={34} h={34} href="/img/bnb.png" />
+                          <Logo x={x + w / 2 + 22} y={y1 + h + 30} w={34} h={34} href="/img/sol.png" />
+                        </g>
+                      )}
+                    </g>
+                  );
+                  x += w;
+                  return g;
+                })}
+                {/* transfers: Tron carries ~73% */}
+                <g opacity={smooth(clamp(v.chains * 2 - 0.9))}>
+                  <text x={X0} y={y2 - 16} fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: tf, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                    {L.moveTitle}
+                  </text>
+                  <rect x={X0} y={y2} width={(X1 - X0) * 0.73 - 6} height={h} rx={10} fill="#eb0029" />
+                  <rect x={X0 + (X1 - X0) * 0.73} y={y2} width={(X1 - X0) * 0.27} height={h} rx={10} fill={C.line} />
+                  {Array.from({ length: 12 }, (_, k) => {
+                    const ph = (v.chains * 3 + k / 12) % 1;
+                    return <circle key={k} cx={X0 + 220 + ph * ((X1 - X0) * 0.73 - 240)} cy={y2 + h / 2} r={6} fill="#fff" opacity={0.7} />;
+                  })}
+                  <text x={X0 + 20} y={y2 + h / 2 + 8} fill="#fff" style={{ fontFamily: "var(--font-sans)", fontSize: big(16, 24), fontWeight: 700 }}>
+                    {L.moveTron}
+                  </text>
+                  {!mobile && (
+                    <text x={X1 - 12} y={y2 + h / 2 + 7} textAnchor="end" fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: big(12, 18) }}>
+                      {L.moveRest}
+                    </text>
                   )}
                 </g>
-              );
-              x += w;
-              return g;
-            });
+              </g>
+            );
           })()}
-          <Logo x={X0 + 30} y={by + 150} w={52} h={52} href="/img/tron.png" />
         </g>
       )}
 
-      {/* frozen */}
+      {/* frozen: 100 wallets, ~4 ever released */}
       {frO > 0.01 && (
         <g opacity={frO}>
-          <g transform={`translate(${X0 + 60},${by + 40})`}>
-            <path d="M-30,-10 v-26 a30,30 0 0 1 60,0 v26" fill="none" stroke={C.ink} strokeWidth={9} />
-            <rect x={-48} y={-12} width={96} height={80} rx={12} fill={C.warn} />
-            <circle cx={0} cy={22} r={10} fill="#fff" />
-          </g>
-          <text x={X0 + 150} y={by + 40} fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(34, 48), fontWeight: 500 }}>
+          <text x={X0} y={by - 70} fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(30, 42), fontWeight: 500 }}>
             {L.frozen}
           </text>
-          <text x={X0 + 150} y={by + 40 + big(15, 24) * 1.8} fill={C.mute} style={{ fontFamily: "var(--font-sans)", fontSize: big(15, 24) }}>
-            {L.frozenSub}
+          {Array.from({ length: 100 }, (_, k) => {
+            const col = k % 20, row = Math.floor(k / 20);
+            const x = X0 + 14 + col * ((X1 - X0) / 20), y = by + 24 + row * 36;
+            const q = smooth(clamp(v.freeze * 2.2 - k * 0.008));
+            const free = [13, 37, 58, 86].includes(k) && v.freeze > 0.7;
+            return (
+              <g key={k} opacity={q} transform={`translate(${x},${y}) scale(0.62)`}>
+                <path d={free ? "M-14,-6 v-14 a14,14 0 0 1 28,0" : "M-14,-6 v-12 a14,14 0 0 1 28,0 v12"} fill="none" stroke={free ? C.green : C.ink} strokeWidth={6} />
+                <rect x={-20} y={-8} width={40} height={32} rx={6} fill={free ? C.green : C.warn} />
+              </g>
+            );
+          })}
+          <text x={X0} y={by - 70 + big(15, 22) * 1.9} fill={C.mute} style={{ fontFamily: "var(--font-sans)", fontSize: big(15, 22) }}>
+            {L.lockNote}
           </text>
         </g>
       )}

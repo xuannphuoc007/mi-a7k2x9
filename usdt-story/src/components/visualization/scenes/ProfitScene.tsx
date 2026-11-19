@@ -19,7 +19,7 @@ export default function ProfitScene() {
   const { big, mobile } = useK();
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, a: 0, drip: 0, bars: 0, uses: 0, model: 0, exit: 0 },
+    { vis: 0, a: 0, drip: 0, bars: 0, uses: 0, model: 0, rate: 0, flowT: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.04))
         .to(v, { a: 1, duration: 0.08 }, at(-0.02))
@@ -27,6 +27,8 @@ export default function ProfitScene() {
         .to(v, { bars: 1, duration: 0.14 }, at(0.24))
         .to(v, { uses: 1, duration: 0.1 }, at(0.48))
         .to(v, { model: 1, duration: 0.1 }, at(0.7))
+        .to(v, { flowT: 6, duration: 0.24, ease: "none" }, at(0.7))
+        .to(v, { rate: 1, duration: 0.12 }, at(0.78))
         .to(v, { exit: 1, duration: 0.07 }, at(0.93))
         .to(v, { vis: 0, duration: 0.01, ease: "none" }, at(1.0));
     },
@@ -109,29 +111,38 @@ export default function ProfitScene() {
         </g>
       )}
 
-      {/* C: where the profit goes */}
+      {/* C: one Tether employee vs ~300 Goldman Sachs employees */}
       {usesO > 0.01 && (
         <g opacity={usesO}>
-          <Logo x={500} y={430} w={180} h={180} href="/img/tether.png" />
-          {L.uses.map((u, i) => {
-            const q = smooth(clamp(v.uses * 2 - i * 0.25));
-            const y = 430 + (i === 1 ? 300 : 170) * q;
-            const col = [C.btc, C.brass, C.sky][i];
-            const w = Math.max(160, u.length * big(15, 24) * 0.6 + 40);
-            const spread = mobile ? 220 : 240;
-            const xx = i === 0 ? 500 - spread * q : i === 2 ? 500 + spread * q : 500;
+          <g transform="translate(200,470)">
+            <circle r={110} fill={C.accentSoft} />
+            <circle cy={-38} r={30} fill={C.green} />
+            <path d="M-46,52 C-46,6 -26,-4 0,-4 C26,-4 46,6 46,52 Z" fill={C.green} />
+            <Logo x={0} y={-150} w={70} h={70} href="/img/tether.png" />
+          </g>
+          <text x={200} y={630 + big(15, 24)} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-sans)", fontSize: big(15, 24), fontWeight: 600 }}>
+            {L.empOne}
+          </text>
+          <text x={395} y={485} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: 64 }}>
+            =
+          </text>
+          {Array.from({ length: 300 }, (_, k) => {
+            const col = k % 15, row = Math.floor(k / 15);
+            const x = 470 + col * 30, y = 200 + row * 27;
+            const q = Math.min(1, Math.max(0, v.uses * 1.8 - k * 0.0025));
+            if (q <= 0.01) return null;
             return (
-              <g key={u} opacity={q}>
-                <line x1={500} y1={430} x2={xx} y2={y} stroke={C.line} strokeWidth={3} />
-                <rect x={xx - w / 2} y={y - 30} width={w} height={60} rx={30} fill="#fff" stroke={col} strokeWidth={3} />
-                <text x={xx} y={y + big(15, 24) * 0.35} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-sans)", fontSize: big(15, 24), fontWeight: 500 }}>
-                  {u}
-                </text>
+              <g key={k} opacity={q}>
+                <circle cx={x} cy={y - 6} r={5} fill={C.grey} />
+                <path d={`M${x - 8},${y + 12} C${x - 8},${y + 2} ${x - 4},${y} ${x},${y} C${x + 4},${y} ${x + 8},${y + 2} ${x + 8},${y + 12} Z`} fill={C.grey} />
               </g>
             );
           })}
-          <text x={500} y={230} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontSize: big(26, 42) }}>
-            {L.usesTitle}
+          <text x={680} y={770 + big(14, 22)} textAnchor="middle" fill={C.mute} style={{ fontFamily: "var(--font-sans)", fontSize: big(14, 22), fontWeight: 500 }}>
+            {L.empMany}
+          </text>
+          <text x={500} y={890} textAnchor="middle" fill={C.gd} style={{ fontFamily: "var(--font-serif)", fontSize: big(26, 38), fontWeight: 500 }}>
+            {L.empVal}
           </text>
         </g>
       )}
@@ -140,7 +151,7 @@ export default function ProfitScene() {
       {modelO > 0.01 && (
         <g opacity={modelO}>
           {(() => {
-            const y = 500;
+            const y = 470;
             const nodes = [
               { x: 160, label: "USDT", sub: L.nodes[0], col: C.warn },
               { x: 500, label: "Tether", sub: L.nodes[1], col: C.green },
@@ -167,7 +178,31 @@ export default function ProfitScene() {
                     </text>
                   </g>
                 ))}
-                <text x={500} y={y + 230} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: big(28, 46) }}>
+                {/* interest flowing back from the US government to Tether; it thins as rates fall */}
+                <path d={`M840,${y - 80} C760,${y - 230} 580,${y - 230} 520,${y - 90}`} fill="none" stroke={C.line} strokeWidth={3} strokeDasharray="3 8" />
+                {Array.from({ length: 10 }, (_, k) => {
+                  const dens = 1 - 0.55 * smooth(v.rate);
+                  if (k / 10 > dens) return null;
+                  const ph = (v.flowT + k / 10) % 1;
+                  const bx = (1 - ph) ** 3 * 840 + 3 * (1 - ph) ** 2 * ph * 760 + 3 * (1 - ph) * ph ** 2 * 580 + ph ** 3 * 520;
+                  const by = (1 - ph) ** 3 * (y - 80) + 3 * (1 - ph) ** 2 * ph * (y - 230) + 3 * (1 - ph) * ph ** 2 * (y - 230) + ph ** 3 * (y - 90);
+                  return <circle key={k} cx={bx} cy={by} r={10} fill={C.brass} stroke="#9c7425" strokeWidth={2} />;
+                })}
+                {/* rate slider */}
+                <g transform={`translate(0,${y + 200})`}>
+                  <line x1={260} x2={740} y1={0} y2={0} stroke={C.line} strokeWidth={8} strokeLinecap="round" />
+                  <circle cx={lerp(700, 300, smooth(v.rate))} cy={0} r={18} fill={C.ink} />
+                  <text x={260} y={-26} fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: big(12, 19) }}>
+                    {L.rateLow}
+                  </text>
+                  <text x={740} y={-26} textAnchor="end" fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: big(12, 19) }}>
+                    {L.rateHigh}
+                  </text>
+                  <text x={500} y={70} textAnchor="middle" fill={C.warn} opacity={smooth(v.rate)} style={{ fontFamily: "var(--font-serif)", fontSize: big(24, 36), fontWeight: 500 }}>
+                    {L.rateNote}
+                  </text>
+                </g>
+                <text x={500} y={180} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: big(26, 40) }}>
                   {L.model}
                 </text>
               </g>

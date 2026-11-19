@@ -19,10 +19,11 @@ export default function VietnamScene() {
   const { big, mobile } = useK();
   const v = useSceneTimeline(
     IDX,
-    { vis: 0, rank: 0, p2p: 0, flow: 0, board: 0, risks: 0, law: 0, exit: 0 },
+    { vis: 0, rank: 0, cmp: 0, p2p: 0, flow: 0, board: 0, risks: 0, law: 0, exit: 0 },
     (tl, v, at) => {
       tl.to(v, { vis: 1, duration: 0.04, ease: "none" }, at(-0.04))
-        .to(v, { rank: 1, duration: 0.08 }, at(-0.02))
+        .to(v, { rank: 1, duration: 0.06 }, at(-0.02))
+        .to(v, { cmp: 1, duration: 0.12 }, at(0.03))
         .to(v, { p2p: 1, duration: 0.06 }, at(0.17))
         .to(v, { flow: 1, duration: 0.14, ease: "none" }, at(0.21))
         .to(v, { board: 1, duration: 0.08 }, at(0.36))
@@ -42,19 +43,44 @@ export default function VietnamScene() {
   const lawO = fadeIn(smooth(v.law));
   return (
     <g opacity={v.vis * (1 - ex)}>
-      {/* A: #4 */}
+      {/* A: #4 — and $220B a year next to the whole economy */}
       {rankO > 0.01 && (
         <g opacity={rankO}>
-          <text x={500} y={560} textAnchor="middle" fill={C.gd} style={{ fontFamily: "var(--font-serif)", fontSize: 300, fontWeight: 400 }}>
-            {L.rank}
-          </text>
-          <text x={500} y={660} textAnchor="middle" fill={C.ink} style={{ fontFamily: "var(--font-mono)", fontSize: big(18, 30), letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            {L.rankSub}
-          </text>
-          {/* a small flag-like band: red with a gold star */}
-          <g transform="translate(500,760)">
-            <rect x={-60} y={-40} width={120} height={80} rx={6} fill="#da251d" />
-            <path d="M0,-24 L7,-6 L26,-6 L11,5 L17,23 L0,12 L-17,23 L-11,5 L-26,-6 L-7,-6 Z" fill="#ffcd00" />
+          <g transform="translate(110,250)">
+            <rect x={0} y={-62} width={86} height={58} rx={6} fill="#da251d" />
+            <path d="M43,-50 L48,-38 L61,-38 L51,-30 L55,-17 L43,-25 L31,-17 L35,-30 L25,-38 L38,-38 Z" fill="#ffcd00" />
+            <text x={110} y={-10} fill={C.gd} style={{ fontFamily: "var(--font-serif)", fontSize: 92, fontWeight: 450 }}>
+              {L.rank}
+            </text>
+            <text x={250} y={-24} fill={C.ink} style={{ fontFamily: "var(--font-mono)", fontSize: big(14, 22), letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              {L.rankSub}
+            </text>
+          </g>
+          {[
+            { label: L.gdp, val: L.gdpVal, w: 1, col: C.grey, y: 380 },
+            { label: L.crypto, val: L.cryptoVal, w: 220 / 514, col: C.green, y: 600 },
+          ].map((b, k) => {
+            const q = smooth(clamp(v.cmp * 1.6 - k * 0.5));
+            return (
+              <g key={b.label}>
+                <text x={110} y={b.y - 22} fill={C.mute} style={{ fontFamily: "var(--font-mono)", fontSize: big(13, 21), letterSpacing: "0.04em" }}>
+                  {b.label}
+                </text>
+                <rect x={110} y={b.y} width={780 * b.w * q} height={110} rx={14} fill={b.col} />
+                <text x={k === 0 ? 130 : 110 + 780 * b.w * q + 24} y={b.y + 70} fill={k === 0 ? "#fff" : C.gd} opacity={q} style={{ fontFamily: "var(--font-serif)", fontSize: big(34, 46), fontWeight: 500 }}>
+                  {b.val}
+                </text>
+              </g>
+            );
+          })}
+          <g opacity={smooth(clamp(v.cmp * 2 - 1.2))}>
+            <line x1={110 + 780 * (220 / 514)} x2={110 + 780 * (220 / 514)} y1={380} y2={710} stroke={C.ink} strokeWidth={2} strokeDasharray="6 6" />
+            <text x={110} y={830} fill={C.gd} style={{ fontFamily: "var(--font-serif)", fontSize: big(56, 72), fontWeight: 500 }}>
+              {L.pct}
+            </text>
+            <text x={110 + big(56, 72) * 3.2} y={820} fill={C.mute} style={{ fontFamily: "var(--font-sans)", fontSize: big(15, 22) }}>
+              {L.gdpShare}
+            </text>
           </g>
         </g>
       )}

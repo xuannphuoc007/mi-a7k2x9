@@ -134,6 +134,15 @@ export default function Story() {
                               {n}
                             </p>
                           ))}
+                          {beat.insight && (
+                            <aside className="mt-4 border-l-[3px] border-[#c49a3a] bg-[#fbf5e6] px-4 py-3">
+                              <div className="tag flex items-center gap-2 text-[#9c7425]">
+                                <svg aria-hidden width="12" height="12" viewBox="0 0 12 12"><path d="M6 0 L7.4 4.6 L12 6 L7.4 7.4 L6 12 L4.6 7.4 L0 6 L4.6 4.6 Z" fill="currentColor" /></svg>
+                                {t.ui.insight}
+                              </div>
+                              <p className="serif mt-1.5 text-[18px] leading-snug text-ink">{beat.insight}</p>
+                            </aside>
+                          )}
                           {beat.deep && beat.deep.length > 0 && (
                             <details className="group mt-4 border-t border-line pt-2.5">
                               <summary className="tag flex cursor-pointer list-none items-center gap-2 text-mute hover:text-accent">
