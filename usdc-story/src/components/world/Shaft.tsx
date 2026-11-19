@@ -1,79 +1,66 @@
 "use client";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import * as THREE from "three";
 import { scrollState, local, ramp, smooth } from "@/lib/timeline";
-import { COL, clock, g, tmpC, tmpM, tmpQ, tmpS, tmpV, xr } from "./shared";
+import { COL, g, tmpM, tmpQ, tmpS, tmpV, xr } from "./shared";
 
-/** The descent from the packet into the financial infrastructure: a lit shaft that ends at the vault hatch. */
-const PATH = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0, -1.5, -8),
-  new THREE.Vector3(0, -6, -14),
-  new THREE.Vector3(0, -16, -21),
-  new THREE.Vector3(0, -30, -27),
-  new THREE.Vector3(0, -43, -30),
-]);
-const N = 46;
+/** A glass elevator shaft from the table down to the vault antechamber. */
+const TOP = -1.2;
+const BOT = -56;
+const N = 28;
+const R = 3.8;
 
 export default function Shaft() {
   const grp = useRef<THREE.Group>(null);
   const rings = useRef<THREE.InstancedMesh>(null);
-  const lines = useRef<THREE.LineBasicMaterial>(null);
-  const frames = useMemo(() => PATH.computeFrenetFrames(N, false), []);
-  const railGeo = useMemo(() => {
-    const arr: number[] = [];
-    for (let k = 0; k < 8; k++) {
-      const a = (k / 8) * Math.PI * 2;
-      const pts = PATH.getPoints(80).map((p, i) => {
-        const tng = PATH.getTangentAt(i / 80);
-        const side = new THREE.Vector3().crossVectors(tng, new THREE.Vector3(1, 0, 0)).normalize();
-        const up = new THREE.Vector3(1, 0, 0);
-        return p.clone().add(side.multiplyScalar(Math.cos(a) * 4.2)).add(up.multiplyScalar(Math.sin(a) * 4.2));
-      });
-      for (let i = 0; i < pts.length - 1; i++) arr.push(pts[i].x, pts[i].y, pts[i].z, pts[i + 1].x, pts[i + 1].y, pts[i + 1].z);
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3));
-    return geo;
-  }, []);
+  const glass = useRef<THREE.MeshPhysicalMaterial>(null);
+  const led = useRef<THREE.MeshBasicMaterial>(null);
   useFrame(() => {
     const u = scrollState.u;
-    const vis = u > g("s01", 0.55) && u < g("s03", 0.25);
+    const vis = u > g("s01", 0.55) && u < g("s03", 0.2);
     if (grp.current) grp.current.visible = vis;
     if (!vis || !rings.current) return;
-    const tl = local("s01", u);
-    const on = smooth(ramp(tl, 0.6, 0.75));
-    const tm = clock.t;
+    const on = smooth(ramp(local("s01", u), 0.58, 0.74));
     for (let i = 0; i < N; i++) {
-      const s = i / (N - 1);
-      PATH.getPoint(s, tmpV);
-      tmpQ.setFromUnitVectors(Z, frames.tangents[i]);
-      const appear = smooth(ramp(on * 1.3 - s * 0.3, 0, 1));
-      tmpS.setScalar(Math.max(0.001, appear));
+      const y = TOP - (i / (N - 1)) * (TOP - BOT);
+      tmpV.set(0, y, -8);
+      tmpQ.setFromAxisAngle(tmpS.set(1, 0, 0), Math.PI / 2);
+      const a = Math.max(0.001, smooth(ramp(on * 1.4 - (i / N) * 0.4, 0, 1)));
+      tmpS.set(a, a, a);
       tmpM.compose(tmpV, tmpQ, tmpS);
       rings.current.setMatrixAt(i, tmpM);
-      const pulse = 0.5 + 0.5 * Math.sin(tm * 2 - s * 18);
-      tmpC.set(COL.usdc).lerp(C2.set(COL.ice), pulse * 0.5).multiplyScalar(0.5 + pulse * 0.7);
-      rings.current.setColorAt(i, tmpC);
     }
     rings.current.instanceMatrix.needsUpdate = true;
-    if (rings.current.instanceColor) rings.current.instanceColor.needsUpdate = true;
-    if (lines.current) {
-      lines.current.opacity = on * (0.35 + 0.4 * xr.v);
-      lines.current.visible = lines.current.opacity > 0.005;
-    }
+    if (glass.current) glass.current.opacity = on * (0.16 - 0.1 * xr.v);
+    if (led.current) led.current.opacity = on * 0.9;
   });
+  const H = TOP - BOT;
   return (
     <group ref={grp}>
       <instancedMesh ref={rings} args={[undefined, undefined, N]} frustumCulled={false}>
-        <torusGeometry args={[4.2, 0.035, 8, 90]} />
-        <meshBasicMaterial toneMapped={false} />
+        <torusGeometry args={[R, 0.09, 12, 72]} />
+        <meshStandardMaterial color={COL.silver} metalness={0.9} roughness={0.3} />
       </instancedMesh>
-      <lineSegments geometry={railGeo}>
-        <lineBasicMaterial ref={lines} color={COL.volt} transparent opacity={0} />
-      </lineSegments>
+      {Array.from({ length: 6 }, (_, k) => {
+        const a = (k / 6) * Math.PI * 2 + 0.3;
+        return (
+          <mesh key={k} position={[Math.cos(a) * R, (TOP + BOT) / 2, -8 + Math.sin(a) * R]}>
+            <boxGeometry args={[0.14, H, 0.14]} />
+            <meshStandardMaterial color="#c9a24a" metalness={0.85} roughness={0.3} />
+          </mesh>
+        );
+      })}
+      <mesh position={[0, (TOP + BOT) / 2, -8]}>
+        <cylinderGeometry args={[R - 0.05, R - 0.05, H, 48, 1, true]} />
+        <meshPhysicalMaterial ref={glass} color="#dfeefc" roughness={0.08} metalness={0} transparent opacity={0} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      {Array.from({ length: 6 }, (_, k) => (
+        <mesh key={k} position={[0, TOP - 4 - k * 9, -8]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[R - 0.12, 0.025, 6, 72]} />
+          <meshBasicMaterial ref={k === 0 ? led : undefined} color={COL.usdc} transparent opacity={0.9} />
+        </mesh>
+      ))}
     </group>
   );
 }
-const Z = new THREE.Vector3(0, 0, 1);
-const C2 = new THREE.Color();

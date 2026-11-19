@@ -1,10 +1,11 @@
 "use client";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { scrollState, local, ramp, smooth, band, lerp } from "@/lib/timeline";
 import { useI18n } from "@/lib/i18n";
-import { COL, packetPoints, rnd, tmpM, tmpQ, tmpV, tmpS, tmpC, clock, xr, g } from "./shared";
+import { COL, coinPoints, loadSampler, rnd, tmpM, tmpQ, tmpV, tmpS, tmpC, clock, xr, g } from "./shared";
+import { asset } from "@/lib/asset";
 import Tag from "./Tag";
 
 const W = 6.6;
@@ -115,7 +116,7 @@ export default function Hero() {
         paper.push(new THREE.Color(img[i] / 255, img[i + 1] / 255, img[i + 2] / 255).convertSRGBToLinear());
       }
     // packet targets, sorted so tiles fly to nearby facets (keeps the morph legible)
-    const { pts, nrm } = packetPoints(N, 1.55);
+    const { pts, nrm } = coinPoints(N, 1.75);
     const order = pts.map((p, i) => ({ i, k: Math.atan2(p.y, p.x) + p.z * 0.4 }));
     const gord = grid.map((p, i) => ({ i, k: Math.atan2(p.y * 2.3, p.x) }));
     order.sort((a, b) => a.k - b.k);
@@ -126,16 +127,31 @@ export default function Hero() {
       target[gord[j].i] = pts[order[j].i];
       normal[gord[j].i] = nrm[order[j].i];
     }
-    const digital = paper.map((_, i) => new THREE.Color(rnd(i) > 0.55 ? COL.volt : rnd(i + 9) > 0.5 ? COL.usdc : COL.ice).convertSRGBToLinear());
-    const qn = normal.map((n) => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n));
+    const digital = paper.map(() => new THREE.Color(COL.usdc).convertSRGBToLinear());
+    const qn = normal.map((n) => (n.z > 0 ? new THREE.Quaternion() : new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)));
     return { tex, grid, paper, target, qn, digital, tw, th };
   }, [N, COLS, ROWS]);
+
+  // paint the token with the real USDC logo once the image is loaded
+  useEffect(() => {
+    if (!data) return;
+    let live = true;
+    loadSampler(asset("/img/usdc.png")).then((sample) => {
+      if (!live) return;
+      data.target.forEach((p, i) => {
+        const x = p.z > 0 ? p.x : -p.x;
+        data.digital[i].copy(sample((x / 1.75 + 1) / 2, 1 - (p.y / 1.75 + 1) / 2));
+      });
+    });
+    return () => {
+      live = false;
+    };
+  }, [data]);
 
   const inst = useRef<THREE.InstancedMesh>(null);
   const plane = useRef<THREE.Mesh>(null);
   const planeMat = useRef<THREE.MeshStandardMaterial>(null);
   const tileMat = useRef<THREE.MeshStandardMaterial>(null);
-  const glow = useRef<THREE.Mesh>(null);
   const group = useRef<THREE.Group>(null);
   const halo = useRef<THREE.Mesh>(null);
   const wire = useRef<THREE.LineSegments>(null);
@@ -147,7 +163,7 @@ export default function Hero() {
   const qT = useMemo(() => new THREE.Quaternion(), []);
   const bR = useMemo(() => new THREE.Vector3(), []);
   const Y = useMemo(() => new THREE.Vector3(0, 1, 0), []);
-  const wireGeo = useMemo(() => new THREE.EdgesGeometry(new THREE.OctahedronGeometry(1.62)), []);
+  const wireGeo = useMemo(() => new THREE.EdgesGeometry(new THREE.CylinderGeometry(1.8, 1.8, 0.2, 48).rotateX(Math.PI / 2), 30), []);
 
   useFrame(() => {
     if (!data || !inst.current || !group.current) return;
@@ -169,7 +185,7 @@ export default function Hero() {
     inst.current.visible = tl > 0.215;
 
     const shown = tl > 0.215;
-    rotQ.setFromAxisAngle(Y, tm * 0.12);
+    rotQ.setFromAxisAngle(Y, Math.sin(tm * 0.35) * 0.45);
     if (shown) {
       for (let i = 0; i < data.grid.length; i++) {
         const a = data.grid[i];
@@ -190,7 +206,7 @@ export default function Hero() {
         spin.setFromAxisAngle(axis, bi * (2 + r1 * 3));
         qT.multiplyQuaternions(rotQ, data.qn[i]);
         tmpQ.slerpQuaternions(ident, qT, mi).multiply(spin);
-        const sc = lerp(1, 0.78, mi);
+        const sc = lerp(1, 0.97, mi);
         tmpS.set(sc, sc, 1);
         tmpM.compose(tmpV, tmpQ, tmpS);
         inst.current.setMatrixAt(i, tmpM);
@@ -201,20 +217,15 @@ export default function Hero() {
       if (inst.current.instanceColor) inst.current.instanceColor.needsUpdate = true;
     }
     if (tileMat.current) {
-      tileMat.current.emissiveIntensity = 0.05 + m * 0.9 + burst * 0.4;
+      tileMat.current.emissiveIntensity = burst * 0.08;
       tileMat.current.opacity = 1 - 0.75 * xr.v;
-    }
-    if (glow.current) {
-      const s = 0.2 + m * 1.0;
-      glow.current.scale.setScalar(s);
-      (glow.current.material as THREE.MeshBasicMaterial).opacity = m * 0.55 * (1 - ramp(tl, 0.66, 0.74) * 0.6);
     }
     if (halo.current) {
       halo.current.rotation.z = tm * 0.1;
       (halo.current.material as THREE.MeshBasicMaterial).opacity = band(tl, 0.42, 0.52, 0.6, 0.68) * 0.6;
     }
     if (wire.current) {
-      wire.current.rotation.y = tm * 0.12;
+      wire.current.rotation.y = Math.sin(tm * 0.35) * 0.45;
       const wo = xr.v * smooth(ramp(tl, 0.4, 0.5));
       (wire.current.material as THREE.LineBasicMaterial).opacity = wo;
       wire.current.visible = wo > 0.005;
@@ -230,32 +241,38 @@ export default function Hero() {
   if (!data) return null;
   return (
     <group ref={group}>
-      <mesh ref={plane} position={[0, 0, 0]}>
+      {/* light oak table the note floats above: grounds the scene with a real shadow */}
+      <mesh position={[0, -2.45, -0.6]} receiveShadow>
+        <boxGeometry args={[13, 0.3, 8]} />
+        <meshStandardMaterial color="#dcc7a4" roughness={0.62} metalness={0} />
+      </mesh>
+      <mesh position={[0, -2.29, -0.6]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[12.6, 7.6]} />
+        <shadowMaterial opacity={0.18} />
+      </mesh>
+      <mesh ref={plane} position={[0, 0, 0]} castShadow>
         <planeGeometry args={[W, H]} />
         <meshStandardMaterial ref={planeMat} map={data.tex} transparent roughness={0.85} metalness={0} side={THREE.DoubleSide} />
       </mesh>
-      <instancedMesh ref={inst} args={[undefined, undefined, N]} frustumCulled={false}>
+      <instancedMesh ref={inst} args={[undefined, undefined, N]} frustumCulled={false} castShadow>
         <boxGeometry args={[data.tw * 0.985, data.th * 0.985, 0.012]} />
         <meshStandardMaterial
           ref={tileMat}
-          roughness={0.55}
-          metalness={0.25}
+          roughness={0.3}
+          metalness={0.35}
+          envMapIntensity={1.1}
           emissive={COL.usdc}
           emissiveIntensity={0}
           side={THREE.DoubleSide}
           transparent
         />
       </instancedMesh>
-      <mesh ref={glow}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshBasicMaterial color={COL.volt} transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
       <mesh ref={halo} rotation={[0, 0, 0]}>
-        <ringGeometry args={[2.3, 2.34, 128]} />
-        <meshBasicMaterial color={COL.ice} transparent opacity={0} side={THREE.DoubleSide} />
+        <ringGeometry args={[2.3, 2.33, 128]} />
+        <meshBasicMaterial color={COL.usdc} transparent opacity={0} side={THREE.DoubleSide} />
       </mesh>
       <lineSegments ref={wire} geometry={wireGeo}>
-        <lineBasicMaterial color={COL.ice} transparent opacity={0} />
+        <lineBasicMaterial color={COL.usdc} transparent opacity={0} />
       </lineSegments>
 
       <Tag kind="cine" position={[-3.3, 1.75, 0]} text={L.note} vis={noteVis} />

@@ -9,13 +9,14 @@ import Hero from "./Hero";
 import Vault from "./Vault";
 import Portal from "./Portal";
 import Shaft from "./Shaft";
-import { COL, clock, rnd, xr } from "./shared";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { COL, clock, rnd, xr, LOOK } from "./shared";
 
 /** One render loop drives clocks and the X-RAY blend; the scene graph never rebuilds on toggle. */
 function Driver() {
   const { scene } = useThree();
   const bg = useMemo(() => new THREE.Color(COL.night), []);
-  const bgX = useMemo(() => new THREE.Color("#0a1a33"), []);
+  const bgX = useMemo(() => new THREE.Color("#e2ebf7"), []);
   useFrame((_, dt) => {
     const { xray, reduced } = useView.getState();
     clock.reduced = reduced;
@@ -27,6 +28,58 @@ function Driver() {
   });
   return null;
 }
+
+/** Image-based light from a procedural studio room: gives metal and glass real reflections, no network fetch. */
+function Env() {
+  const { gl, scene } = useThree();
+  useEffect(() => {
+    const pm = new THREE.PMREMGenerator(gl);
+    const tex = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = tex;
+    scene.environmentIntensity = 0.65;
+    return () => {
+      tex.dispose();
+      pm.dispose();
+    };
+  }, [gl, scene]);
+  return null;
+}
+
+/** Daylight sun whose shadow box follows what the camera is looking at. */
+function Sun() {
+  const light = useRef<THREE.DirectionalLight>(null);
+  const { scene } = useThree();
+  useEffect(() => {
+    if (light.current) scene.add(light.current.target);
+  }, [scene]);
+  useFrame(() => {
+    const l = light.current;
+    if (!l) return;
+    l.target.position.copy(LOOK);
+    l.position.copy(LOOK).add(SUN_OFF);
+    l.target.updateMatrixWorld();
+  });
+  const mobile = typeof window !== "undefined" && window.innerWidth < 760;
+  return (
+    <directionalLight
+      ref={light}
+      intensity={1.9}
+      color="#fffaf0"
+      castShadow={!mobile}
+      shadow-mapSize-width={2048}
+      shadow-mapSize-height={2048}
+      shadow-camera-left={-22}
+      shadow-camera-right={22}
+      shadow-camera-top={22}
+      shadow-camera-bottom={-22}
+      shadow-camera-near={1}
+      shadow-camera-far={90}
+      shadow-bias={-0.0004}
+      shadow-normalBias={0.02}
+    />
+  );
+}
+const SUN_OFF = new THREE.Vector3(14, 30, 18);
 
 function Dust() {
   const n = typeof window !== "undefined" && window.innerWidth < 760 ? 900 : 1800;
@@ -47,7 +100,7 @@ function Dust() {
   });
   return (
     <points ref={ref} geometry={geo}>
-      <pointsMaterial color={COL.ice} size={0.07} transparent opacity={0.55} depthWrite={false} sizeAttenuation />
+      <pointsMaterial color="#9fb3cc" size={0.06} transparent opacity={0.35} depthWrite={false} sizeAttenuation />
     </points>
   );
 }
@@ -61,21 +114,23 @@ export default function World() {
       className="!fixed inset-0"
       style={{ position: "fixed", inset: 0, zIndex: 0 }}
       dpr={[1, typeof window !== "undefined" && window.innerWidth < 760 ? 1.5 : 1.75]}
+      shadows
       gl={{ antialias: true, powerPreference: "high-performance" }}
       camera={{ fov: 46, near: 0.05, far: 600, position: [0, 0.3, 15] }}
       onCreated={({ scene, gl }) => {
         scene.background = new THREE.Color(COL.night);
-        scene.fog = new THREE.FogExp2(COL.night, 0.011);
+        scene.fog = new THREE.FogExp2(COL.night, 0.0085);
         gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.05;
+        gl.toneMappingExposure = 0.9;
+        gl.shadowMap.type = THREE.PCFShadowMap;
       }}
     >
       <Driver />
       <CameraRig />
-      <ambientLight intensity={0.35} />
-      <hemisphereLight args={[COL.ice, COL.night, 0.55]} />
-      <directionalLight position={[6, 8, 10]} intensity={1.6} color="#f2f6ff" />
-      <directionalLight position={[-8, -4, -6]} intensity={0.5} color={COL.volt} />
+      <Env />
+      <Sun />
+      <ambientLight intensity={0.12} />
+      <hemisphereLight args={["#ffffff", "#b9c4d3", 0.5]} />
       <Dust />
       <Hero />
       <Shaft />

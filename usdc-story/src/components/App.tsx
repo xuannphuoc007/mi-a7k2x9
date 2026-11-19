@@ -64,7 +64,7 @@ function Header({ vh }: { vh: number }) {
   const cur = u < START.s03 ? "01" : u < START.s05 ? "03" : u < START.end ? "05" : "";
   const go = (id: SceneId) => window.scrollTo({ top: START[id] * vh + 2, behavior: useView.getState().reduced ? "auto" : "smooth" });
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex h-[52px] items-center justify-between gap-3 px-4 md:px-7" style={{ background: "linear-gradient(#070f20ee, #070f2000)" }}>
+    <header className="fixed inset-x-0 top-0 z-40 flex h-[52px] items-center justify-between gap-3 px-4 md:px-7" style={{ background: "linear-gradient(#eef2f7f2, #eef2f700)" }}>
       <button onClick={() => window.scrollTo({ top: 0 })} className="flex min-w-0 items-center gap-2.5 text-left">
         <img src={asset("/img/usdc.png")} alt="USDC" width={22} height={22} />
         <span className="mono hidden truncate text-[11px] uppercase tracking-[.16em] text-warm/90 lg:inline">{t.ui.project}</span>
@@ -78,7 +78,7 @@ function Header({ vh }: { vh: number }) {
               disabled={!live}
               onClick={() => live && go(live)}
               title={live ? undefined : "—"}
-              className={`mono rounded px-1.5 py-1 text-[11px] tracking-wider transition ${cur === n ? "text-warm" : live ? "text-mist hover:text-warm" : "cursor-default text-white/20"}`}
+              className={`mono rounded px-1.5 py-1 text-[11px] tracking-wider transition ${cur === n ? "text-warm" : live ? "text-mist hover:text-warm" : "cursor-default text-black/20"}`}
             >
               {n}
               <span className={`mx-auto mt-0.5 block h-px transition-all ${cur === n ? "w-full bg-volt" : "w-0"}`} />
@@ -87,7 +87,7 @@ function Header({ vh }: { vh: number }) {
         })}
       </nav>
       <div className="flex items-center gap-2">
-        <div className="mono flex items-center rounded-full border border-white/15 p-0.5 text-[10.5px] uppercase" role="group" aria-label="X-RAY">
+        <div className="mono flex items-center rounded-full border border-black/10 p-0.5 text-[10.5px] uppercase" role="group" aria-label="X-RAY">
           <span className="hidden px-2 text-volt sm:inline">X-ray</span>
           {[false, true].map((v) => (
             <button
@@ -100,7 +100,7 @@ function Header({ vh }: { vh: number }) {
             </button>
           ))}
         </div>
-        <div className="mono flex rounded-full border border-white/15 p-0.5 text-[10.5px]">
+        <div className="mono flex rounded-full border border-black/10 p-0.5 text-[10.5px]">
           {(["en", "vi"] as const).map((l) => (
             <button key={l} onClick={() => setLang(l)} className={`rounded-full px-2 py-1 uppercase ${lang === l ? "bg-warm text-night" : "text-mist"}`}>
               {l}
@@ -116,7 +116,7 @@ function Progress() {
   const u = useGlobalU(0.01);
   const p = Math.min(1, u / (TOTAL - 1));
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-[2px] bg-white/5">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-[2px] bg-black/5">
       <div className="h-full bg-volt" style={{ width: `${p * 100}%` }} />
     </div>
   );
@@ -131,7 +131,7 @@ function XrayVeil() {
         className="pointer-events-none fixed inset-0 z-[5] transition-opacity duration-500"
         style={{
           opacity: xray ? 1 : 0,
-          backgroundImage: "linear-gradient(rgba(96,180,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(96,180,255,.06) 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(rgba(39,117,202,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(39,117,202,.09) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
         }}
       />
@@ -144,8 +144,6 @@ function XrayVeil() {
 
 function BeatBlock({ b, top }: { b: BeatT; top: number }) {
   const { t } = useI18n();
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => setMobile(window.innerWidth < 768), []);
   const align = b.side === "l" ? "md:mr-auto md:ml-[6vw]" : b.side === "r" ? "md:ml-auto md:mr-[6vw]" : "mx-auto text-center";
   const veil = b.side === "l" ? "veil-l" : b.side === "r" ? "veil-r" : "veil-c";
   return (
@@ -163,9 +161,9 @@ function BeatBlock({ b, top }: { b: BeatT; top: number }) {
         {b.head && <h3 className="display shadow-text mb-3 text-[30px] font-semibold leading-[1.05] tracking-[-0.02em] text-warm md:text-[44px]">{b.head}</h3>}
         <p className="shadow-text text-[18px] font-light leading-[1.55] text-warm md:text-[21px]">{b.l1}</p>
         {b.l2 && (
-          <details className="group/l2 mt-4" open={!mobile}>
+          <details className="group/l2 mt-4">
             <summary className="mono mb-1 inline-flex items-center gap-2 text-[10px] uppercase tracking-[.18em] text-volt">
-              <span className="grid h-4 w-4 place-items-center rounded-full border border-volt/60 text-[10px] md:hidden">{"›"}</span>
+              <span className="grid h-4 w-4 place-items-center rounded-full border border-volt/60 text-[10px]">{"›"}</span>
               {t.ui.l2}
             </summary>
             <p className="shadow-text text-[15px] leading-[1.6] text-mist md:text-[16px]">{b.l2}</p>
@@ -177,7 +175,7 @@ function BeatBlock({ b, top }: { b: BeatT; top: number }) {
               <span className="grid h-4 w-4 place-items-center rounded-full border border-ice/60 text-[10px] transition group-open:rotate-45">+</span>
               {t.ui.deep}
             </summary>
-            <ul className="mt-2 space-y-1.5 border-l border-white/10 pl-3 text-[14px] leading-relaxed text-mist">
+            <ul className="mt-2 space-y-1.5 border-l border-black/10 pl-3 text-[14px] leading-relaxed text-mist">
               {b.deep.map((d) => (
                 <li key={d}>{d}</li>
               ))}
@@ -185,7 +183,7 @@ function BeatBlock({ b, top }: { b: BeatT; top: number }) {
           </details>
         )}
         {b.insight && (
-          <aside className="mt-5 border-l-2 border-volt bg-[#0b1c3a]/70 py-3 pl-4 pr-3 text-left">
+          <aside className="mt-5 border-l-2 border-volt bg-white/80 py-3 pl-4 pr-3 text-left">
             <div className="mono mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-[.18em] text-volt">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9L22 10l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.2L2 10l7.1-1.1z" /></svg>
               {t.ui.insight}
@@ -260,7 +258,7 @@ function EndSection({ vh }: { vh: number }) {
   const { t } = useI18n();
   return (
     <section className="relative" style={{ height: SECTIONS[3].screens * vh }}>
-      <div className="absolute inset-x-0 bottom-0 px-5 pb-16 md:px-[6vw]" style={{ background: "linear-gradient(#070f2000, #070f20e6 22%, #070f20)" }}>
+      <div className="absolute inset-x-0 bottom-0 px-5 pb-16 md:px-[6vw]" style={{ background: "linear-gradient(#eef2f700, #eef2f7e6 22%, #eef2f7)" }}>
         <div className="grid gap-10 pt-24 md:grid-cols-[1.1fr_1fr]">
           <div>
             <div className="mono mb-3 inline-flex rounded-full border border-dashed border-ice/50 px-3 py-1 text-[10.5px] uppercase tracking-[.14em] text-ice">{t.ui.preview}</div>
@@ -269,7 +267,7 @@ function EndSection({ vh }: { vh: number }) {
             <ol className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
               {t.upcoming.map((x) => (
                 <li key={x.num} className="text-[14px] text-mist">
-                  <span className="mono mr-2 text-white/30">{x.num}</span>
+                  <span className="mono mr-2 text-black/30">{x.num}</span>
                   {x.title}
                 </li>
               ))}
@@ -312,7 +310,7 @@ function Inner() {
     <>
       {gl && <World />}
       {gl === false && (
-        <div className="fixed inset-0 z-0" style={{ background: "radial-gradient(60% 50% at 50% 40%, #12305a 0%, #070f20 70%)" }}>
+        <div className="fixed inset-0 z-0" style={{ background: "radial-gradient(60% 50% at 50% 40%, #ffffff 0%, #eef2f7 70%)" }}>
           <p className="mono absolute bottom-6 left-1/2 -translate-x-1/2 text-[11px] text-mist">{t.ui.nowebgl}</p>
         </div>
       )}

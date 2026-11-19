@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "Follow the money. A cinematic, scroll-driven documentary about what happens behind every USDC: the reserve vault, the cross-chain portal, and the risks.",
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#070F20" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#eef2f7" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

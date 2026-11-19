@@ -5,23 +5,59 @@ import * as THREE from "three";
 import { scrollState, local, ramp, smooth, band, lerp } from "@/lib/timeline";
 import { useI18n } from "@/lib/i18n";
 import { COL, VAULT, rnd, tmpM, tmpQ, tmpV, tmpS, clock, xr, g } from "./shared";
+import { cashTex, cashSideTex, docTex, floorTex, lockerTex } from "./textures";
 import Tag from "./Tag";
+import { asset } from "@/lib/asset";
 
-const C = VAULT.center; // floor centre (0,-72,-30)
+const C = VAULT.center; // floor centre (0,-72,-40)
 const FY = C.y;
-const HY = VAULT.hatchY;
+const CY = VAULT.ceil;
+const ZF = VAULT.front;
+const ZB = VAULT.back;
+const HW = VAULT.halfW;
+const DOOR = new THREE.Vector3(0, -64.6, ZF);
+const DR = 4.9;
+const EXIT = new THREE.Vector3(0, -58, ZB);
 const X = { repo: -9, tbill: -3, bank: 4.5, other: 8.4 };
 const H = { repo: 16, tbill: 8.05, bank: 2.98 };
-const REPO_LEVELS = 26;
-const DISCS = 40;
+const REPO_LEVELS = 22;
+const EUL = new THREE.Euler();
+const BILLC = [new THREE.Color("#ffd9cf"), new THREE.Color("#fff0b8"), new THREE.Color("#d6f0d0")];
+const SHEETS = 34;
 
-const fadeMats = (mats: (THREE.Material | null)[], base: number[], k: number) =>
-  mats.forEach((m, i) => {
-    if (m) (m as THREE.MeshStandardMaterial).opacity = base[i] * k;
-  });
+/** wall with a round opening */
+function holedWall(w: number, h: number, hx: number, hy: number, r: number, depth: number) {
+  const s = new THREE.Shape();
+  s.moveTo(-w / 2, -h / 2);
+  s.lineTo(w / 2, -h / 2);
+  s.lineTo(w / 2, h / 2);
+  s.lineTo(-w / 2, h / 2);
+  s.lineTo(-w / 2, -h / 2);
+  const hole = new THREE.Path();
+  hole.absarc(hx, hy, r, 0, Math.PI * 2, true);
+  s.holes.push(hole);
+  return new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false, curveSegments: 64 });
+}
 
-/** A small classical bank built from simple solids (cash cubes visible through glass). */
-function Bank({ position, scale, rise, matRef, cashRef }: { position: [number, number, number]; scale: number; rise: React.MutableRefObject<number>; matRef: React.MutableRefObject<THREE.MeshStandardMaterial | null>; cashRef: React.MutableRefObject<THREE.MeshStandardMaterial | null> }) {
+function useMats() {
+  return useMemo(() => {
+    const side = new THREE.MeshStandardMaterial({ map: cashSideTex(), roughness: 0.85 });
+    const top = new THREE.MeshStandardMaterial({ map: cashTex(), roughness: 0.8 });
+    const cash = [side, side, top, side, side, side];
+    const docTop = new THREE.MeshStandardMaterial({ map: docTex("NOTE"), roughness: 0.9 });
+    const paper = new THREE.MeshStandardMaterial({ color: "#efe8d6", roughness: 0.95 });
+    const doc = [paper, paper, docTop, paper, paper, paper];
+    const billTop = new THREE.MeshStandardMaterial({ map: docTex("BILL · 13 WK"), roughness: 0.9 });
+    const bill = [paper, paper, billTop, paper, paper, paper];
+    const steel = new THREE.MeshStandardMaterial({ color: "#2f4f78", metalness: 0.45, roughness: 0.45 });
+    const marble = new THREE.MeshStandardMaterial({ color: "#efece6", roughness: 0.45, metalness: 0.02 });
+    const stone = new THREE.MeshStandardMaterial({ color: "#e2ddd2", roughness: 0.55 });
+    return { cash, doc, bill, steel, marble, stone, fadeable: [side, top, docTop, paper, billTop, marble, stone] };
+  }, []);
+}
+
+/** A small classical bank in marble, with strapped cash visible between the columns. */
+function Bank({ position, scale, rise, mats }: { position: [number, number, number]; scale: number; rise: React.MutableRefObject<number>; mats: ReturnType<typeof useMats> }) {
   const grp = useRef<THREE.Group>(null);
   useFrame(() => {
     if (grp.current) {
@@ -32,31 +68,34 @@ function Bank({ position, scale, rise, matRef, cashRef }: { position: [number, n
   const cols = [-1.25, -0.42, 0.42, 1.25];
   return (
     <group ref={grp} position={position}>
-      <mesh position={[0, 0.18, 0]}>
+      <mesh position={[0, 0.18, 0]} material={mats.stone} castShadow receiveShadow>
         <boxGeometry args={[3.6, 0.36, 2.6]} />
-        <meshStandardMaterial ref={matRef} color="#1d3d66" metalness={0.6} roughness={0.35} transparent opacity={0.85} />
       </mesh>
+      {[0, 1, 2].map((k) => (
+        <mesh key={k} position={[0, 0.06 + k * 0.1, 1.45 + k * 0.12]} material={mats.stone}>
+          <boxGeometry args={[3.2 - k * 0.2, 0.1, 0.25]} />
+        </mesh>
+      ))}
       {cols.map((x) => (
-        <mesh key={x} position={[x, 1.36, 0.95]}>
-          <cylinderGeometry args={[0.17, 0.2, 2, 16]} />
-          <meshStandardMaterial color={COL.silver} metalness={0.7} roughness={0.3} />
+        <mesh key={x} position={[x, 1.36, 0.95]} material={mats.marble} castShadow>
+          <cylinderGeometry args={[0.17, 0.2, 2, 20]} />
         </mesh>
       ))}
       {[0, 1, 2].map((r) =>
         [0, 1].map((c) => (
-          <mesh key={`${r}${c}`} position={[-0.38 + c * 0.76, 0.66 + r * 0.62, -0.25]}>
-            <boxGeometry args={[0.6, 0.5, 0.9]} />
-            <meshStandardMaterial ref={r === 0 && c === 0 ? cashRef : undefined} color={COL.volt} emissive={COL.usdc} emissiveIntensity={0.6} metalness={0.2} roughness={0.4} />
+          <mesh key={`${r}${c}`} position={[-0.42 + c * 0.84, 0.54 + r * 0.34, -0.2]} material={mats.cash}>
+            <boxGeometry args={[0.78, 0.32, 0.42]} />
           </mesh>
         )),
       )}
-      <mesh position={[0, 2.5, 0]}>
-        <boxGeometry args={[3.9, 0.26, 2.8]} />
-        <meshStandardMaterial color="#26507f" metalness={0.6} roughness={0.35} />
+      <mesh position={[0, 1.3, -1.15]} material={mats.stone}>
+        <boxGeometry args={[3.4, 2.2, 0.2]} />
       </mesh>
-      <mesh position={[0, 2.95, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[1.95, 1, 0.65]}>
+      <mesh position={[0, 2.5, 0]} material={mats.marble} castShadow>
+        <boxGeometry args={[3.9, 0.26, 2.8]} />
+      </mesh>
+      <mesh position={[0, 2.95, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[1.95, 1, 0.65]} material={mats.stone} castShadow>
         <cylinderGeometry args={[1, 1, 2.8, 3]} />
-        <meshStandardMaterial color="#26507f" metalness={0.6} roughness={0.35} />
       </mesh>
     </group>
   );
@@ -67,50 +106,56 @@ export default function Vault() {
   const L = t.labels;
   const S = t.sys;
   const mobile = typeof window !== "undefined" && window.innerWidth < 760;
-  const NCLOUD = mobile ? 220 : 420;
+  const NCLOUD = mobile ? 200 : 380;
+  const mats = useMats();
 
   const group = useRef<THREE.Group>(null);
-  const halfA = useRef<THREE.Group>(null);
-  const halfB = useRef<THREE.Group>(null);
-  const fins = useRef<THREE.InstancedMesh>(null);
-  const finMat = useRef<THREE.MeshStandardMaterial>(null);
-  const roofMat = useRef<THREE.MeshStandardMaterial>(null);
+  const door = useRef<THREE.Group>(null);
+  const wheel = useRef<THREE.Group>(null);
+  const bolts = useRef<THREE.InstancedMesh>(null);
   const cubes = useRef<THREE.InstancedMesh>(null);
   const bonds = useRef<THREE.InstancedMesh>(null);
-  const plates = useRef<THREE.InstancedMesh>(null);
-  const discs = useRef<THREE.InstancedMesh>(null);
-  const discGrp = useRef<THREE.Group>(null);
+  const shelves = useRef<THREE.InstancedMesh>(null);
+  const sheets = useRef<THREE.InstancedMesh>(null);
   const cloud = useRef<THREE.InstancedMesh>(null);
-  const cloudMat = useRef<THREE.MeshStandardMaterial>(null);
-  const fundMat = useRef<THREE.MeshBasicMaterial>(null);
+  const fundMat = useRef<THREE.MeshPhysicalMaterial>(null);
   const fundEdge = useRef<THREE.LineBasicMaterial>(null);
   const linesMat = useRef<THREE.LineBasicMaterial>(null);
   const node = useRef<THREE.Mesh>(null);
-  const light = useRef<THREE.PointLight>(null);
-  const bankMat = useRef<THREE.MeshStandardMaterial | null>(null);
-  const bankCash = useRef<THREE.MeshStandardMaterial | null>(null);
-  const otherMat = useRef<THREE.MeshStandardMaterial | null>(null);
-  const otherCash = useRef<THREE.MeshStandardMaterial | null>(null);
+  const wallMats = useRef<THREE.MeshStandardMaterial[]>([]);
   const riseBank = useRef(0);
   const riseOther = useRef(0);
-  const edgeMat = useMemo(() => new THREE.LineBasicMaterial({ color: COL.ice, transparent: true, opacity: 0 }), []);
+  const glowRepo = useRef<THREE.MeshBasicMaterial>(null);
+  const glowBill = useRef<THREE.MeshBasicMaterial>(null);
+  const glowBank = useRef<THREE.MeshBasicMaterial>(null);
+  const edgeMat = useMemo(() => new THREE.LineBasicMaterial({ color: COL.usdc, transparent: true, opacity: 0 }), []);
+
+  const geo = useMemo(() => {
+    const wallH = CY - FY;
+    return {
+      front: holedWall(HW * 2, wallH, 0, DOOR.y - (FY + CY) / 2, DR + 0.25, 1.2),
+      back: holedWall(HW * 2, wallH, 0, EXIT.y - (FY + CY) / 2, 4.6, 1.2),
+      fundEdges: new THREE.EdgesGeometry(new THREE.BoxGeometry(10.6, 17.6, 5.2)),
+      towers: [new THREE.EdgesGeometry(new THREE.BoxGeometry(3.4, H.repo, 2.4)), new THREE.EdgesGeometry(new THREE.BoxGeometry(2.6, H.tbill, 2.0))],
+    };
+  }, []);
 
   const cloudPts = useMemo(
     () =>
       Array.from({ length: NCLOUD }, (_, i) => {
         const a = rnd(i) * Math.PI * 2;
-        const r = Math.sqrt(rnd(i + 2)) ;
-        return new THREE.Vector3(Math.cos(a) * r * 10, (rnd(i + 5) - 0.5) * 3.2, Math.sin(a) * r * 7.5);
+        const r = Math.sqrt(rnd(i + 2));
+        return new THREE.Vector3(Math.cos(a) * r * 11, (rnd(i + 5) - 0.5) * 2.4, Math.sin(a) * r * 8);
       }),
     [NCLOUD],
   );
-  const NODE = useMemo(() => new THREE.Vector3(0, -57.5, -30), []);
+  const CLOUD_Y = -52.6;
+  const NODE = useMemo(() => new THREE.Vector3(0, -58.2, C.z), []);
   const lineGeo = useMemo(() => {
     const arr: number[] = [];
-    const cc = new THREE.Vector3(0, -51.5, -30);
     for (let i = 0; i < cloudPts.length; i += 4) {
-      const p = cloudPts[i].clone().add(cc);
-      arr.push(p.x, p.y, p.z, NODE.x, NODE.y, NODE.z);
+      const p = cloudPts[i];
+      arr.push(p.x, CLOUD_Y + p.y, C.z + p.z, NODE.x, NODE.y, NODE.z);
     }
     const tops: [number, number][] = [
       [X.repo, FY + H.repo],
@@ -119,139 +164,140 @@ export default function Vault() {
       [X.other, FY + 1.1],
     ];
     for (const [x, y] of tops) arr.push(NODE.x, NODE.y, NODE.z, x, y + 0.2, C.z);
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3));
-    return geo;
+    const g0 = new THREE.BufferGeometry();
+    g0.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3));
+    return g0;
   }, [cloudPts, NODE]);
-  const fundEdgesGeo = useMemo(() => new THREE.EdgesGeometry(new THREE.BoxGeometry(10.6, 17.6, 5.2)), []);
-  const towerEdges = useMemo(() => {
-    const gs = [new THREE.BoxGeometry(3.4, H.repo, 2.4), new THREE.CylinderGeometry(1.5, 1.5, H.tbill, 18, 1, true)];
-    return gs.map((g0) => new THREE.EdgesGeometry(g0));
-  }, []);
 
-  const finCount = 84;
+  const floorMap = useMemo(() => floorTex(), []);
+  const coinMats = useMemo(() => {
+    const face = new THREE.TextureLoader().load(asset("/img/usdc.png"));
+    face.colorSpace = THREE.SRGBColorSpace;
+    const side = new THREE.MeshStandardMaterial({ color: "#d7e3f2", metalness: 0.6, roughness: 0.3 });
+    const cap = new THREE.MeshStandardMaterial({ map: face, color: "#ffffff", metalness: 0.1, roughness: 0.35 });
+    return [side, cap, cap];
+  }, []);
+  const lockerMap = useMemo(() => lockerTex(), []);
 
   useFrame(() => {
     const u = scrollState.u;
-    const vis = u > g("s01", 0.74) && u < g("s05", 0.16);
+    const vis = u > g("s01", 0.8) && u < g("s05", 0.16);
     if (group.current) group.current.visible = vis;
     if (!vis) return;
     const tl = local("s03", u);
     const tm = clock.t;
     const x = xr.v;
 
-    // hatch irises open as the camera arrives
-    const open = smooth(ramp(tl, 0.03, 0.13));
-    if (halfA.current) halfA.current.position.x = open * 8.5;
-    if (halfB.current) halfB.current.position.x = -open * 8.5;
-
-    // glass fins of the vault wall
-    if (fins.current) {
-      for (let i = 0; i < finCount; i++) {
-        const a = (i / finCount) * Math.PI * 2;
-        tmpV.set(C.x + Math.cos(a) * VAULT.radius, (FY + HY) / 2, C.z + Math.sin(a) * VAULT.radius);
-        tmpQ.setFromAxisAngle(tmpS.set(0, 1, 0), -a);
+    // the vault door: wheel turns, bolts retract, door swings inward on its hinge
+    const spin = smooth(ramp(tl, 0.03, 0.08));
+    const retract = smooth(ramp(tl, 0.06, 0.09));
+    const swing = smooth(ramp(tl, 0.085, 0.15));
+    if (wheel.current) wheel.current.rotation.z = -spin * Math.PI * 1.5;
+    if (door.current) door.current.rotation.y = swing * 1.85;
+    if (bolts.current) {
+      for (let i = 0; i < 20; i++) {
+        const a = (i / 20) * Math.PI * 2;
+        const r = DR - 0.1 + (1 - retract) * 0.55;
+        tmpV.set(Math.cos(a) * r, Math.sin(a) * r, 0);
+        tmpQ.setFromAxisAngle(tmpS.set(0, 0, 1), a - Math.PI / 2);
         tmpS.set(1, 1, 1);
         tmpM.compose(tmpV, tmpQ, tmpS);
-        fins.current.setMatrixAt(i, tmpM);
+        bolts.current.setMatrixAt(i, tmpM);
       }
-      fins.current.instanceMatrix.needsUpdate = true;
+      bolts.current.instanceMatrix.needsUpdate = true;
     }
-    fadeMats([finMat.current, roofMat.current], [0.42, 0.95], 1 - 0.7 * x);
+    wallMats.current.forEach((m) => {
+      m.transparent = x > 0.01;
+      m.opacity = 1 - 0.75 * x;
+    });
+    mats.fadeable.forEach((m) => {
+      m.transparent = x > 0.01;
+      m.opacity = 1 - 0.55 * x;
+    });
 
-    // towers rise one after another
     const rise = (i: number) => smooth(ramp(tl, 0.15 + i * 0.035, 0.27 + i * 0.035));
     const rRepo = rise(0);
     const rT = rise(1);
     riseBank.current = rise(2);
     riseOther.current = rise(3);
 
-    // overnight repo: each night cash (cube) and Treasury (cylinder) swap sides, then swap back
-    if (cubes.current && bonds.current && plates.current) {
-      const focus = band(tl, 0.3, 0.36, 0.44, 0.5);
+    // overnight repo: on every shelf, a cash bundle and a Treasury folder swap sides each "night" and swap back
+    if (cubes.current && bonds.current && shelves.current) {
       for (let i = 0; i < REPO_LEVELS; i++) {
         const shown = rRepo * REPO_LEVELS > i ? 1 : 0;
-        const y = FY + 0.35 + i * (H.repo / REPO_LEVELS);
-        const ph = (tm * 0.22 + i * 0.137) % 1;
+        const y = FY + 0.4 + i * (H.repo / REPO_LEVELS);
+        const ph = (tm * 0.2 + i * 0.137) % 1;
         const sw = smooth(ramp(ph, 0.1, 0.35)) - smooth(ramp(ph, 0.6, 0.85));
-        const arc = Math.sin(Math.PI * sw) * 0.25;
+        const lift = Math.sin(Math.PI * sw) * 0.22;
         tmpQ.identity();
         tmpS.setScalar(shown);
-        tmpV.set(X.repo + lerp(-0.85, 0.85, sw), y + 0.22 + arc, C.z);
+        tmpV.set(X.repo + lerp(-0.78, 0.78, sw), y + 0.19 + lift, C.z);
         tmpM.compose(tmpV, tmpQ, tmpS);
         cubes.current.setMatrixAt(i, tmpM);
-        tmpV.set(X.repo + lerp(0.85, -0.85, sw), y + 0.18 - arc * 0.5, C.z);
-        tmpQ.setFromAxisAngle(tmpS.set(1, 0, 0), Math.PI / 2);
-        tmpS.setScalar(shown);
+        tmpV.set(X.repo + lerp(0.78, -0.78, sw), y + 0.08 + lift * 0.5, C.z);
         tmpM.compose(tmpV, tmpQ, tmpS);
         bonds.current.setMatrixAt(i, tmpM);
-        tmpQ.identity();
         tmpV.set(X.repo, y, C.z);
-        tmpS.set(shown, shown, shown);
         tmpM.compose(tmpV, tmpQ, tmpS);
-        plates.current.setMatrixAt(i, tmpM);
+        shelves.current.setMatrixAt(i, tmpM);
       }
       cubes.current.instanceMatrix.needsUpdate = true;
       bonds.current.instanceMatrix.needsUpdate = true;
-      plates.current.instanceMatrix.needsUpdate = true;
-      (cubes.current.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.5 + focus * 0.9;
+      shelves.current.instanceMatrix.needsUpdate = true;
     }
 
-    // T-bills: a slow spiral; discs drift down as they mature and reappear on top
-    if (discs.current && discGrp.current) {
-      discGrp.current.rotation.y = tm * 0.08;
+    // T-bills: certificates drift down the rack as they mature, new ones arrive on top
+    if (sheets.current) {
       const span = H.tbill - 0.3;
-      for (let j = 0; j < DISCS; j++) {
-        let y = (j * (span / DISCS) - tm * 0.12) % span;
+      for (let j = 0; j < SHEETS; j++) {
+        let y = (j * (span / SHEETS) - tm * 0.1) % span;
         if (y < 0) y += span;
-        const edge = Math.min(1, y / 0.6, (span - y) / 0.6);
+        const edge = Math.min(1, y / 0.5, (span - y) / 0.5);
         const shown = rT * span > y ? 1 : 0;
-        const a = j * 0.55;
-        tmpV.set(Math.cos(a) * 0.35, 0.2 + y, Math.sin(a) * 0.35);
-        tmpQ.identity();
+        tmpV.set(X.tbill + (rnd(j) - 0.5) * 0.14, FY + 0.25 + y, C.z + (rnd(j + 3) - 0.5) * 0.14);
+        tmpQ.setFromAxisAngle(tmpS.set(0, 1, 0), (rnd(j + 7) - 0.5) * 0.12);
         tmpS.set(edge * shown, shown, edge * shown);
         tmpM.compose(tmpV, tmpQ, tmpS);
-        discs.current.setMatrixAt(j, tmpM);
+        sheets.current.setMatrixAt(j, tmpM);
+        sheets.current.setColorAt(j, BILLC[j % 3]);
       }
-      discs.current.instanceMatrix.needsUpdate = true;
-      (discs.current.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.05 + band(tl, 0.44, 0.5, 0.56, 0.62) * 0.5;
+      sheets.current.instanceMatrix.needsUpdate = true;
+      if (sheets.current.instanceColor) sheets.current.instanceColor.needsUpdate = true;
     }
-    const bankFocus = band(tl, 0.56, 0.62, 0.68, 0.73);
-    [bankCash.current, otherCash.current].forEach((m) => m && (m.emissiveIntensity = 0.5 + bankFocus * 1.2));
-    fadeMats([bankMat.current, otherMat.current], [0.85, 0.85], 1 - 0.6 * x);
 
-    // the fund wrapper appears around repo + T-bills
+    // floor spotlights under the asset being discussed
+    if (glowRepo.current) glowRepo.current.opacity = band(tl, 0.3, 0.36, 0.44, 0.5) * 0.55;
+    if (glowBill.current) glowBill.current.opacity = band(tl, 0.44, 0.5, 0.56, 0.62) * 0.55;
+    if (glowBank.current) glowBank.current.opacity = band(tl, 0.56, 0.62, 0.68, 0.73) * 0.55;
+
     const fund = smooth(ramp(tl, 0.68, 0.75));
     if (fundMat.current) {
-      fundMat.current.opacity = fund * (0.07 + 0.08 * x);
+      fundMat.current.opacity = fund * 0.16;
       fundMat.current.visible = fund > 0.005;
     }
     if (fundEdge.current) {
-      fundEdge.current.opacity = fund * (0.55 + 0.45 * x);
+      fundEdge.current.opacity = fund * 0.95;
       fundEdge.current.visible = fund > 0.005;
     }
 
-    // USDC cloud above: every token is linked to one shared pool, not to an asset
     const cl = smooth(ramp(tl, 0.76, 0.84));
     if (cloud.current) {
       for (let i = 0; i < cloudPts.length; i++) {
         const p = cloudPts[i];
-        tmpV.set(p.x + Math.sin(tm * 0.3 + i) * 0.25, -51.5 + p.y + Math.sin(tm * 0.5 + i * 1.7) * 0.18, C.z + p.z);
-        tmpQ.setFromAxisAngle(tmpS.set(0, 1, 0), tm * 0.4 + i);
-        const sc = cl * (0.16 + rnd(i + 1) * 0.08);
-        tmpS.setScalar(sc);
+        tmpV.set(p.x + Math.sin(tm * 0.3 + i) * 0.25, CLOUD_Y + p.y + Math.sin(tm * 0.5 + i * 1.7) * 0.15, C.z + p.z);
+        tmpQ.setFromEuler(EUL.set(Math.PI / 2 - 0.35 + Math.sin(tm * 0.5 + i) * 0.25, Math.sin(tm * 0.3 + i * 2.1) * 0.6, 0));
+        const sc = cl * (0.17 + rnd(i + 1) * 0.08);
+        tmpS.setScalar(Math.max(0.0001, sc));
         tmpM.compose(tmpV, tmpQ, tmpS);
         cloud.current.setMatrixAt(i, tmpM);
       }
       cloud.current.instanceMatrix.needsUpdate = true;
     }
-    if (cloudMat.current) cloudMat.current.emissiveIntensity = 0.6 + 0.4 * Math.sin(tm);
     if (linesMat.current) {
-      linesMat.current.opacity = smooth(ramp(tl, 0.8, 0.87)) * (0.35 + 0.4 * x);
+      linesMat.current.opacity = smooth(ramp(tl, 0.8, 0.87)) * (0.45 + 0.35 * x);
       linesMat.current.visible = linesMat.current.opacity > 0.005;
     }
-    if (node.current) node.current.scale.setScalar(smooth(ramp(tl, 0.8, 0.86)) * (1 + 0.15 * Math.sin(tm * 2)));
-    if (light.current) light.current.intensity = 60 + 40 * smooth(ramp(tl, 0.1, 0.25));
+    if (node.current) node.current.scale.setScalar(Math.max(0.001, smooth(ramp(tl, 0.8, 0.86))));
     edgeMat.opacity = x * smooth(ramp(tl, 0.2, 0.3));
     edgeMat.visible = edgeMat.opacity > 0.005;
   });
@@ -260,124 +306,196 @@ export default function Vault() {
   const sysIn = (u: number) => band(local("s03", u), 0.18, 0.26, 0.95, 1.0);
   const fundVis = (u: number) => band(local("s03", u), 0.7, 0.76, 0.95, 1.0);
   const poolVis = (u: number) => band(local("s03", u), 0.8, 0.86, 0.97, 1.0);
+  const doorVis = (u: number) => band(local("s03", u), -0.05, 0.0, 0.08, 0.12);
+  const wallRef = (m: THREE.MeshStandardMaterial | null) => {
+    if (m && !wallMats.current.includes(m)) wallMats.current.push(m);
+  };
+  const wallH = CY - FY;
+  const yMid = (FY + CY) / 2;
 
   return (
     <group ref={group}>
-      <pointLight ref={light} position={[0, -52, -30]} color={COL.volt} intensity={60} distance={60} decay={1.4} />
-      <pointLight position={[-8, -60, -20]} color={COL.ice} intensity={25} distance={30} decay={1.6} />
-      <pointLight position={[6, -50, -24]} color="#cfe6ff" intensity={45} distance={40} decay={1.5} />
+      <pointLight position={[0, CY - 2, C.z]} color="#fff6e8" intensity={70} distance={60} decay={1.3} />
+      <pointLight position={[-9, -58, C.z + 9]} color="#ffffff" intensity={28} distance={30} decay={1.5} />
+      <pointLight position={[0, -60, ZF + 10]} color="#ffffff" intensity={40} distance={30} decay={1.4} />
 
-      {/* roof ring + iris hatch */}
-      <mesh position={[C.x, HY + 0.3, C.z]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[7.6, 21.5, 96, 1]} />
-        <meshStandardMaterial ref={roofMat} color="#0f2340" metalness={0.75} roughness={0.35} transparent opacity={0.95} side={THREE.DoubleSide} />
+      {/* floors (antechamber + vault) */}
+      <mesh position={[0, FY, (ZF + 8 + ZB) / 2]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[HW * 2 + 6, ZF + 8 - ZB]} />
+        <meshStandardMaterial ref={wallRef} map={floorMap} roughness={0.35} metalness={0.05} />
       </mesh>
-      <mesh position={[C.x, HY + 0.3, C.z]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[7.6, 0.32, 16, 120]} />
-        <meshStandardMaterial color={COL.silver} metalness={0.9} roughness={0.25} />
+      {/* walls */}
+      <mesh geometry={geo.front} position={[0, yMid, ZF - 1.2]} receiveShadow>
+        <meshStandardMaterial ref={wallRef} color="#e6dccb" roughness={0.8} />
       </mesh>
-      {[halfA, halfB].map((ref, k) => (
-        <group key={k} ref={ref}>
-          <group position={[C.x, HY + 0.3, C.z]} rotation={[0, k ? Math.PI : 0, 0]}>
-            <mesh>
-              <cylinderGeometry args={[7.3, 7.3, 0.5, 64, 1, false, 0, Math.PI]} />
-              <meshStandardMaterial color="#1a3459" metalness={0.85} roughness={0.3} side={THREE.DoubleSide} />
-            </mesh>
-            {Array.from({ length: 9 }, (_, i) => {
-              const a = ((i + 0.5) / 9) * Math.PI;
-              return (
-                <mesh key={i} position={[Math.sin(a) * 6.4, 0.32, Math.cos(a) * 6.4]}>
-                  <cylinderGeometry args={[0.28, 0.28, 0.2, 16]} />
-                  <meshStandardMaterial color={COL.silver} metalness={0.9} roughness={0.2} />
-                </mesh>
-              );
-            })}
-            <mesh position={[0, 0.27, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <ringGeometry args={[2.2, 2.4, 64, 1, 0, Math.PI]} />
-              <meshBasicMaterial color={COL.volt} side={THREE.DoubleSide} />
-            </mesh>
-          </group>
-        </group>
+      <mesh geometry={geo.back} position={[0, yMid, ZB - 1.2]}>
+        <meshStandardMaterial ref={wallRef} color="#e6dccb" roughness={0.8} />
+      </mesh>
+      {[-1, 1].map((sd) => (
+        <mesh key={sd} position={[sd * HW, yMid, (ZF + ZB) / 2]} receiveShadow>
+          <boxGeometry args={[0.6, wallH, ZF - ZB]} />
+          <meshStandardMaterial ref={wallRef} map={lockerMap} roughness={0.4} metalness={0.45} />
+        </mesh>
       ))}
-
-      {/* glass wall fins */}
-      <instancedMesh ref={fins} args={[undefined, undefined, finCount]} frustumCulled={false}>
-        <boxGeometry args={[0.16, HY - FY, 1.4]} />
-        <meshStandardMaterial ref={finMat} color="#1b3a63" metalness={0.6} roughness={0.25} transparent opacity={0.42} emissive={COL.usdc} emissiveIntensity={0.08} />
-      </instancedMesh>
-
-      {/* floor with survey rings */}
-      <mesh position={[C.x, FY, C.z]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[VAULT.radius + 0.5, 96]} />
-        <meshStandardMaterial color="#0b1730" metalness={0.5} roughness={0.6} />
+      <mesh position={[0, CY + 0.3, (ZF + ZB) / 2]}>
+        <boxGeometry args={[HW * 2, 0.6, ZF - ZB]} />
+        <meshStandardMaterial ref={wallRef} color="#f1ebe0" roughness={0.9} />
       </mesh>
-      {[4, 8, 12, 16, 19.5].map((r) => (
-        <mesh key={r} position={[C.x, FY + 0.02, C.z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[r, r + 0.03, 128]} />
-          <meshBasicMaterial color={COL.usdc} transparent opacity={0.45} />
+      {[-8, 0, 8].map((x) => (
+        <mesh key={x} position={[x, CY - 0.02, (ZF + ZB) / 2]} rotation={[Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1.2, ZF - ZB - 6]} />
+          <meshBasicMaterial color="#ffffff" />
         </mesh>
       ))}
 
-      {/* overnight repo tower */}
-      <instancedMesh ref={plates} args={[undefined, undefined, REPO_LEVELS]} frustumCulled={false}>
-        <boxGeometry args={[3.2, 0.05, 2.2]} />
-        <meshStandardMaterial color="#20446f" metalness={0.5} roughness={0.3} transparent opacity={0.7} />
-      </instancedMesh>
-      <instancedMesh ref={cubes} args={[undefined, undefined, REPO_LEVELS]} frustumCulled={false}>
-        <boxGeometry args={[0.42, 0.34, 0.42]} />
-        <meshStandardMaterial color={COL.volt} emissive={COL.usdc} emissiveIntensity={0.6} roughness={0.35} metalness={0.2} />
-      </instancedMesh>
-      <instancedMesh ref={bonds} args={[undefined, undefined, REPO_LEVELS]} frustumCulled={false}>
-        <cylinderGeometry args={[0.13, 0.13, 1.2, 16]} />
-        <meshStandardMaterial color={COL.silver} metalness={0.85} roughness={0.25} />
-      </instancedMesh>
+      {/* door frame + exit frame */}
+      <mesh position={[DOOR.x, DOOR.y, ZF + 0.05]}>
+        <torusGeometry args={[DR + 0.35, 0.32, 16, 96]} />
+        <meshStandardMaterial color={COL.steel} metalness={0.9} roughness={0.3} />
+      </mesh>
+      <mesh position={[EXIT.x, EXIT.y, ZB + 0.05]}>
+        <torusGeometry args={[4.7, 0.25, 16, 96]} />
+        <meshStandardMaterial color={COL.steel} metalness={0.9} roughness={0.3} />
+      </mesh>
+      <mesh position={[EXIT.x, EXIT.y, ZB + 0.2]}>
+        <torusGeometry args={[4.35, 0.05, 8, 96]} />
+        <meshBasicMaterial color={COL.usdc} />
+      </mesh>
 
-      {/* T-bill spiral */}
-      <group ref={discGrp} position={[X.tbill, FY, C.z]}>
-        <instancedMesh ref={discs} args={[undefined, undefined, DISCS]} frustumCulled={false}>
-          <cylinderGeometry args={[1.15, 1.15, 0.08, 40]} />
-          <meshStandardMaterial color="#8fa4c2" metalness={0.75} roughness={0.35} emissive={COL.ice} emissiveIntensity={0.05} />
-        </instancedMesh>
+      {/* the vault door, hinged on the left */}
+      <group ref={door} position={[DOOR.x - DR - 0.45, DOOR.y, ZF + 0.1]}>
+        <group position={[DR + 0.45, 0, 0]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[DR, DR, 1.3, 96]} />
+            <meshStandardMaterial color="#c9d1dc" metalness={0.92} roughness={0.28} />
+          </mesh>
+          <mesh position={[0, 0, 0.66]}>
+            <torusGeometry args={[DR - 0.35, 0.18, 16, 96]} />
+            <meshStandardMaterial color="#b7c1ce" metalness={0.95} roughness={0.22} />
+          </mesh>
+          {[1.2, 2.3, 3.4].map((r) => (
+            <mesh key={r} position={[0, 0, 0.66]}>
+              <torusGeometry args={[r, 0.03, 8, 96]} />
+              <meshStandardMaterial color="#a5afbd" metalness={0.9} roughness={0.3} />
+            </mesh>
+          ))}
+          <instancedMesh ref={bolts} args={[undefined, undefined, 20]} frustumCulled={false}>
+            <cylinderGeometry args={[0.2, 0.2, 1.1, 16]} />
+            <meshStandardMaterial color="#d9b65e" metalness={0.95} roughness={0.2} />
+          </instancedMesh>
+          <group ref={wheel} position={[0, 0, 1.05]}>
+            <mesh>
+              <torusGeometry args={[1.45, 0.13, 12, 64]} />
+              <meshStandardMaterial color="#c9a24a" metalness={0.95} roughness={0.25} />
+            </mesh>
+            {[0, 1, 2].map((k) => (
+              <mesh key={k} rotation={[0, 0, (k * Math.PI) / 3]}>
+                <boxGeometry args={[2.9, 0.12, 0.12]} />
+                <meshStandardMaterial color="#c9a24a" metalness={0.95} roughness={0.25} />
+              </mesh>
+            ))}
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.35, 0.35, 0.4, 24]} />
+              <meshStandardMaterial color="#d9b65e" metalness={0.95} roughness={0.2} />
+            </mesh>
+          </group>
+        </group>
+        {[-2.6, 0, 2.6].map((y) => (
+          <mesh key={y} position={[0, y, 0]}>
+            <cylinderGeometry args={[0.32, 0.32, 1.4, 20]} />
+            <meshStandardMaterial color="#9aa6b6" metalness={0.9} roughness={0.3} />
+          </mesh>
+        ))}
       </group>
 
+      {/* overnight repo: steel shelving */}
+      {[
+        [-1.6, -1.1],
+        [1.6, -1.1],
+        [-1.6, 1.1],
+        [1.6, 1.1],
+      ].map(([dx, dz]) => (
+        <mesh key={`${dx}${dz}`} position={[X.repo + dx, FY + H.repo / 2 + 0.2, C.z + dz]} material={mats.steel} castShadow>
+          <boxGeometry args={[0.1, H.repo + 0.4, 0.1]} />
+        </mesh>
+      ))}
+      <instancedMesh ref={shelves} args={[undefined, undefined, REPO_LEVELS]} frustumCulled={false} material={mats.steel} castShadow receiveShadow>
+        <boxGeometry args={[3.3, 0.05, 2.3]} />
+      </instancedMesh>
+      <instancedMesh ref={cubes} args={[undefined, undefined, REPO_LEVELS]} frustumCulled={false} material={mats.cash} castShadow>
+        <boxGeometry args={[0.95, 0.34, 0.5]} />
+      </instancedMesh>
+      <instancedMesh ref={bonds} args={[undefined, undefined, REPO_LEVELS]} frustumCulled={false} material={mats.doc} castShadow>
+        <boxGeometry args={[0.9, 0.12, 1.12]} />
+      </instancedMesh>
+
+      {/* T-bill rack */}
+      {[
+        [-1.15, -0.8],
+        [1.15, -0.8],
+        [-1.15, 0.8],
+        [1.15, 0.8],
+      ].map(([dx, dz]) => (
+        <mesh key={`b${dx}${dz}`} position={[X.tbill + dx, FY + H.tbill / 2, C.z + dz]} material={mats.steel} castShadow>
+          <boxGeometry args={[0.07, H.tbill, 0.07]} />
+        </mesh>
+      ))}
+      <instancedMesh ref={sheets} args={[undefined, undefined, SHEETS]} frustumCulled={false} material={mats.bill} castShadow>
+        <boxGeometry args={[1.9, 0.045, 1.35]} />
+      </instancedMesh>
+
       {/* cash at banks */}
-      <Bank position={[X.bank, FY, C.z]} scale={1} rise={riseBank} matRef={bankMat} cashRef={bankCash} />
-      <Bank position={[X.other, FY, C.z]} scale={0.32} rise={riseOther} matRef={otherMat} cashRef={otherCash} />
+      <Bank position={[X.bank, FY, C.z]} scale={1} rise={riseBank} mats={mats} />
+      <Bank position={[X.other, FY, C.z]} scale={0.32} rise={riseOther} mats={mats} />
 
-      {/* X-RAY outlines of the towers */}
-      <lineSegments geometry={towerEdges[0]} material={edgeMat} position={[X.repo, FY + H.repo / 2, C.z]} />
-      <lineSegments geometry={towerEdges[1]} material={edgeMat} position={[X.tbill, FY + H.tbill / 2, C.z]} />
+      {/* soft floor spotlights */}
+      {(
+        [
+          [X.repo, glowRepo, 2.6],
+          [X.tbill, glowBill, 2.0],
+          [X.bank + 1.6, glowBank, 4.2],
+        ] as [number, React.RefObject<THREE.MeshBasicMaterial>, number][]
+      ).map(([x, ref, r]) => (
+        <mesh key={x} position={[x, FY + 0.02, C.z]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[r, 48]} />
+          <meshBasicMaterial ref={ref} color={COL.volt} transparent opacity={0} depthWrite={false} />
+        </mesh>
+      ))}
 
-      {/* Circle Reserve Fund wrapper */}
+      {/* X-RAY outlines */}
+      <lineSegments geometry={geo.towers[0]} material={edgeMat} position={[X.repo, FY + H.repo / 2, C.z]} />
+      <lineSegments geometry={geo.towers[1]} material={edgeMat} position={[X.tbill, FY + H.tbill / 2, C.z]} />
+
+      {/* Circle Reserve Fund: a glass display case */}
       <mesh position={[(X.repo + X.tbill) / 2 - 0.3, FY + 8.8, C.z]}>
         <boxGeometry args={[10.6, 17.6, 5.2]} />
-        <meshBasicMaterial ref={fundMat} color={COL.volt} transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
+        <meshPhysicalMaterial ref={fundMat} color="#d9ecff" roughness={0.05} transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
       </mesh>
-      <lineSegments geometry={fundEdgesGeo} position={[(X.repo + X.tbill) / 2 - 0.3, FY + 8.8, C.z]}>
-        <lineBasicMaterial ref={fundEdge} color={COL.ice} transparent opacity={0} />
+      <lineSegments geometry={geo.fundEdges} position={[(X.repo + X.tbill) / 2 - 0.3, FY + 8.8, C.z]}>
+        <lineBasicMaterial ref={fundEdge} color="#b38d48" transparent opacity={0} />
       </lineSegments>
 
-      {/* USDC cloud and the single pool node */}
-      <instancedMesh ref={cloud} args={[undefined, undefined, cloudPts.length]} frustumCulled={false}>
-        <octahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial ref={cloudMat} color={COL.volt} emissive={COL.usdc} emissiveIntensity={0.8} roughness={0.3} metalness={0.3} />
+      {/* USDC holders above, all tied to one pool */}
+      <instancedMesh ref={cloud} args={[undefined, undefined, cloudPts.length]} frustumCulled={false} material={coinMats}>
+        <cylinderGeometry args={[1, 1, 0.14, 32]} />
       </instancedMesh>
       <mesh ref={node} position={NODE}>
-        <sphereGeometry args={[0.45, 24, 24]} />
-        <meshBasicMaterial color={COL.ice} />
+        <sphereGeometry args={[0.5, 32, 32]} />
+        <meshStandardMaterial color="#c9a24a" metalness={0.8} roughness={0.25} />
       </mesh>
       <lineSegments geometry={lineGeo}>
-        <lineBasicMaterial ref={linesMat} color={COL.volt} transparent opacity={0} depthWrite={false} />
+        <lineBasicMaterial ref={linesMat} color={COL.usdc} transparent opacity={0} depthWrite={false} />
       </lineSegments>
 
       {/* labels */}
-      <Tag kind="cine" position={[X.repo - 1.8, FY + 0.6, C.z + 2.2]} text={L.repo} vis={vRepo} align="right" />
+      <Tag kind="cine" position={[DOOR.x + DR + 1, DOOR.y + 3, ZF + 0.5]} text={L.vault} vis={doorVis} />
+      <Tag kind="cine" position={[X.repo - 1.9, FY + 0.6, C.z + 2.2]} text={L.repo} vis={vRepo} align="right" />
       <Tag kind="cine" position={[X.tbill - 0.2, FY + 0.25, C.z + 2.6]} text={L.tbill} vis={vRepo} />
-      <Tag kind="cine" position={[X.bank - 1.2, FY + 0.15, C.z + 2.4]} text={L.bank} vis={vRepo} />
+      <Tag kind="cine" position={[X.bank - 1.2, FY + 0.15, C.z + 2.6]} text={L.bank} vis={vRepo} />
       <Tag kind="cine" position={[X.other + 0.3, FY + 0.9, C.z + 0.6]} text={L.other} vis={vRepo} />
       <Tag kind="cine" position={[X.repo - 0.5, FY + 18.1, C.z]} text={L.fund} vis={fundVis} />
       <Tag kind="cine" position={[NODE.x + 0.8, NODE.y, NODE.z]} text={L.pool} vis={poolVis} />
-      <Tag kind="cine" position={[9.5, -50.5, C.z]} text={L.tokens} vis={poolVis} />
+      <Tag kind="cine" position={[10.5, CLOUD_Y + 0.5, C.z]} text={L.tokens} vis={poolVis} />
 
       <Tag kind="sys" position={[X.repo + 1.9, FY + 12, C.z]} k={S.repo[0]} text={S.repo[1]} vis={sysIn} />
       <Tag kind="sys" position={[X.tbill + 1.6, FY + 6.5, C.z]} k={S.tbill[0]} text={S.tbill[1]} vis={sysIn} />
@@ -385,7 +503,7 @@ export default function Vault() {
       <Tag kind="sys" position={[X.other + 0.9, FY + 1.6, C.z]} k={S.other[0]} text={S.other[1]} vis={sysIn} />
       <Tag kind="sys" position={[X.repo - 2.4, FY + 18.4, C.z]} k={S.fund[0]} text={S.fund[1]} vis={fundVis} align="right" />
       <Tag kind="sys" position={[NODE.x + 1, NODE.y - 1.2, NODE.z]} k={S.pool[0]} text={S.pool[1]} vis={poolVis} />
-      <Tag kind="sys" position={[-12, -47, C.z]} k={S.report[0]} text={S.report[1]} vis={sysIn} />
+      <Tag kind="sys" position={[-13, CY - 2, C.z]} k={S.report[0]} text={S.report[1]} vis={sysIn} />
     </group>
   );
 }

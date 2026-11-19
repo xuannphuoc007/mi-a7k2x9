@@ -1,15 +1,16 @@
 "use client";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { scrollState, local, ramp, smooth, band, lerp } from "@/lib/timeline";
 import { useI18n } from "@/lib/i18n";
 import { asset } from "@/lib/asset";
-import { COL, ETH, SOL, TUNNEL, packetPoints, rnd, tmpM, tmpQ, tmpV, tmpS, tmpC, clock, xr, g } from "./shared";
+import { COL, ETH, SOL, TUNNEL, coinPoints, loadSampler, rnd, tmpM, tmpQ, tmpV, tmpS, tmpC, clock, xr, g } from "./shared";
+import { envelopeTex, facadeTex } from "./textures";
 import { tunnelS } from "./CameraRig";
 import Tag from "./Tag";
 
-const RINGS = 64;
+const RINGS = 46;
 const GATE_S = 0.08;
 const PKT_E = new THREE.Vector3(ETH.x, ETH.y + 2.3, ETH.z);
 const PKT_S = new THREE.Vector3(SOL.x, SOL.y + 2.3, SOL.z);
@@ -20,10 +21,10 @@ function Platform({ at, sides, color, matRef }: { at: THREE.Vector3; sides: numb
     <group position={at}>
       <mesh>
         <cylinderGeometry args={[9, 9.4, 0.6, sides]} />
-        <meshStandardMaterial ref={matRef} color="#0e1f3b" metalness={0.7} roughness={0.35} transparent opacity={0.95} />
+        <meshStandardMaterial ref={matRef} color="#e4e8ed" metalness={0.1} roughness={0.7} transparent opacity={0.95} />
       </mesh>
       <lineSegments geometry={edges}>
-        <lineBasicMaterial color={color} transparent opacity={0.7} />
+        <lineBasicMaterial color={color} transparent opacity={0.9} />
       </lineSegments>
       {[3, 5.5, 8].map((r) => (
         <mesh key={r} position={[0, 0.31, 0]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -33,8 +34,41 @@ function Platform({ at, sides, color, matRef }: { at: THREE.Vector3; sides: numb
       ))}
       <mesh position={[0, 0.5, 0]}>
         <cylinderGeometry args={[1.1, 1.3, 0.4, sides === 6 ? 6 : 48]} />
-        <meshStandardMaterial color="#1b3559" metalness={0.8} roughness={0.3} />
+        <meshStandardMaterial color="#c9d1db" metalness={0.8} roughness={0.3} />
       </mesh>
+    </group>
+  );
+}
+
+/** grass ring and a few simple trees so the plazas read as real places */
+function Garden({ at }: { at: THREE.Vector3 }) {
+  const trees = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, i) => {
+        const a = (i / 14) * Math.PI * 2 + rnd(i + at.x) * 0.3;
+        const r = 11.5 + rnd(i + 2 + at.z) * 3.5;
+        return { x: Math.cos(a) * r, z: Math.sin(a) * r, h: 1.6 + rnd(i + 5) * 1.4 };
+      }),
+    [at],
+  );
+  return (
+    <group position={[at.x, at.y - 0.25, at.z]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <ringGeometry args={[9.2, 17, 64]} />
+        <meshStandardMaterial color="#9fc48a" roughness={0.95} />
+      </mesh>
+      {trees.map((t, i) => (
+        <group key={i} position={[t.x, 0, t.z]}>
+          <mesh position={[0, t.h * 0.35, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.16, t.h * 0.7, 8]} />
+            <meshStandardMaterial color="#8a6a4a" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, t.h * 0.9, 0]} castShadow>
+            <sphereGeometry args={[t.h * 0.42, 14, 12]} />
+            <meshStandardMaterial color={i % 3 ? "#6fa45a" : "#86b86b"} roughness={0.85} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }
@@ -44,7 +78,7 @@ export default function Portal() {
   const L = t.labels;
   const S = t.sys;
   const mobile = typeof window !== "undefined" && window.innerWidth < 760;
-  const N = mobile ? 300 : 560;
+  const N = mobile ? 560 : 1000;
 
   const group = useRef<THREE.Group>(null);
   const tiles = useRef<THREE.InstancedMesh>(null);
@@ -65,9 +99,24 @@ export default function Portal() {
   const flare = useRef<THREE.Mesh>(null);
   const pathMat = useRef<THREE.LineBasicMaterial>(null);
 
-  const pkt = useMemo(() => packetPoints(N, 1.25, 1), [N]);
-  const qn = useMemo(() => pkt.nrm.map((n) => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n)), [pkt]);
-  const tcol = useMemo(() => pkt.pts.map((_, i) => new THREE.Color(rnd(i) > 0.55 ? COL.volt : rnd(i + 9) > 0.5 ? COL.usdc : COL.ice)), [pkt]);
+  const pkt = useMemo(() => coinPoints(N, 1.35), [N]);
+  const qn = useMemo(() => pkt.nrm.map((n) => (n.z > 0 ? new THREE.Quaternion() : new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI))), [pkt]);
+  const tcol = useMemo(() => pkt.pts.map(() => new THREE.Color(COL.usdc)), [pkt]);
+  useEffect(() => {
+    let live = true;
+    loadSampler(asset("/img/usdc.png")).then((sample) => {
+      if (!live) return;
+      pkt.pts.forEach((p, i) => tcol[i].copy(sample(((p.z > 0 ? p.x : -p.x) / 1.35 + 1) / 2, 1 - (p.y / 1.35 + 1) / 2)));
+    });
+    return () => {
+      live = false;
+    };
+  }, [pkt, tcol]);
+  const envMap = useMemo(() => (typeof document !== "undefined" ? envelopeTex() : null), []);
+  const ethFac = useMemo(() => (typeof document !== "undefined" ? facadeTex("#5d6acb", "eth") : null), []);
+  const solFac = useMemo(() => (typeof document !== "undefined" ? facadeTex("#2b3552", "sol") : null), []);
+  const tubeGeo = useMemo(() => new THREE.TubeGeometry(TUNNEL, 220, 2.5, 32, false), []);
+  const seal = useRef<THREE.Mesh>(null);
   const frames = useMemo(() => TUNNEL.computeFrenetFrames(RINGS, false), []);
   const trailGeo = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -124,7 +173,7 @@ export default function Portal() {
         const ang = r2 * Math.PI * 2 + ki * (atSol ? -3 : 3);
         const ringR = 2.1;
         const ring = tmpS.set(Math.cos(ang) * ringR, -2.0 + (atSol ? 0 : 0) , Math.sin(ang) * ringR);
-        const spinY = tm * 0.25;
+        const spinY = Math.sin(tm * 0.4) * 0.5 + 0.35;
         tmpV.copy(p).applyAxisAngle(UPY, spinY);
         tmpV.lerp(ring, ki).add(base);
         tmpV.y += Math.sin(Math.PI * ki) * (atSol ? 1.2 : 0.8);
@@ -143,7 +192,7 @@ export default function Portal() {
     if (mintRing.current) mintRing.current.opacity = 0.25 + band(tl, 0.7, 0.75, 0.86, 0.92) * 0.75;
 
     // Ethereum crystals turn slowly; Solana light bands stream fast
-    if (crystals.current) crystals.current.children.forEach((c, i) => (c.rotation.y = tm * (0.1 + i * 0.01)));
+    if (crystals.current) crystals.current.rotation.y = tm * 0.15;
     if (bands.current) {
       let i = 0;
       for (let r = 0; r < 3; r++)
@@ -152,12 +201,12 @@ export default function Portal() {
           let xx = ((c / 16) * 17 + tm * sp + r * 3) % 17;
           xx -= 8.5;
           const edge = Math.min(1, (8.5 - Math.abs(xx)) / 1.2);
-          tmpV.set(SOL.x + xx, SOL.y + 1.0 + r * 0.95, SOL.z - 5.5 - r * 0.6);
+          tmpV.set(SOL.x + 6 + xx * 0.27, SOL.y + 3.2 + r * 2.6, SOL.z - 0.05);
           tmpQ.identity();
-          tmpS.set(Math.max(0, edge), 1, 1);
+          tmpS.set(Math.max(0, edge) * 0.4, 1, 1);
           tmpM.compose(tmpV, tmpQ, tmpS);
           bands.current.setMatrixAt(i, tmpM);
-          tmpC.set(COL.solA).lerp(tmpC2.set(COL.solB), (xx + 8.5) / 17).lerp(tmpC2.set(COL.night), 0.35);
+          tmpC.set(COL.solA).lerp(tmpC2.set(COL.solB), (xx + 8.5) / 17);
           bands.current.setColorAt(i, tmpC);
           i++;
         }
@@ -181,8 +230,7 @@ export default function Portal() {
     }
     const signed = smooth(ramp(s, GATE_S - 0.02, GATE_S + 0.01));
     if (msgMat.current) {
-      msgMat.current.emissive.set(COL.ice).lerp(tmpC2.set("#ffffff"), signed);
-      msgMat.current.emissiveIntensity = 0.6 + signed * 1.4;
+      msgMat.current.emissiveIntensity = 0.05;
     }
     if (trail.current) {
       const pos = trailGeo.attributes.position as THREE.BufferAttribute;
@@ -208,7 +256,7 @@ export default function Portal() {
         const scl = 1 + near * 0.25;
         tmpM.compose(tmpV, tmpQ, tmpSc.set(scl, scl, scl));
         rings.current.setMatrixAt(i, tmpM);
-        tmpC.set(COL.usdc).lerp(tmpC2.set(COL.ice), near).multiplyScalar(0.55 + near * 1.2);
+        tmpC.set("#c9a24a").lerp(tmpC2.set(COL.usdc), near);
         rings.current.setColorAt(i, tmpC);
       }
       rings.current.instanceMatrix.needsUpdate = true;
@@ -217,7 +265,8 @@ export default function Portal() {
 
     // attestation gate flashes when the message passes
     const flash = Math.exp(-Math.pow((s - GATE_S) * 22, 2)) * (tl > 0.38 && tl < 0.6 ? 1 : 0);
-    if (gateMat.current) gateMat.current.emissiveIntensity = 0.4 + flash * 3 + band(tl, 0.3, 0.36, 0.44, 0.5) * 0.6;
+    if (gateMat.current) gateMat.current.emissiveIntensity = flash * 1.2 + band(tl, 0.3, 0.36, 0.44, 0.5) * 0.2;
+    if (seal.current) seal.current.scale.setScalar(Math.max(0.001, signed));
     if (arcs.current) arcs.current.rotation.z = tm * 0.3 + flash * 2;
     if (flare.current) {
       flare.current.scale.setScalar(0.5 + flash * 2.2);
@@ -240,79 +289,88 @@ export default function Portal() {
 
       {/* Ethereum world: slow, crystalline */}
       <Platform at={ETH} sides={6} color={COL.eth} matRef={ethMat} />
-      <group ref={crystals} position={[ETH.x, ETH.y, ETH.z]}>
-        {Array.from({ length: 9 }, (_, i) => {
-          const a = Math.PI * (1.08 + (i / 8) * 0.84);
-          const r = 6.4 + rnd(i) * 2;
-          const h = 1.0 + rnd(i + 3) * 1.8;
-          return (
-            <mesh key={i} position={[Math.cos(a) * r, 0.3 + h, Math.sin(a) * r]} scale={[0.4, h, 0.4]}>
-              <octahedronGeometry args={[1, 0]} />
-              <meshStandardMaterial color={COL.eth} emissive="#3c4fb8" emissiveIntensity={0.5} metalness={0.4} roughness={0.2} transparent opacity={0.85} />
-            </mesh>
-          );
-        })}
+      <Garden at={ETH} />
+      <Garden at={SOL} />
+      {/* Ethereum tower with a crystal crown */}
+      <mesh position={[ETH.x - 6, ETH.y + 6.3, ETH.z - 2.5]} castShadow receiveShadow>
+        <boxGeometry args={[5, 12, 4]} />
+        <meshStandardMaterial map={ethFac} metalness={0.4} roughness={0.25} />
+      </mesh>
+      <group ref={crystals} position={[ETH.x - 6, ETH.y + 14.2, ETH.z - 2.5]}>
+        <mesh scale={[1.3, 2.0, 1.3]} castShadow>
+          <octahedronGeometry args={[1, 0]} />
+          <meshStandardMaterial color={COL.eth} metalness={0.5} roughness={0.15} />
+        </mesh>
       </group>
+      <mesh position={[ETH.x, ETH.y + 0.5, ETH.z]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[2.3, 0.14, 12, 72]} />
+        <meshStandardMaterial color={COL.steel} metalness={0.9} roughness={0.3} />
+      </mesh>
       <mesh position={[ETH.x, ETH.y + 0.36, ETH.z]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[2.0, 2.25, 96]} />
         <meshBasicMaterial ref={burnRing} color={COL.risk} transparent opacity={0.25} side={THREE.DoubleSide} />
       </mesh>
 
       {/* Solana world: fast, streaming */}
-      <Platform at={SOL} sides={48} color="#7fe9d0" matRef={solMat} />
+      <Platform at={SOL} sides={48} color="#4fcfae" matRef={solMat} />
+      <mesh position={[SOL.x + 6, SOL.y + 5.8, SOL.z - 2.5]} castShadow receiveShadow>
+        <boxGeometry args={[5, 11, 4.8]} />
+        <meshStandardMaterial map={solFac} metalness={0.4} roughness={0.25} />
+      </mesh>
       <instancedMesh ref={bands} args={[undefined, undefined, 48]} frustumCulled={false}>
         <boxGeometry args={[1.6, 0.07, 0.07]} />
         <meshBasicMaterial toneMapped={false} />
       </instancedMesh>
       <mesh position={[SOL.x, SOL.y + 0.36, SOL.z]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[2.0, 2.25, 96]} />
-        <meshBasicMaterial ref={mintRing} color={COL.volt} transparent opacity={0.25} side={THREE.DoubleSide} />
+        <meshBasicMaterial ref={mintRing} color={COL.usdc} transparent opacity={0.25} side={THREE.DoubleSide} />
       </mesh>
 
       {/* the packet (burned on one chain, minted on the other) */}
       <instancedMesh ref={tiles} args={[undefined, undefined, N]} frustumCulled={false}>
-        <boxGeometry args={[0.15, 0.15, 0.014]} />
-        <meshStandardMaterial ref={tileMat} emissive={COL.usdc} emissiveIntensity={0.85} roughness={0.5} metalness={0.25} side={THREE.DoubleSide} transparent />
+        <boxGeometry args={[pkt.d * 1.0, pkt.d * 1.0, 0.02]} />
+        <meshStandardMaterial ref={tileMat} emissive={COL.usdc} emissiveIntensity={0.02} roughness={0.35} metalness={0.15} side={THREE.DoubleSide} transparent />
       </instancedMesh>
 
-      {/* tunnel + attestation gate */}
+      {/* pneumatic glass tube + attestation (notary) ring */}
+      <mesh geometry={tubeGeo}>
+        <meshPhysicalMaterial color="#dcecfb" roughness={0.06} transparent opacity={0.16} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
       <instancedMesh ref={rings} args={[undefined, undefined, RINGS]} frustumCulled={false}>
-        <torusGeometry args={[2.6, 0.03, 8, 72]} />
-        <meshBasicMaterial toneMapped={false} />
+        <torusGeometry args={[2.62, 0.06, 10, 72]} />
+        <meshStandardMaterial metalness={0.85} roughness={0.3} />
       </instancedMesh>
       <group ref={gate} position={gatePos} quaternion={gateQ}>
         <mesh>
           <torusGeometry args={[4.2, 0.12, 16, 120]} />
-          <meshStandardMaterial ref={gateMat} color={COL.ice} emissive={COL.volt} emissiveIntensity={0.4} metalness={0.6} roughness={0.25} />
+          <meshStandardMaterial ref={gateMat} color="#c9a24a" emissive={COL.usdc} emissiveIntensity={0} metalness={0.9} roughness={0.25} />
         </mesh>
         <group ref={arcs}>
           {[0, 1, 2].map((k) => (
             <mesh key={k} rotation={[0, 0, (k * Math.PI * 2) / 3]}>
-              <torusGeometry args={[3.5, 0.04, 8, 60, Math.PI * 0.45]} />
-              <meshBasicMaterial color={COL.ice} />
+              <torusGeometry args={[3.5, 0.07, 8, 60, Math.PI * 0.45]} />
+              <meshStandardMaterial color={COL.usdc} metalness={0.5} roughness={0.3} />
             </mesh>
           ))}
         </group>
         <mesh ref={flare}>
           <circleGeometry args={[1, 48]} />
-          <meshBasicMaterial color={COL.volt} transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
+          <meshBasicMaterial color={COL.usdc} transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
         </mesh>
       </group>
 
       <group ref={msg}>
-        <mesh>
-          <boxGeometry args={[0.9, 0.56, 0.06]} />
-          <meshStandardMaterial ref={msgMat} color="#dff1ff" emissive={COL.ice} emissiveIntensity={0.8} metalness={0.2} roughness={0.3} />
+        <mesh castShadow>
+          <boxGeometry args={[1.0, 0.62, 0.03]} />
+          <meshStandardMaterial ref={msgMat} map={envMap} color="#ffffff" emissive="#ffffff" emissiveIntensity={0.05} roughness={0.8} />
         </mesh>
-        {[0.14, 0, -0.14].map((y, i) => (
-          <mesh key={y} position={[-0.08 + i * 0.04, y, 0.035]}>
-            <boxGeometry args={[0.55 - i * 0.12, 0.035, 0.01]} />
-            <meshBasicMaterial color={COL.usdc} />
-          </mesh>
-        ))}
+        <mesh ref={seal} position={[0, 0.02, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.12, 0.13, 0.04, 24]} />
+          <meshStandardMaterial color="#b8322a" metalness={0.1} roughness={0.45} />
+        </mesh>
       </group>
       <points ref={trail} geometry={trailGeo}>
-        <pointsMaterial color={COL.ice} size={0.09} transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
+        <pointsMaterial color={COL.volt} size={0.07} transparent opacity={0} depthWrite={false} />
       </points>
 
       {/* labels */}

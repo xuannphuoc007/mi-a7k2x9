@@ -16,16 +16,16 @@ export function PortalHud() {
   const flight = tl > 0.27 && tl < 0.8;
   const total = eth + sol;
   const rows: [string, string, string][] = [
-    [h.eth, fmt(eth, locale), eth < 999 && eth > 1 ? "#ed846b" : "#a0b4ce"],
-    [h.flight, flight ? "✉ 1 msg" : "—", flight ? "#a7dbff" : "#55688a"],
-    [h.sol, fmt(sol, locale), sol > 1 && sol < 999 ? "#60b4ff" : "#a0b4ce"],
+    [h.eth, fmt(eth, locale), eth < 999 && eth > 1 ? "#c4512f" : "#4f6380"],
+    [h.flight, flight ? "✉ 1 msg" : "—", flight ? "#1f66b8" : "#9aa8bb"],
+    [h.sol, fmt(sol, locale), sol > 1 && sol < 999 ? "#2775ca" : "#4f6380"],
   ];
   return (
     <div
       className="pointer-events-none fixed inset-x-0 bottom-5 z-30 flex justify-center px-3"
       style={{ opacity: show, transform: `translateY(${(1 - show) * 10}px)` }}
     >
-      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 rounded-full border border-white/10 bg-[#070f20]/80 px-4 py-2 backdrop-blur-sm md:px-5">
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 rounded-full border border-black/10 bg-white/85 px-4 py-2 backdrop-blur-sm md:px-5">
         <span className="mono text-[10px] uppercase tracking-[.14em] text-volt">{h.route}</span>
         {rows.map(([k, v, c]) => (
           <span key={k} className="flex items-baseline gap-2">
@@ -35,7 +35,7 @@ export function PortalHud() {
             </span>
           </span>
         ))}
-        <span className="flex items-baseline gap-2 border-l border-white/15 pl-4">
+        <span className="flex items-baseline gap-2 border-l border-black/10 pl-4">
           <span className="text-[11.5px] text-warm">{h.total}</span>
           <span className="mono text-[13.5px] tabular-nums text-warm">{fmt(total, locale)}</span>
         </span>
@@ -57,7 +57,7 @@ export function Confirm() {
   ];
   return (
     <div
-      className="pointer-events-none fixed right-4 top-[64px] z-30 w-[min(330px,calc(100vw-2rem))] md:right-10 md:top-1/2 md:-translate-y-1/2"
+      className="pointer-events-none fixed right-4 top-[64px] z-30 w-[min(340px,calc(100vw-2rem))] rounded-xl border border-black/10 bg-white/90 p-4 shadow-[0_10px_40px_rgba(15,35,64,.12)] md:right-10 md:top-1/2 md:-translate-y-1/2"
       style={{ opacity: show }}
     >
       <div className="mono mb-3 text-[10.5px] uppercase tracking-[.16em] text-volt">{h.confirm}</div>
@@ -67,7 +67,7 @@ export function Confirm() {
           <div key={k} className="flex items-center gap-3 py-1.5">
             <span
               className="grid h-5 w-5 place-items-center rounded-full border text-[11px]"
-              style={{ borderColor: on ? "#60b4ff" : "#2a3d5c", color: "#070f20", background: on ? "#60b4ff" : "transparent" }}
+              style={{ borderColor: on ? "#2775ca" : "#c4cdd8", color: "#ffffff", background: on ? "#2775ca" : "transparent" }}
             >
               {on ? "✓" : ""}
             </span>
@@ -76,7 +76,7 @@ export function Confirm() {
           </div>
         );
       })}
-      <div className="mono mt-2 border-t border-white/10 pt-2 text-[12px] text-ice">
+      <div className="mono mt-2 border-t border-black/10 pt-2 text-[12px] text-ice">
         {h.change}: <span className="text-warm">0</span>
       </div>
     </div>
@@ -99,7 +99,7 @@ export function Coverage() {
         <span>{label}</span>
         <span className="mono tabular-nums text-warm">${nf(val * k)}B</span>
       </div>
-      <div className="h-2.5 w-full rounded-full bg-white/5">
+      <div className="h-2.5 w-full rounded-full bg-black/5">
         <div
           className="h-full rounded-full"
           style={{ width: `${((val * k) / max) * 100}%`, background: dashed ? `repeating-linear-gradient(90deg, ${color} 0 6px, transparent 6px 9px)` : color }}
@@ -113,8 +113,8 @@ export function Coverage() {
         <div className="mono mb-2 flex items-center gap-2 text-[10.5px] uppercase tracking-[.14em] text-volt">
           <span className="h-1.5 w-1.5 rounded-full bg-volt" /> {v.normal}
         </div>
-        <Bar label={v.reserves} val={68.1} color="#60b4ff" k={a} />
-        <Bar label={v.usdc} val={owed} color="#a0b4ce" k={a} />
+        <Bar label={v.reserves} val={68.1} color="#2775ca" k={a} />
+        <Bar label={v.usdc} val={owed} color="#4f6380" k={a} />
         <div className="mono text-[13px] text-warm">
           {v.cover} ≈ {((68.1 / owed) * 100 * clamp(a * 1.0)).toLocaleString(locale, { maximumFractionDigits: 1 })}%
         </div>
@@ -123,8 +123,8 @@ export function Coverage() {
         <div className="mono mb-2 flex items-center gap-2 text-[10.5px] uppercase tracking-[.14em] text-ice">
           <span className="h-1.5 w-1.5 rounded-full border border-ice" /> {t.ui.sim} · {v.stress}
         </div>
-        <Bar label={v.liquid} val={60.1} color="#ed846b" k={b} dashed />
-        <Bar label={v.usdc} val={owed} color="#a0b4ce" k={b} />
+        <Bar label={v.liquid} val={60.1} color="#c4512f" k={b} dashed />
+        <Bar label={v.usdc} val={owed} color="#4f6380" k={b} />
         <div className="mono text-[13px] text-risk">
           {v.cover} ≈ {((60.1 / owed) * 100 * b).toLocaleString(locale, { maximumFractionDigits: 1 })}%
         </div>
@@ -150,7 +150,7 @@ export function Compare() {
           <div
             key={s}
             className="relative z-10 rounded-md border px-2.5 py-2 text-[12.5px] leading-snug text-warm"
-            style={{ borderColor: i === 1 && wrapped ? "#ed846b" : `${hot}66`, background: "#0a1730" }}
+            style={{ borderColor: i === 1 && wrapped ? "#c4512f" : `${hot}66`, background: "#ffffff" }}
           >
             <span className="mono mr-1 text-[10px] text-mist">{i + 1}</span>
             {s}
@@ -163,8 +163,8 @@ export function Compare() {
   return (
     <div className="mt-6 w-full max-w-[680px] text-left">
       <style>{`@keyframes flow{0%{left:6%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:92%;opacity:0}} .flow-dot{animation:flow 3.2s linear infinite} @media (prefers-reduced-motion: reduce){.flow-dot{animation:none;left:50%}}`}</style>
-      <Row title={c.cctp} steps={c.cctpSteps} risk={c.cctpRisk} hot="#60b4ff" />
-      <Row title={c.bridge} steps={c.bridgeSteps} risk={c.bridgeRisk} hot="#ed846b" wrapped />
+      <Row title={c.cctp} steps={c.cctpSteps} risk={c.cctpRisk} hot="#2775ca" />
+      <Row title={c.bridge} steps={c.bridgeSteps} risk={c.bridgeRisk} hot="#c4512f" wrapped />
     </div>
   );
 }

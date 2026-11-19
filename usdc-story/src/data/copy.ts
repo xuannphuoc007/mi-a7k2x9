@@ -110,7 +110,7 @@ export const en: Dict = {
     replay: "Replay from the start",
     sources: "Sources",
     disclaimer: "Educational illustration, not financial advice. Simulated values are labelled. No real transfers are executed. Reserve figures are as reported for 12 Nov 2026 and change every week.",
-    credits: "USDC logo © Circle Internet Group, used for identification. Banknote is an original stylised illustration, not a real currency design.",
+    credits: "USDC logo © Circle Internet Group; Ethereum and Solana logos belong to their projects, used for identification. Banknote, certificates and buildings are original stylised illustrations, not real designs.",
     nowebgl: "Your browser can't show the 3D world, so you're seeing the simplified version.",
   },
   scenes: [
@@ -322,6 +322,7 @@ export const en: Dict = {
     source: "Source · Ethereum",
     dest: "Destination · Solana",
     gate: "Attestation",
+    vault: "Reserve vault",
   },
   sys: {
     issuer: ["ISSUER", "Circle Internet Group · NYSE: CRCL"],
@@ -365,7 +366,7 @@ export const vi: Dict = {
     replay: "Xem lại từ đầu",
     sources: "Nguồn",
     disclaimer: "Nội dung giáo dục, không phải lời khuyên tài chính. Số liệu mô phỏng đều được ghi rõ. Không có giao dịch thật nào được thực hiện. Số liệu dự trữ theo báo cáo ngày 12/11/2026 và thay đổi hằng tuần.",
-    credits: "Logo USDC © Circle Internet Group, dùng để nhận diện. Tờ tiền là hình minh hoạ tự vẽ, không phải mẫu tiền thật.",
+    credits: "Logo USDC © Circle Internet Group; logo Ethereum và Solana thuộc về các dự án, dùng để nhận diện. Tờ tiền, chứng chỉ và toà nhà là hình minh hoạ tự vẽ, không phải mẫu thật.",
     nowebgl: "Trình duyệt của bạn không hiển thị được thế giới 3D, nên đây là bản rút gọn.",
   },
   scenes: [
@@ -573,6 +574,7 @@ export const vi: Dict = {
     source: "Nguồn · Ethereum",
     dest: "Đích · Solana",
     gate: "Xác nhận",
+    vault: "Két dự trữ",
   },
   sys: {
     issuer: ["BÊN PHÁT HÀNH", "Circle Internet Group · NYSE: CRCL"],
