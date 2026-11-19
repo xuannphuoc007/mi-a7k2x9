@@ -161,6 +161,23 @@ function BeatBlock({ b, top }: { b: BeatT; top: number }) {
         )}
         {b.head && <h3 className="display shadow-text mb-3 text-[30px] font-semibold leading-[1.05] tracking-[-0.02em] text-warm md:text-[44px]">{b.head}</h3>}
         <p className="shadow-text text-[18px] font-light leading-[1.55] text-warm md:text-[21px]">{b.l1}</p>
+        {b.analogy && (
+          <div className="relative mt-4 flex gap-3 rounded-xl border border-[#e8c96a] bg-[#fff6d6] py-3 pl-4 pr-4 text-left shadow-[0_6px_24px_rgba(120,90,10,.12)]">
+            <span className="absolute -left-[7px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-[#eef2f7]" />
+            <span className="absolute -right-[7px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-[#eef2f7]" />
+            <svg width="30" height="30" viewBox="0 0 32 32" className="mt-0.5 shrink-0" aria-hidden>
+              <rect x="2" y="7" width="28" height="18" rx="3" fill="#f2b705" />
+              <circle cx="2" cy="16" r="3" fill="#fff6d6" />
+              <circle cx="30" cy="16" r="3" fill="#fff6d6" />
+              <path d="M21 9v14" stroke="#fff6d6" strokeWidth="1.6" strokeDasharray="2 2" />
+              <text x="11.5" y="20.5" fontSize="11" fontWeight="700" fill="#5a4300" textAnchor="middle" fontFamily="Arial">P</text>
+            </svg>
+            <div>
+              <div className="mono mb-0.5 text-[10px] uppercase tracking-[.16em] text-[#8a6a00]">{t.ui.analogy}</div>
+              <p className="text-[15.5px] leading-[1.5] text-[#3d3000] md:text-[16.5px]">{b.analogy}</p>
+            </div>
+          </div>
+        )}
         {b.l2 && (
           <details className="group/l2 mt-4">
             <summary className="mono mb-1 inline-flex items-center gap-2 text-[10px] uppercase tracking-[.18em] text-volt">

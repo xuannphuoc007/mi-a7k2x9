@@ -13,6 +13,7 @@ import Mint from "./Mint";
 import Network from "./Network";
 import Market from "./Market";
 import Control from "./Control";
+import Cast from "./Cast";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { COL, clock, rnd, xr, LOOK, g } from "./shared";
 import { scrollState as SS } from "@/lib/timeline";
@@ -151,6 +152,7 @@ export default function World() {
       <Network />
       <Market />
       <Control />
+      <Cast />
     </Canvas>
   );
 }

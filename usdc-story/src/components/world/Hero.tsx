@@ -243,6 +243,40 @@ export default function Hero() {
   if (!data) return null;
   return (
     <group ref={group}>
+      {/* Hà's workshop: wooden floor, bench legs and a few Hội An lanterns */}
+      <mesh position={[0, -4.42, 2.1]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[26, 13.6]} />
+        <meshStandardMaterial color="#c9a57a" roughness={0.8} />
+      </mesh>
+      {[
+        [-6.1, -4.2],
+        [6.1, -4.2],
+        [-6.1, 3.0],
+        [6.1, 3.0],
+      ].map(([x, z]) => (
+        <mesh key={`${x}${z}`} position={[x, -3.45, z]} castShadow>
+          <boxGeometry args={[0.35, 1.9, 0.35]} />
+          <meshStandardMaterial color="#b48d62" roughness={0.7} />
+        </mesh>
+      ))}
+      {[
+        [-5.0, -2.3, -3.2, "#d8342c"],
+        [-3.6, -2.3, -3.4, "#f2b705"],
+        [4.6, -2.3, -3.3, "#e0662c"],
+      ].map(([x, y, z, c]) => (
+        <group key={String(x)} position={[x as number, y as number, z as number]}>
+          <mesh position={[0, 0.75, 0]} scale={[0.55, 0.62, 0.55]} castShadow>
+            <sphereGeometry args={[1, 24, 18]} />
+            <meshStandardMaterial color={c as string} roughness={0.55} emissive={c as string} emissiveIntensity={0.15} />
+          </mesh>
+          {[0.1, 1.42].map((yy) => (
+            <mesh key={yy} position={[0, yy, 0]}>
+              <cylinderGeometry args={[0.2, 0.2, 0.12, 16]} />
+              <meshStandardMaterial color="#7a5a22" roughness={0.5} />
+            </mesh>
+          ))}
+        </group>
+      ))}
       {/* light oak table the note floats above: grounds the scene with a real shadow */}
       <mesh position={[0, -2.45, -0.6]} receiveShadow>
         <boxGeometry args={[13, 0.3, 8]} />

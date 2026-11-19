@@ -10,6 +10,8 @@ export type Beat = {
   deep?: string[];
   insight?: string;
   chip?: Chip;
+  /** everyday comparison: the parking ticket */
+  analogy?: string;
 };
 export type SceneKey = "s01" | "s02" | "s03" | "s04" | "s05" | "s06" | "s07" | "s08" | "s09";
 export type Scene = { id: SceneKey; num: string; kicker: string; title: string; beats: Beat[] };
@@ -17,7 +19,7 @@ export type Scene = { id: SceneKey; num: string; kicker: string; title: string; 
 type Pair = [string, string];
 type Dict = {
   meta: { title: string };
-  ui: Record<"project" | "subtitle" | "scroll" | "cinematic" | "system" | "l2" | "deep" | "insight" | "data" | "sim" | "metaphor" | "replay" | "sources" | "disclaimer" | "credits" | "nowebgl", string>;
+  ui: Record<"analogy" | "project" | "subtitle" | "scroll" | "cinematic" | "system" | "l2" | "deep" | "insight" | "data" | "sim" | "metaphor" | "replay" | "sources" | "disclaimer" | "credits" | "nowebgl", string>;
   scenes: Scene[];
   hud: Record<string, string>;
   mint: { title: string; steps: string[]; presets: string; rule: string; exchange: string; usd: string; usdc: string };
@@ -59,11 +61,14 @@ const sources = [
   "Cointelegraph — Circle redeemed $3.8B and minted $0.8B, 13–15 Mar 2023",
   "The Block — USDC market cap fell ≈ $10B in two weeks (30 Mar 2023)",
   "Stablecoin Insider — What backs USDC (reserve changes after 2023)",
+  "BYDFi — USDC supply by blockchain (Solana transfer ≈ $0.0004)",
+  "VietnamFinance — no licensed domestic crypto exchange yet (Nov 2026)",
 ];
 
 export const en: Dict = {
   meta: { title: "The Journey of a Digital Dollar — USDC" },
   ui: {
+    analogy: "Like a parking ticket",
     project: "The Journey of a Digital Dollar",
     subtitle: "Follow the money. Discover what happens behind every USDC.",
     scroll: "Scroll to follow the dollar",
@@ -91,7 +96,8 @@ export const en: Dict = {
         {
           t: 0.13,
           side: "l",
-          l1: "This is a dollar. For a hundred years it has moved the way banks move: on business days, inside their walls, a few days at a time across borders.",
+          l1: "Meet Hà. She sells handmade lanterns online from Hội An. A customer in Australia, Sarah, has just paid her 1,000 USDC — and Hà wants to know what she actually received.",
+          analogy: "USDC works like a parking ticket. You leave a dollar, you get a ticket. The ticket isn’t the dollar — but whoever holds it can get the dollar back.",
         },
         {
           t: 0.36,
@@ -131,6 +137,7 @@ export const en: Dict = {
           t: 0.08,
           side: "l",
           l1: "A business sends real dollars to Circle by bank wire.",
+          analogy: "A car park prints a ticket only when a car drives in. Circle prints USDC only when real dollars arrive.",
           l2: "Only approved institutions — exchanges, banks, wallet providers, trading firms — can mint directly. They pass a business identity check (KYB) and wire US dollars from their own bank.",
           chip: { kind: "data", text: "Circle Mint: institutions only, not individuals · Oct 2026" },
         },
@@ -152,7 +159,8 @@ export const en: Dict = {
           t: 0.66,
           side: "r",
           head: "Buying on an exchange is different.",
-          l1: "When you buy USDC on an exchange, nothing is printed: someone else’s USDC simply changes hands.",
+          l1: "That’s how Sarah got hers: she bought USDC on an exchange. Nothing new was printed — someone else’s USDC simply changed hands.",
+          analogy: "Buying a ticket from another driver doesn’t put a new car in the car park.",
           l2: "This is how most people get USDC. Only the exchange — or another institution — deals with Circle directly.",
         },
         { t: 0.84, side: "c", head: "One floor down: the vault.", l1: "Every dollar that came in has to be kept somewhere." },
@@ -168,6 +176,7 @@ export const en: Dict = {
           t: 0.1,
           side: "l",
           l1: "Under every USDC there is a vault. It holds almost no banknotes. It holds short loans — to the US government and to the biggest banks.",
+          analogy: "Every car that comes in is parked somewhere. Hà’s 1,000 USDC is backed by the whole car park — not by one numbered space.",
           chip: { kind: "data", text: "Reserves ≈ $68.1B vs ≈ 67.9B USDC · 12 Nov 2026" },
         },
         {
@@ -227,7 +236,8 @@ export const en: Dict = {
         {
           t: 0.08,
           side: "l",
-          l1: "USDC doesn’t live on one blockchain. Circle issues it directly on dozens — each one like a different town, with its own roads and tolls.",
+          l1: "USDC doesn’t live on one blockchain. Circle issues it directly on dozens — each one like a different town, with its own roads and tolls. Hà’s wallet can hold it on Ethereum, Base or Solana.",
+          analogy: "The same ticket is accepted at car parks in many towns.",
           chip: { kind: "data", text: "Native on 30 blockchains · 6 Feb 2026" },
         },
         {
@@ -248,6 +258,7 @@ export const en: Dict = {
           side: "r",
           head: "Native vs bridged",
           l1: "A bridge locks real USDC in its own vault and hands out a look-alike: USDC.e.",
+          analogy: "USDC.e is like a ticket re-issued by a middleman car park. It is only as good as the middleman.",
           l2: "USDC.e is a claim on the bridge, not on Circle. If the bridge fails or is hacked, the copy can lose its backing — and Circle does not redeem it.",
           deep: [
             "The “.e” means “bridged from Ethereum”. It appeared on Avalanche, Arbitrum, Optimism and Polygon before Circle arrived there natively.",
@@ -273,7 +284,8 @@ export const en: Dict = {
         {
           t: 0.08,
           side: "l",
-          l1: "Blockchains cannot see each other. Ethereum has no idea what happens on Solana. So 'moving' USDC between them is really two separate events — and someone has to vouch that the first one happened.",
+          l1: "Hà wants her USDC on Solana, where sending it costs less than a cent. But blockchains cannot see each other — so ‘moving’ USDC is really two separate events, and someone has to vouch for the first.",
+          analogy: "To move a ticket to another car park: the first one tears it up and phones ahead, the second one prints a fresh ticket.",
         },
         {
           t: 0.21,
@@ -326,7 +338,8 @@ export const en: Dict = {
         {
           t: 0.08,
           side: "l",
-          l1: "On exchanges USDC is bought and sold like anything else, so its price can wobble.",
+          l1: "Hà sells some USDC on an exchange to pay her suppliers. Like anything traded, its price can wobble a little.",
+          analogy: "Tickets can be resold. If one goes for 99 cents, someone buys it and collects the full dollar at the car park — so the price comes back.",
           l2: "Two worlds meet here: the market, where anyone trades, and Circle’s counter, where approved institutions swap 1 : 1 for dollars.",
           chip: { kind: "sim", text: "Price paths in this chapter are simulations" },
         },
@@ -363,7 +376,8 @@ export const en: Dict = {
         {
           t: 0.08,
           side: "l",
-          l1: "Behind every USDC is a smart contract with special keys — and Circle holds all of them.",
+          l1: "Behind every USDC is a smart contract with special keys — and Circle holds all of them. That’s why Hà only takes payments from customers she knows.",
+          analogy: "The car park can block a ticket reported stolen: whoever holds it can no longer get a car out.",
           l2: "The contract has an owner, a master minter who decides who may create tokens, a pauser, a blacklister and an admin who can upgrade the code.",
         },
         {
@@ -401,6 +415,7 @@ export const en: Dict = {
           side: "l",
           head: "Friday, 10 March 2023",
           l1: "US regulators close Silicon Valley Bank. Circle’s wires to move cash out have not gone through.",
+          analogy: "Part of the cars sat in a side car park that was sealed on a Friday night — and the main office was closed all weekend. People sold their tickets cheap.",
           l2: "$3.3B of USDC’s ≈ $40B reserve is stuck there — about 8%.",
           chip: { kind: "data", text: "Historical · 10–16 March 2023" },
         },
@@ -408,7 +423,7 @@ export const en: Dict = {
           t: 0.3,
           side: "r",
           head: "Saturday: $0.87",
-          l1: "Holders rush to sell on exchanges. With banks shut for the weekend, nobody can redeem at Circle, and USDC falls to about $0.87.",
+          l1: "Holders rush to sell on exchanges. With banks shut for the weekend, nobody can redeem at Circle, and USDC falls to about $0.87. Had Hà needed cash that Saturday, her 1,000 USDC would have fetched about $870.",
         },
         {
           t: 0.5,
@@ -440,7 +455,8 @@ export const en: Dict = {
         {
           t: 0.06,
           side: "l",
-          l1: "An approved institution sends USDC back to Circle.",
+          l1: "Hà sells her USDC to an exchange; the exchange — an approved institution — hands USDC back to Circle.",
+          analogy: "Hand back the ticket, get your car. Only regular customers deal with the office directly — everyone else goes through an exchange.",
           l2: "Direct redemption is for Circle Mint customers only — exchanges, banks, fintechs, trading firms. Individuals usually sell their USDC on an exchange or in an app instead.",
           chip: { kind: "data", text: "Standard: no Circle fee · Express: 0.05% · from 19 Oct 2026" },
         },
@@ -453,6 +469,7 @@ export const en: Dict = {
           l2: "Settlement time depends on the banks and payment rails involved; Express is faster, for a fee.",
           deep: [
             "Who you depend on: Circle and its terms; its partner banks and the reserve fund; the blockchain your USDC sits on; and, if you are not a Circle Mint customer, the exchange or app you sell through.",
+            "In Vietnam, people usually turn USDC into đồng through exchanges or peer-to-peer trades. As of mid-November 2026, no domestic crypto exchange had yet been licensed under the 2025 pilot.",
           ],
         },
         { t: 0.6, side: "r", head: "All the way back.", l1: "From the counter, over the chains and the vault, up to the table where it started." },
@@ -460,7 +477,7 @@ export const en: Dict = {
           t: 0.86,
           side: "c",
           head: "One dollar again.",
-          l1: "USDC works because, at the end of the road, someone hands you a dollar. Every part of the machine exists to keep that promise.",
+          l1: "Hà’s 1,000 USDC is money again — enough for next month’s silk and bamboo. USDC works because, at the end of the road, someone hands you a dollar.",
           insight: "The real question about USDC is not “is it backed?” — on 12 Nov 2026 it was, slightly over 100%. It is “how fast, for whom, and on which days can it become a dollar?”",
         },
       ],
@@ -596,6 +613,7 @@ export const en: Dict = {
 export const vi: Dict = {
   meta: { title: "Hành trình của một đồng đô số — USDC" },
   ui: {
+    analogy: "Giống vé giữ xe",
     project: "Hành trình của một đồng đô số",
     subtitle: "Đi theo dòng tiền. Xem điều gì diễn ra phía sau mỗi đồng USDC.",
     scroll: "Cuộn để đi theo đồng đô",
@@ -623,7 +641,8 @@ export const vi: Dict = {
         {
           t: 0.13,
           side: "l",
-          l1: "Đây là một đô la. Suốt trăm năm, nó đi theo cách của ngân hàng: chỉ trong ngày làm việc, chỉ trong hệ thống của họ, và mất vài ngày nếu chuyển ra nước ngoài.",
+          l1: "Đây là chị Hà, bán đèn lồng thủ công online ở Hội An. Một khách ở Úc tên Sarah vừa trả chị 1.000 USDC — và chị muốn biết mình thật sự nhận được cái gì.",
+          analogy: "USDC giống vé giữ xe. Gửi 1 đô, nhận 1 tấm vé. Vé không phải là tiền — nhưng ai cầm vé thì lấy lại được tiền.",
         },
         {
           t: 0.36,
@@ -663,6 +682,7 @@ export const vi: Dict = {
           t: 0.08,
           side: "l",
           l1: "Một doanh nghiệp chuyển đô la thật cho Circle bằng điện chuyển tiền ngân hàng.",
+          analogy: "Bãi xe chỉ in vé khi có xe chạy vào. Circle chỉ in USDC khi có đô la thật gửi vào.",
           l2: "Chỉ các tổ chức được duyệt — sàn giao dịch, ngân hàng, ví, công ty giao dịch — mới được đúc trực tiếp. Họ phải qua kiểm tra danh tính doanh nghiệp (KYB) và chuyển đô từ ngân hàng của mình.",
           chip: { kind: "data", text: "Circle Mint: chỉ dành cho tổ chức, không cho cá nhân · 10/2026" },
         },
@@ -684,7 +704,8 @@ export const vi: Dict = {
           t: 0.66,
           side: "r",
           head: "Mua trên sàn thì khác.",
-          l1: "Khi bạn mua USDC trên sàn, không có đồng nào được in ra: USDC của người khác chỉ đổi chủ.",
+          l1: "Sarah có USDC theo cách này: chị mua trên sàn. Không có đồng nào được in ra — USDC của người khác chỉ đổi chủ.",
+          analogy: "Mua lại vé của một người gửi xe khác thì không có thêm chiếc xe nào vào bãi.",
           l2: "Đa số mọi người có USDC theo cách này. Chỉ sàn — hoặc một tổ chức khác — làm việc trực tiếp với Circle.",
         },
         { t: 0.84, side: "c", head: "Xuống thêm một tầng: chiếc két.", l1: "Mỗi đô la vừa chuyển vào phải được cất ở đâu đó." },
@@ -700,6 +721,7 @@ export const vi: Dict = {
           t: 0.1,
           side: "l",
           l1: "Dưới mỗi đồng USDC là một chiếc két. Trong đó gần như không có tờ tiền nào. Chỉ có những khoản cho vay ngắn hạn — cho chính phủ Mỹ và cho các ngân hàng lớn nhất.",
+          analogy: "Xe gửi vào thì phải đỗ ở đâu đó. 1.000 USDC của chị Hà được bảo đảm bằng cả bãi xe — chứ không phải một ô đỗ đánh số riêng.",
           chip: { kind: "data", text: "Dự trữ ≈ 68,1 tỷ đô so với ≈ 67,9 tỷ USDC · 12/11/2026" },
         },
         {
@@ -755,7 +777,8 @@ export const vi: Dict = {
         {
           t: 0.08,
           side: "l",
-          l1: "USDC không chỉ sống trên một blockchain. Circle phát hành trực tiếp trên hàng chục mạng — mỗi mạng như một thị trấn riêng, có đường và trạm thu phí riêng.",
+          l1: "USDC không chỉ sống trên một blockchain. Circle phát hành trực tiếp trên hàng chục mạng — mỗi mạng như một thị trấn riêng, có đường và trạm thu phí riêng. Ví của chị Hà giữ được USDC trên Ethereum, Base hay Solana.",
+          analogy: "Cùng một loại vé được nhận ở bãi xe của nhiều thị trấn.",
           chip: { kind: "data", text: "USDC gốc trên 30 blockchain · 6/2/2026" },
         },
         {
@@ -776,6 +799,7 @@ export const vi: Dict = {
           side: "r",
           head: "Hàng gốc và hàng qua cầu",
           l1: "Cầu nối khoá USDC thật trong két của nó, rồi phát ra một bản trông giống: USDC.e.",
+          analogy: "USDC.e giống vé do một bãi xe trung gian in lại. Nó chỉ đáng tin bằng chính bãi trung gian đó.",
           l2: "USDC.e là quyền đòi đối với cầu nối, không phải với Circle. Nếu cầu hỏng hoặc bị hack, bản sao có thể mất chỗ dựa — và Circle không đổi lại nó.",
           deep: [
             "“.e” nghĩa là “mang sang từ Ethereum”. Nó xuất hiện trên Avalanche, Arbitrum, Optimism và Polygon trước khi Circle có mặt trực tiếp ở đó.",
@@ -801,7 +825,8 @@ export const vi: Dict = {
         {
           t: 0.08,
           side: "l",
-          l1: "Các blockchain không nhìn thấy nhau. Ethereum không biết gì về những gì xảy ra trên Solana. Nên “chuyển” USDC giữa chúng thực ra là hai sự kiện riêng biệt — và phải có ai đó xác nhận rằng sự kiện đầu tiên đã xảy ra.",
+          l1: "Chị Hà muốn chuyển USDC sang Solana, nơi gửi tiền tốn chưa tới 1 xu. Nhưng các blockchain không nhìn thấy nhau — nên “chuyển” USDC thực ra là hai sự kiện riêng, và phải có người xác nhận sự kiện đầu tiên.",
+          analogy: "Muốn chuyển vé sang bãi khác: bãi cũ xé vé rồi gọi điện báo trước, bãi mới in một tấm vé mới.",
         },
         {
           t: 0.21,
@@ -854,7 +879,8 @@ export const vi: Dict = {
         {
           t: 0.08,
           side: "l",
-          l1: "Trên sàn, USDC được mua bán như mọi thứ khác, nên giá có thể lệch một chút.",
+          l1: "Chị Hà bán một ít USDC trên sàn để trả tiền cho thợ. Như mọi thứ được mua bán, giá của nó có thể lệch một chút.",
+          analogy: "Vé có thể bán lại. Nếu có tấm vé bán 99 xu, người ta mua rồi vào bãi đổi lấy đủ 1 đô — thế là giá vé lại về 1 đô.",
           l2: "Hai thế giới gặp nhau ở đây: thị trường, nơi ai cũng giao dịch được, và quầy của Circle, nơi tổ chức được duyệt đổi 1 : 1 lấy đô.",
           chip: { kind: "sim", text: "Đường giá trong chương này là mô phỏng" },
         },
@@ -891,7 +917,8 @@ export const vi: Dict = {
         {
           t: 0.08,
           side: "l",
-          l1: "Phía sau mỗi USDC là một hợp đồng thông minh có những chìa khoá đặc biệt — và Circle giữ tất cả.",
+          l1: "Phía sau mỗi USDC là một hợp đồng thông minh có những chìa khoá đặc biệt — và Circle giữ tất cả. Vì vậy chị Hà chỉ nhận tiền từ khách quen.",
+          analogy: "Bãi xe có thể khoá một tấm vé bị báo mất cắp: ai cầm vé đó cũng không lấy được xe ra nữa.",
           l2: "Hợp đồng có chủ sở hữu, người quản lý việc đúc (quyết định ai được tạo token), người tạm dừng, người lập danh sách đen và quản trị viên có thể nâng cấp mã.",
         },
         {
@@ -929,6 +956,7 @@ export const vi: Dict = {
           side: "l",
           head: "Thứ Sáu, 10/3/2023",
           l1: "Cơ quan quản lý Mỹ đóng cửa ngân hàng Silicon Valley Bank. Lệnh chuyển tiền ra của Circle chưa kịp đi.",
+          analogy: "Một phần xe đang đỗ ở bãi phụ bị niêm phong đúng tối thứ Sáu — còn văn phòng bãi chính nghỉ cả cuối tuần. Người ta bán tháo vé với giá rẻ.",
           l2: "3,3 tỷ trong khoảng 40 tỷ đô dự trữ của USDC bị kẹt ở đó — khoảng 8%.",
           chip: { kind: "data", text: "Sự kiện thật · 10–16/3/2023" },
         },
@@ -936,7 +964,7 @@ export const vi: Dict = {
           t: 0.3,
           side: "r",
           head: "Thứ Bảy: 0,87 đô",
-          l1: "Người giữ đổ xô bán trên sàn. Ngân hàng nghỉ cuối tuần nên không ai đổi được ở Circle, và USDC rơi xuống khoảng 0,87 đô.",
+          l1: "Người giữ đổ xô bán trên sàn. Ngân hàng nghỉ cuối tuần nên không ai đổi được ở Circle, và USDC rơi xuống khoảng 0,87 đô. Nếu chị Hà cần tiền đúng thứ Bảy đó, 1.000 USDC chỉ bán được khoảng 870 đô.",
         },
         {
           t: 0.5,
@@ -968,7 +996,8 @@ export const vi: Dict = {
         {
           t: 0.06,
           side: "l",
-          l1: "Một tổ chức được duyệt gửi USDC trả lại cho Circle.",
+          l1: "Chị Hà bán USDC cho sàn; sàn — một tổ chức được duyệt — gửi USDC trả lại cho Circle.",
+          analogy: "Trả vé, lấy lại xe. Chỉ khách quen mới làm việc thẳng với văn phòng bãi — người khác đi qua sàn.",
           l2: "Đổi trực tiếp chỉ dành cho khách hàng Circle Mint — sàn, ngân hàng, công ty fintech, công ty giao dịch. Cá nhân thường bán USDC trên sàn hoặc trong ứng dụng.",
           chip: { kind: "data", text: "Standard: không phí Circle · Express: 0,05% · từ 19/10/2026" },
         },
@@ -981,6 +1010,7 @@ export const vi: Dict = {
           l2: "Thời gian về tiền tuỳ ngân hàng và kênh thanh toán; Express nhanh hơn nhưng có phí.",
           deep: [
             "Bạn đang phụ thuộc vào: Circle và điều khoản của họ; ngân hàng đối tác và quỹ dự trữ; blockchain nơi USDC của bạn nằm; và nếu không phải khách Circle Mint, cả sàn hoặc ứng dụng bạn bán qua.",
+            "Ở Việt Nam, người dùng thường đổi USDC ra tiền đồng qua sàn hoặc giao dịch P2P. Tính đến giữa tháng 11/2026, chưa có sàn trong nước nào được cấp phép theo chương trình thí điểm năm 2025.",
           ],
         },
         { t: 0.6, side: "r", head: "Quay về tận nơi bắt đầu.", l1: "Từ quầy đổi, bay qua các chuỗi và chiếc két, lên lại chiếc bàn nơi mọi thứ bắt đầu." },
@@ -988,7 +1018,7 @@ export const vi: Dict = {
           t: 0.86,
           side: "c",
           head: "Lại là một đô la.",
-          l1: "USDC chạy được vì ở cuối con đường, có người trao lại cho bạn một đô la. Mọi bộ phận của cỗ máy đều để giữ lời hứa đó.",
+          l1: "1.000 USDC của chị Hà lại thành tiền — đủ mua lụa và tre cho tháng sau. USDC chạy được vì ở cuối con đường, có người trao lại cho bạn một đô la.",
           insight: "Câu hỏi thật về USDC không phải “có tài sản đảm bảo không?” — ngày 12/11/2026 là có, hơn 100% một chút. Mà là “nhanh đến đâu, cho ai, và vào những ngày nào thì nó đổi lại được thành đô?”",
         },
       ],
