@@ -36,16 +36,16 @@ export default function Footer() {
           </ol>
         </div>
         <div className="md:pt-14">
-          <div className="border border-line p-5">
+          <div className="rounded-2xl border border-line bg-white p-5">
             <div className="tag text-warn">{t.ui.disclaimerTitle}</div>
             <p className="mt-3 text-[14px] leading-relaxed">{t.ui.disclaimer}</p>
           </div>
           {reduced && <p className="tag mt-4 text-mute">{t.ui.reducedMotion}</p>}
           <p className="mt-6 text-[13px] text-mute">{t.ui.credits}</p>
-          <button onClick={() => goToChapter(0)} className="tag mt-8 inline-flex items-center gap-2 border border-accent px-3 py-2 text-accent hover:bg-accent hover:text-paper">
+          <button onClick={() => goToChapter(0)} className="tag mt-8 inline-flex items-center gap-2 rounded-full border border-accent px-4 py-2 text-accent hover:bg-accent hover:text-paper">
             <ArrowUp size={13} /> {t.ui.backToTop}
           </button>
-          <div className="serif mt-16 text-[64px] leading-none text-line md:text-[88px]">USD₮</div>
+          <div className="serif mt-16 text-[64px] leading-none text-line md:text-[88px]">USDC</div>
         </div>
       </div>
     </footer>

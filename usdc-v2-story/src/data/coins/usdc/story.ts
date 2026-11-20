@@ -317,7 +317,7 @@ export const chaptersEn: Chapter[] = [
     label: "Conclusion",
     title: "Conclusion",
     question: "So, should Hà accept USDC?",
-    figure: "Hà's phone shows 1,000 USDC ≈ $1,000; then the USDC coin assembles and can be turned.",
+    figure: "Hà's phone shows 1,000 USDC ≈ $1,000; then the camera rises over the whole map of the journey.",
     beats: [
       {
         title: "USDC does one job well: a dollar you can check.",
@@ -331,7 +331,6 @@ export const chaptersEn: Chapter[] = [
         title: "For Hà: a tool, not a savings account.",
         body: [
           "To get paid by Sarah in minutes, USDC is practical. To spend the money, Hà still has to turn it into đồng — and as of November 2026 no crypto exchange in Vietnam is licensed yet. So convert promptly, use reputable platforms and don't leave large sums on one exchange. This is education, not investment advice.",
-          "Drag the coin to turn it over.",
         ],
       },
     ],
@@ -651,7 +650,7 @@ export const chaptersVi: Chapter[] = [
     label: "Kết luận",
     title: "Kết luận",
     question: "Vậy Hà có nên nhận USDC không?",
-    figure: "Điện thoại của Hà hiện 1.000 USDC ≈ 1.000 USD; sau đó đồng USDC ráp lại và có thể xoay.",
+    figure: "Điện thoại của Hà hiện 1.000 USDC ≈ 1.000 USD; sau đó camera bay lên nhìn toàn bộ bản đồ hành trình.",
     beats: [
       {
         title: "USDC làm tốt một việc: một đồng đô la mà bạn kiểm tra được.",
@@ -665,7 +664,6 @@ export const chaptersVi: Chapter[] = [
         title: "Với Hà: một công cụ, không phải sổ tiết kiệm.",
         body: [
           "Để nhận tiền của Sarah trong vài phút, USDC rất tiện. Nhưng để tiêu, Hà vẫn phải đổi sang tiền đồng — và tính tới tháng 11/2026, Việt Nam chưa có sàn crypto nào được cấp phép. Vì vậy hãy đổi sớm, dùng nền tảng uy tín và đừng để số tiền lớn trên một sàn. Đây là nội dung giáo dục, không phải lời khuyên đầu tư.",
-          "Kéo để lật đồng coin.",
         ],
       },
     ],

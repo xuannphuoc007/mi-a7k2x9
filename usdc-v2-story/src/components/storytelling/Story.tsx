@@ -1,15 +1,16 @@
 "use client";
 /**
- * The reading column. Each chapter is a tall section whose scroll length maps
- * to the chapter's local progress; text beats are placed at the same local
- * progress values the scene timelines use, so copy and visuals stay in sync.
+ * Map edition: the isometric map fills the screen and stays put; chapters are
+ * tall transparent sections whose text cards float over the map. Card
+ * positions use the same beat fractions as the camera keyframes.
  */
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { chapters, type PanelKind } from "@/data/coins/usdc/chapters";
 import { registerSection, initScrollEngine } from "@/animations/scrollController";
 import { useI18n } from "@/lib/i18n";
-import Stage from "@/components/visualization/Stage";
+import { asset } from "@/lib/asset";
+import MapStage from "@/components/map/MapStage";
 import ComparePanel from "@/components/interactive/ComparePanel";
 import { useIsMobile, useReducedMotion } from "@/hooks/useMedia";
 
@@ -17,6 +18,15 @@ const PANELS: Record<PanelKind, () => React.ReactElement> = {
   compare: () => <ComparePanel which="compare" />,
   versus: () => <ComparePanel which="versus" />,
 };
+
+function Bulb() {
+  return (
+    <svg aria-hidden width="14" height="14" viewBox="0 0 16 16">
+      <path d="M8 1.5a4.8 4.8 0 0 0-2.9 8.6c.5.4.8 1 .8 1.6v.3h4.2v-.3c0-.6.3-1.2.8-1.6A4.8 4.8 0 0 0 8 1.5z" fill="currentColor" />
+      <rect x="6" y="13" width="4" height="1.6" rx=".8" fill="currentColor" />
+    </svg>
+  );
+}
 
 export default function Story() {
   const { t } = useI18n();
@@ -30,136 +40,101 @@ export default function Story() {
     return initScrollEngine(storyRef.current, reduced);
   }, [reduced]);
 
-  // beats sit below the mobile stage, or a third of the way down on desktop
-  const beatOffset = mobile ? "54svh" : "30svh";
+  const offset = mobile ? "66svh" : "26svh";
+  const card = "pointer-events-auto rounded-[22px] border border-white/70 bg-white/92 shadow-[0_18px_50px_-20px_rgba(29,43,58,0.35)] backdrop-blur-md";
 
   return (
-    <div ref={storyRef} id="story" className="relative md:grid md:grid-cols-[var(--stage-left)_1fr]">
-      {/* stage — sticky; on mobile it overlays the top half and takes no flow space */}
-      <div className="sticky top-0 z-20 h-[50svh] -mb-[50svh] md:relative md:order-2 md:mb-0 md:h-auto md:self-stretch">
-        <div className="h-[50svh] border-b border-line bg-paper pt-[var(--header-h)] md:sticky md:top-0 md:h-[100svh] md:border-b-0 md:border-l md:pr-14 md:pt-[calc(var(--header-h)+4px)]">
-          <Stage mobile={mobile} />
-        </div>
+    <div ref={storyRef} id="story" className="relative">
+      {/* the map: one full screen, pinned for the whole story */}
+      <div className="sticky top-0 z-0 -mb-[100svh] h-[100svh]">
+        <MapStage mobile={mobile} reduced={reduced} />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#d9ebf3] to-transparent" />
       </div>
 
-      {/* reading column */}
-      <main id="content" className="relative md:order-1">
+      <main id="content" className="pointer-events-none relative z-10">
         {chapters.map((c, i) => {
           const ch = t.chapters[i];
           const H = `${c.height * 100}svh`;
-          const actStart = i === 0 || chapters[i - 1].act !== c.act;
-          const kicker = `${t.ui.act} ${String(c.act + 1).padStart(2, "0")} · ${t.acts[c.act]}`;
           return (
-            <section
-              key={c.id}
-              ref={(el) => registerSection(i, el)}
-              id={`chapter-${i + 1}`}
-              aria-labelledby={`chapter-${i + 1}-title`}
-              className="relative"
-              style={{ height: H }}
-            >
+            <section key={c.id} ref={(el) => registerSection(i, el)} id={`chapter-${i + 1}`} aria-labelledby={`chapter-${i + 1}-title`} className="relative" style={{ height: H }}>
               <p className="sr-only">{ch.figure}</p>
               {c.beats.map((p, j) => {
                 const beat = ch.beats[j];
                 if (!beat) return null;
-                const isHero = i === 0 && j === 0;
+                const hero = i === 0 && j === 0;
                 return (
                   <motion.article
                     key={j}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ amount: 0.4, margin: "0px 0px -10% 0px" }}
-                    transition={{ duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
-                    className="absolute inset-x-0 px-5 md:px-10 lg:px-14"
-                    style={{ top: `calc(${p} * ${H} + ${isHero ? (mobile ? "54svh" : "16svh") : beatOffset})` }}
+                    initial={{ opacity: 0, y: 30, scale: 0.98 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ amount: 0.35, margin: "0px 0px -8% 0px" }}
+                    transition={{ duration: 0.6, ease: [0.2, 0.7, 0.2, 1] }}
+                    className="absolute inset-x-0 px-3 md:px-8"
+                    style={{ top: `calc(${p} * ${H} + ${hero ? (mobile ? "56svh" : "14svh") : offset})` }}
                   >
-                    <div className={`max-w-[34rem] ${mobile ? "border border-line bg-paper/95 p-4 backdrop-blur" : ""}`}>
-                      {j === 0 && !isHero && (
-                        <header className="mb-5">
-                          {actStart && (
-                            <div aria-hidden className="serif mb-2 text-[64px] font-semibold leading-none tracking-[-0.04em] text-line md:text-[88px]">
-                              {String(c.act + 1).padStart(2, "0")}
-                            </div>
-                          )}
-                          <div className="tag flex items-center gap-3 text-mute">
-                            <span className="text-accent">{String(i + 1).padStart(2, "0")}</span>
-                            <span className="h-px w-10 bg-accent/60" />
-                            <span>{kicker}</span>
-                          </div>
-                          <h2 id={`chapter-${i + 1}-title`} className="serif mt-3 text-[40px] leading-[1.02] tracking-[-0.015em] md:text-[54px]">
-                            {ch.title}
-                          </h2>
-                          <p className="mt-3 flex gap-2 text-[17px] leading-snug text-accent md:text-[18px]">
-                            <span aria-hidden className="mono text-[13px] leading-[1.6]">Q</span>
-                            <span className="serif italic">{ch.question}</span>
-                          </p>
-                        </header>
-                      )}
-                      {isHero ? (
+                    <div className={`${card} ${hero ? "max-w-[30rem] p-5 md:p-8" : "max-w-[27rem] p-4 md:p-6"}`}>
+                      {hero ? (
                         <header>
-                          <div className="tag flex items-center gap-3 text-mute">
-                            <span className="text-accent">01</span>
-                            <span className="h-px w-10 bg-accent/60" />
-                            <span>{kicker}</span>
+                          <div className="flex items-center gap-3">
+                            <img src={asset("/img/usdc.png")} alt="" width={44} height={44} />
+                            <span className="tag rounded-full bg-accent-soft px-3 py-1 text-accent">{t.acts[0]}</span>
                           </div>
-                          <h1 id="chapter-1-title" className="serif mt-4 text-[54px] leading-[0.95] tracking-[-0.02em] md:text-[84px]">
-                            <span className="bnb-grad">{t.ui.brand}</span>
+                          <h1 id="chapter-1-title" className="serif mt-4 text-[44px] leading-[0.98] md:text-[60px]">
+                            {t.ui.brand}
                           </h1>
-                          <p className="serif mt-5 text-[22px] italic leading-snug text-accent md:text-[26px]">{ch.question}</p>
-                          <p className="serif mt-5 text-[21px] leading-snug text-ink/90 md:text-[24px]">{beat.title}</p>
+                          <p className="mt-3 text-[18px] font-semibold leading-snug text-accent md:text-[20px]">{ch.question}</p>
+                          <p className="mt-4 text-[18px] font-bold leading-snug">{beat.title}</p>
                           {beat.body.map((b, k) => (
-                            <p key={k} className="mt-4 max-w-[30rem] text-[15.5px] leading-relaxed text-ink/80">
+                            <p key={k} className="mt-2 text-[15px] leading-relaxed text-ink/80">
                               {b}
                             </p>
                           ))}
-                          <ol className="mt-6 grid grid-cols-2 gap-x-4 gap-y-1.5 sm:grid-cols-3" aria-label={t.ui.contents}>
+                          <ol className="mt-5 flex flex-wrap gap-1.5" aria-label={t.ui.contents}>
                             {t.acts.map((a, k) => (
-                              <li key={a} className="tag flex items-baseline gap-2 text-mute">
-                                <span className="text-accent">{String(k + 1).padStart(2, "0")}</span>
-                                {a}
+                              <li key={a} className="rounded-full border border-line px-2.5 py-1 text-[11.5px] font-semibold text-mute">
+                                <span className="text-accent">{k + 1}</span> {a}
                               </li>
                             ))}
                           </ol>
                         </header>
                       ) : (
                         <>
-                          <h3 className="serif text-[24px] leading-tight md:text-[27px]">{beat.title}</h3>
+                          {j === 0 && (
+                            <header className="mb-4">
+                              <div className="flex items-center gap-2">
+                                <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-accent px-2 text-[12px] font-extrabold text-white">{i + 1}</span>
+                                <span className="tag text-mute">{t.acts[c.act]}</span>
+                              </div>
+                              <h2 id={`chapter-${i + 1}-title`} className="serif mt-3 text-[30px] leading-[1.05] md:text-[36px]">
+                                {ch.title.replace(/^\d+ · /, "")}
+                              </h2>
+                              <p className="mt-2 text-[16px] font-semibold leading-snug text-accent">{ch.question}</p>
+                            </header>
+                          )}
+                          <h3 className="text-[17.5px] font-extrabold leading-snug md:text-[20px]">{beat.title}</h3>
                           {beat.body.map((b, k) => (
-                            <p key={k} className="mt-3 text-[15.5px] leading-relaxed text-ink/85">
+                            <p key={k} className="mt-2 text-[14.5px] leading-relaxed text-ink/80 md:mt-2.5 md:text-[15px]">
                               {b}
                             </p>
                           ))}
                           {beat.notes?.map((n) => (
-                            <p key={n} className="mono mt-4 border-l-2 border-accent pl-3 text-[12px] leading-snug text-mute">
+                            <p key={n} className="mt-3 rounded-lg bg-[#f1f4f8] px-3 py-2 text-[12.5px] leading-snug text-mute">
                               {n}
                             </p>
                           ))}
                           {beat.insight && (
-                            <aside className="mt-4 border-l-[3px] border-[#c49a3a] bg-[#fbf5e6] px-4 py-3">
-                              <div className="tag flex items-center gap-2 text-[#9c7425]">
-                                <svg aria-hidden width="12" height="12" viewBox="0 0 12 12"><path d="M6 0 L7.4 4.6 L12 6 L7.4 7.4 L6 12 L4.6 7.4 L0 6 L4.6 4.6 Z" fill="currentColor" /></svg>
+                            <aside className="mt-4 rounded-2xl bg-[#fff6dc] px-4 py-3">
+                              <div className="flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wide text-[#a57a12]">
+                                <Bulb />
                                 {t.ui.insight}
                               </div>
-                              <p className="serif mt-1.5 text-[18px] leading-snug text-ink">{beat.insight}</p>
+                              <p className="mt-1 text-[15.5px] font-semibold leading-snug text-ink">{beat.insight}</p>
                             </aside>
                           )}
-                          {beat.deep && beat.deep.length > 0 && (
-                            <details className="group mt-4 border-t border-line pt-2.5">
-                              <summary className="tag flex cursor-pointer list-none items-center gap-2 text-mute hover:text-accent">
-                                <span className="inline-block transition-transform group-open:rotate-90">›</span>
-                                {t.ui.deeper}
-                              </summary>
-                              {beat.deep.map((d) => (
-                                <p key={d} className="mt-2 text-[14px] leading-relaxed text-ink/75">
-                                  {d}
-                                </p>
-                              ))}
-                            </details>
-                          )}
                           {j === c.beats.length - 1 && ch.takeaway && (
-                            <aside className="mt-5 border border-accent/40 bg-accent-soft/50 px-4 py-3">
-                              <div className="tag text-accent">{t.ui.inShort}</div>
-                              <p className="serif mt-1 text-[18px] leading-snug">{ch.takeaway}</p>
+                            <aside className="mt-4 rounded-2xl border-2 border-dashed border-accent/40 px-4 py-3">
+                              <div className="text-[12px] font-extrabold uppercase tracking-wide text-accent">{t.ui.inShort}</div>
+                              <p className="mt-1 text-[15px] font-semibold leading-snug">{ch.takeaway}</p>
                             </aside>
                           )}
                         </>
@@ -171,13 +146,9 @@ export default function Story() {
               {c.panels.map((slot) => {
                 const Panel = PANELS[slot.kind];
                 return (
-                  <div
-                    key={slot.kind}
-                    className="absolute inset-x-0 px-5 md:px-10 lg:px-14"
-                    style={{ top: `calc(${slot.at} * ${H})`, height: `calc(${slot.span} * ${H} + ${mobile ? "46svh" : "40svh"})` }}
-                  >
-                    <div className="sticky max-w-[34rem]" style={{ top: mobile ? "calc(50svh + 10px)" : "calc(var(--header-h) + 5svh)" }}>
-                      <div className={mobile ? "max-h-[46svh] overflow-y-auto overscroll-contain" : ""}>
+                  <div key={slot.kind} className="absolute inset-x-0 px-3 md:px-8" style={{ top: `calc(${slot.at} * ${H})`, height: `calc(${slot.span} * ${H} + 40svh)` }}>
+                    <div className="sticky max-w-[30rem]" style={{ top: mobile ? "calc(44svh)" : "calc(var(--header-h) + 4svh)" }}>
+                      <div className={`${card} overflow-hidden ${mobile ? "max-h-[52svh] overflow-y-auto overscroll-contain" : ""}`}>
                         <Panel />
                       </div>
                     </div>

@@ -6,6 +6,7 @@ import { goToChapter, ui } from "@/animations/scrollController";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { chapters } from "@/data/coins/usdc/chapters";
+import { asset } from "@/lib/asset";
 
 export default function Header() {
   const { t, lang, setLang } = useI18n();
@@ -13,11 +14,11 @@ export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-[var(--header-h)] border-b border-line/70 bg-paper">
-      <div className="flex h-full items-center justify-between gap-4 px-4 md:px-6">
+    <header className="fixed inset-x-3 top-3 z-50 h-[50px] rounded-full border border-white/80 bg-white/90 shadow-[0_10px_30px_-14px_rgba(29,43,58,0.35)] backdrop-blur-md md:inset-x-6">
+      <div className="flex h-full items-center justify-between gap-4 pl-3 pr-2 md:pl-4">
         <button onClick={() => goToChapter(0)} className="flex items-baseline gap-2 text-left" aria-label={t.ui.backToTop}>
-          <span className="serif text-[19px] leading-none tracking-tight">{t.ui.brand}</span>
-          <span className="tag hidden text-mute sm:inline">/ USDC</span>
+          <img src={asset("/img/usdc.png")} alt="" width={26} height={26} className="self-center" />
+          <span className="serif text-[17px] leading-none">{t.ui.brand}</span>
         </button>
 
         <div className="hidden min-w-0 flex-1 items-center justify-center md:flex">
@@ -28,9 +29,9 @@ export default function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.25 }}
-              className="tag truncate text-mute"
+              className="truncate text-[13px] font-semibold text-mute"
             >
-              <span className="text-ink">{String(chapter + 1).padStart(2, "0")}</span> {t.ui.of} {t.chapters.length} — <span className="text-accent">{t.acts[chapters[chapter].act]}</span> · {t.chapters[chapter].label}
+              <span className="text-accent">{t.acts[chapters[chapter].act]}</span> · {t.chapters[chapter].label}
             </motion.span>
           </AnimatePresence>
         </div>
@@ -63,7 +64,7 @@ export default function Header() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-x-0 top-full border-b border-line bg-paper px-4 py-3 md:hidden"
+            className="absolute inset-x-0 top-[calc(100%+8px)] rounded-3xl border border-line bg-white px-4 py-3 shadow-lg md:hidden"
             aria-label={t.ui.contents}
           >
             <ol className="grid gap-1">

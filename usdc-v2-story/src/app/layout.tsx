@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/fraunces/full.css";
 import "@fontsource/be-vietnam-pro/400.css";
 import "@fontsource/be-vietnam-pro/500.css";
 import "@fontsource/be-vietnam-pro/600.css";
-import "@fontsource/ibm-plex-mono/400.css";
-import "@fontsource/ibm-plex-mono/500.css";
-import "@fontsource/ibm-plex-mono/600.css";
+import "@fontsource/be-vietnam-pro/700.css";
+import "@fontsource/be-vietnam-pro/800.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,7 +20,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="paper-grain">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

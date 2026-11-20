@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f6f6f2;
+  --color-paper: #f5f8fb;
   --color-paper-2: #ffffff;
   --color-ink: #142032;
   --color-mute: #646e7c;
@@ -21,7 +21,7 @@
 
 :root {
   --stage-left: 41%;
-  --header-h: 56px;
+  --header-h: 66px;
   color-scheme: light;
 }
 
@@ -55,22 +55,36 @@ body {
 }
 
 .mono {
-  font-family: var(--font-mono);
-  font-feature-settings: "zero" 1;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
 }
 
+/* this edition uses one rounded, friendly sans for everything */
 .serif {
-  font-family: var(--font-serif);
-  font-optical-sizing: auto;
-  font-variation-settings: "SOFT" 40;
-  font-weight: 420;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .tag {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* map ambience — calm, slow */
+.lantern-bob { transform-box: fill-box; transform-origin: 50% 0%; animation: bob 4.5s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+.flame-flicker { transform-box: fill-box; transform-origin: 50% 100%; animation: flick 1.1s ease-in-out infinite alternate; }
+@keyframes flick { from { transform: scale(0.94, 1.04); } to { transform: scale(1.05, 0.95); } }
+.waves { animation: drift 30s linear infinite; }
+@keyframes drift { from { transform: translate(0, 0); } to { transform: translate(120px, 0); } }
+.ripple { transform-box: fill-box; transform-origin: center; animation: ripple 2.4s ease-out infinite; }
+@keyframes ripple { from { transform: scale(0.4); opacity: 0.9; } to { transform: scale(1.4); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .lantern-bob, .flame-flicker, .waves, .ripple { animation: none; }
 }
 
 /* SVG ink conventions */

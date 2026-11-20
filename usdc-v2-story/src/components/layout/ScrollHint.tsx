@@ -16,7 +16,7 @@ export default function ScrollHint() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="pointer-events-none fixed top-[calc(50svh-110px)] left-1/2 z-40 md:top-auto md:bottom-6 flex -translate-x-1/2 flex-col items-center gap-3 md:left-[calc(var(--stage-left)/2)]"
+          className="pointer-events-none fixed bottom-24 left-1/2 z-40 hidden md:flex -translate-x-1/2 flex-col items-center gap-3 rounded-full bg-white/85 px-4 py-2 backdrop-blur"
           aria-hidden
         >
           <span className="tag text-ink">{t.ui.scroll}</span>
