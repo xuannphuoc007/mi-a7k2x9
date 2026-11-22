@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f7f5fd;
+  --color-paper-2: #ffffff;
+  --color-ink: #1b1530;
+  --color-mute: #6a6580;
+  --color-accent: #6b2bd9;
+  --color-accent-soft: #efe6ff;
+  --color-line: #e6e1f2;
+  --color-warn: #d6403a;
+  --color-warn-soft: #fbe6e3;
+  --color-amber: #f39a24;
+  --color-navy: #24305e;
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk Variable", "Be Vietnam Pro", sans-serif;
+}
+
+:root {
+  --header-h: 64px;
+  color-scheme: light;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-paper);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+}
+
+.serif {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.mono {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.tag {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* daylight sky behind the transparent WebGL canvas */
+.sky {
+  background:
+    radial-gradient(120% 70% at 70% 0%, #f9fbfc 0%, rgba(249, 251, 252, 0) 60%),
+    linear-gradient(180deg, #b9d7ee 0%, #cfe3f1 34%, #e2ecf2 62%, #e7eee9 100%);
+}
+
+/* poster helpers */
+.pv {
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.pv-off {
+  opacity: 0.12;
+}
+.pv-hide {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.draw {
+  transition: stroke-dashoffset 1.1s cubic-bezier(0.3, 0.6, 0.2, 1);
+}
+@keyframes flowdash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.flow {
+  stroke-dasharray: 3 9;
+  animation: flowdash 1s linear infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+.blink {
+  animation: blink 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow,
+  .blink {
+    animation: none;
+  }
+  .pv,
+  .draw {
+    transition: none;
+  }
+}
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes wob {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+.wobble {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wob 1.6s ease-in-out infinite;
+}
+.pv {
+  transform-box: fill-box;
+}
+@keyframes scenein {
+  from {
+    opacity: 0;
+  }
+}
+.scene-in {
+  animation: scenein 0.6s ease;
+}
+/* faint hexagon lattice behind the stage */
+.lattice {
+  background-color: #f5f8fc;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 56 16v32L28 64 0 48V16zM28 64v33' fill='none' stroke='%23dfe7f2' stroke-width='1.2'/%3E%3C/svg%3E");
+}
+
+/* Ship of Light: slow spin for the leader frame */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin-slow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 9s linear infinite;
+}
+/* light "space" behind the stage: soft lavender + mint glows and faint stars */
+.space {
+  background-color: #f7f5fd;
+  background-image:
+    radial-gradient(1.2px 1.2px at 20px 30px, #c9b6f5 50%, transparent 51%),
+    radial-gradient(1px 1px at 90px 120px, #9fe6c8 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 150px 60px, #b9c8f6 50%, transparent 51%);
+  background-size: 180px 160px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin-slow {
+    animation: none;
+  }
+}
