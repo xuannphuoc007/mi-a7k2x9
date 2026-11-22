@@ -96,15 +96,6 @@ export default function Story() {
                               {b}
                             </p>
                           ))}
-                          {beat.life && (
-                            <aside className="mt-3 flex gap-2.5 rounded-xl bg-[#eef6f1] px-3.5 py-2.5">
-                              <span aria-hidden className="text-[18px] leading-none">🏪</span>
-                              <div>
-                                <div className="text-[11px] font-bold uppercase tracking-wide text-[#1a7f5a]">{t.ui.life}</div>
-                                <p className="mt-0.5 text-[14.5px] font-semibold leading-snug text-ink">{beat.life}</p>
-                              </div>
-                            </aside>
-                          )}
                           <ol className="mt-5 flex flex-wrap gap-1.5" aria-label={t.ui.contents}>
                             {t.acts.map((a, k) => (
                               <li key={a} className="flex items-center gap-1.5 rounded-full border border-line bg-white px-2.5 py-1 text-[11.5px] font-medium text-mute">
@@ -141,15 +132,6 @@ export default function Story() {
                               {b}
                             </p>
                           ))}
-                          {beat.life && (
-                            <aside className="mt-3 flex gap-2.5 rounded-xl bg-[#eef6f1] px-3.5 py-2.5">
-                              <span aria-hidden className="text-[18px] leading-none">🏪</span>
-                              <div>
-                                <div className="text-[11px] font-bold uppercase tracking-wide text-[#1a7f5a]">{t.ui.life}</div>
-                                <p className="mt-0.5 text-[14.5px] font-semibold leading-snug text-ink">{beat.life}</p>
-                              </div>
-                            </aside>
-                          )}
                           {beat.term && <p className="mt-2 text-[12.5px] leading-snug text-mute">🔤 {beat.term}</p>}
                           {beat.insight && (
                             <aside className="mt-3.5 rounded-xl bg-[#fff4df] px-3.5 py-2.5">

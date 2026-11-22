@@ -1,8 +1,8 @@
 /** LINK, explained with a pawnshop and the price of gold — beginner edition.
- * Each beat: a short title, one or two plain sentences, an everyday comparison (life),
+ * Each beat: a short title, one or two plain sentences with a concrete example,
  * and optionally the real technical name (term) for readers who want it.
  * Narrator: Khoa, who runs a small lending app (fictional). Sources in references.ts. */
-export type Beat = { title: string; body: string[]; life?: string; term?: string; insight?: string };
+export type Beat = { title: string; body: string[]; term?: string; insight?: string };
 export type Chapter = { label: string; title: string; question: string; figure: string; takeaway?: string; beats: Beat[] };
 
 export const chaptersEn: Chapter[] = [
@@ -15,17 +15,14 @@ export const chaptersEn: Chapter[] = [
       {
         title: "Khoa runs a pawnshop — on the internet.",
         body: ["Customers leave 1 ETH as a pledge and borrow dollars. The app is a program that runs by itself on a blockchain, with no staff."],
-        life: "Like a pawnshop: you leave gold, you borrow cash.",
       },
       {
         title: "To lend safely, it needs today's price.",
         body: ["If ETH is worth $3,000, the app may lend $2,000. If the price drops, it must know at once."],
-        life: "A pawnshop must know today's gold price before handing out cash.",
       },
       {
         title: "But the blockchain is a sealed glass room.",
         body: ["Programs on a blockchain can only see what is already written inside. They cannot open a website or phone an exchange."],
-        life: "A shop with no windows, no phone and no internet.",
         term: "Real name: smart contracts can't read off-chain data.",
       },
     ],
@@ -39,97 +36,85 @@ export const chaptersEn: Chapter[] = [
       {
         title: "That person is called a price messenger.",
         body: ["Someone outside checks the price and writes it into the blockchain."],
-        life: "A runner who goes to the gold shop and comes back with the price.",
         term: "Real name: an oracle.",
       },
       {
         title: "One messenger is risky.",
         body: ["If that one person lies, falls asleep or is bribed, the app lends the wrong amount and someone loses money."],
-        life: "One wrong price slip and the pawnshop hands out far too much cash.",
       },
       {
         title: "Chainlink: many independent messengers.",
         body: ["Chainlink is a network of many separate companies doing this job together, so no single one can cheat or stop the service."],
-        life: "Instead of trusting one runner, you send nine who don't work for each other.",
         insight: "Real companies run Chainlink messengers, including Swisscom and Deutsche Telekom.",
       },
     ],
   },
   {
-    label: "Ask nine shops",
-    title: "Ask nine shops, keep the middle price",
+    label: "Nine price sources",
+    title: "Nine sources, keep the middle price",
     question: "If nine messengers bring nine prices, which one is right?",
-    figure: "Nine messengers each visit a different gold shop. Their prices are lined up; one strange price is thrown out; the middle one is chosen; all nine sign one slip; only that slip enters the glass room.",
+    figure: "Nine messengers each check a different exchange. Their prices are lined up; one strange price is thrown out; the middle one is chosen; all nine sign one slip; only that slip enters the glass room.",
     beats: [
       {
-        title: "① Each one checks a different shop.",
+        title: "① Each one checks a different exchange.",
         body: ["Every messenger collects prices from its own sources, such as different exchanges."],
-        life: "Nine runners, nine gold shops.",
       },
       {
         title: "② Line the prices up, keep the middle.",
-        body: ["The prices are sorted and the middle one is chosen. A crazy price at the edge is simply ignored."],
-        life: "If eight shops say 100 and one says 92, you don't believe the 92.",
+        body: ["The prices are sorted from low to high and the middle one is used. If eight sources say about 100 and one says 92, the 92 is dropped and the price used is 100.1."],
         term: "Real name: the median.",
       },
       {
         title: "③ All of them sign one slip.",
-        body: ["Instead of nine separate notes, they agree on one price slip and most of them sign it. The blockchain checks the signatures."],
-        life: "One receipt with many stamps is harder to fake than one stamp.",
+        body: ["Instead of nine separate notes, they agree on one price slip and most of them sign it. The blockchain checks the signatures, so faking it would mean bribing most of them."],
       },
       {
         title: "④ Only one slip goes in — so it's cheap.",
         body: ["Writing to a blockchain costs a fee. Sending one signed slip instead of nine cut the messengers' fees by up to 90% (since 2021)."],
-        life: "One courier trip instead of nine.",
         term: "Real name: Off-Chain Reporting (OCR).",
       },
     ],
   },
   {
-    label: "Price board or phone call",
-    title: "A price board, or a phone call?",
+    label: "Two ways to get the price",
+    title: "Price kept up to date, or price on request?",
     question: "When does the new price arrive?",
-    figure: "Left: a price board on the wall that changes when the price moves enough or every hour. Right: a customer phones for the price at the exact moment of buying.",
+    figure: "Left: a price stored on the blockchain that is rewritten when it moves enough or every hour. Right: an app asks for a fresh price at the exact moment of a trade.",
     beats: [
       {
-        title: "The price board on the wall.",
-        body: ["The ETH price is updated when it moves 0.5% — or at least every hour. Enough for a pawnshop like Khoa's."],
-        life: "The gold price board in a shop window.",
+        title: "Way 1: the price is kept on the blockchain.",
+        body: ["Chainlink writes the ETH price onto the blockchain whenever it moves 0.5%, and at least once an hour. Any app can read it at any time. Good enough for a lending app like Khoa's."],
         term: "Real name: Data Feeds (push).",
       },
       {
-        title: "The phone call.",
+        title: "Way 2: the app asks when it needs it.",
         body: ["Fast trading apps can't wait an hour. They ask for a fresh, signed price at the exact moment of a trade — in under a second."],
-        life: "Calling the shop to ask \"what's the price right now?\" just before you buy.",
         term: "Real name: Data Streams (pull).",
       },
       {
-        title: "Same signatures, different delivery.",
-        body: ["Both prices are signed by many messengers. The board is always there; the call is faster and paid only when used."],
+        title: "Same signatures, different timing.",
+        body: ["Both prices are signed by many messengers. Way 1 is always there but can be up to an hour old; way 2 is fresher and the app pays only when it asks."],
       },
     ],
   },
   {
-    label: "No shop of its own",
-    title: "Chainlink owns no shop",
+    label: "No chain of its own",
+    title: "Chainlink has no blockchain of its own",
     question: "Is Chainlink a blockchain like Ethereum or Solana?",
     figure: "Five glass rooms — Ethereum, Solana, Base, Arbitrum, BNB Chain — each served by the same team of messengers. Chainlink has no room of its own.",
     takeaway: "Chainlink is not a blockchain. It is a service that works for many blockchains. LINK is how that service gets paid.",
     beats: [
       {
         title: "Chainlink is not a blockchain.",
-        body: ["Ethereum, Solana and BNB Chain are \"shops\". Chainlink has no shop of its own — its messengers serve dozens of shops at once."],
-        life: "Like a delivery company: it owns no stores, it serves all of them.",
+        body: ["Ethereum, Solana and BNB Chain are blockchains: the places where apps (like Khoa's shop) run. Chainlink has no blockchain of its own — its messengers work for dozens of blockchains at once."],
       },
       {
         title: "LINK is the messengers' pay.",
         body: ["LINK is a token that lives on Ethereum. It is used to pay for Chainlink's work and as a deposit messengers put up."],
-        life: "The wage you pay the runners.",
       },
       {
         title: "So it earns differently.",
         body: ["ETH, SOL and BNB earn when people use their blockchain. LINK only earns when someone pays for a Chainlink service."],
-        life: "ETH is like rent for the shop; LINK is like the delivery fee.",
         insight: "That is why the network can be busy while the LINK price stays weak — see chapter 9.",
       },
     ],
@@ -143,18 +128,15 @@ export const chaptersEn: Chapter[] = [
       {
         title: "Checking the safe.",
         body: ["Some coins promise to be backed by dollars or gold in a safe. Messengers report how much is really in the safe."],
-        life: "An inspector who counts the gold in the vault and posts the number.",
         term: "Real name: Proof of Reserve.",
       },
       {
         title: "Not enough in the safe? No new coins.",
         body: ["The coin's program can refuse to print more if the safe doesn't hold enough. Issuers such as 21Shares use this."],
-        life: "The printer locks when the vault count is too low.",
       },
       {
         title: "Fair lottery draws.",
         body: ["Blockchains can't roll dice by themselves. Chainlink brings a random number with a proof; if anyone changes the number, the proof fails."],
-        life: "A lottery drawn with a sealed certificate anyone can check.",
         term: "Real name: VRF (verifiable randomness).",
       },
     ],
@@ -169,42 +151,36 @@ export const chaptersEn: Chapter[] = [
       {
         title: "Old bridges were robbed.",
         body: ["In 2022 thieves stole $624 million from Ronin, $325 million from Wormhole and $190 million from Nomad — all \"bridges\" between blockchains."],
-        life: "A border with one sleepy guard.",
       },
       {
         title: "Two checkpoints that don't share anything.",
         body: ["In Chainlink's version, one team checks the money, then a second, separate team checks it again with different software. Both must agree."],
-        life: "Two customs posts run by different staff, using different machines.",
         term: "Real name: CCIP and its Risk Management Network.",
       },
       {
         title: "The second checkpoint can close the gate.",
         body: ["If it sees something strange, it stops all transfers until the problem is fixed. After other bridges were hacked, projects with over $3 billion moved here."],
-        life: "A red barrier that drops across every lane.",
       },
     ],
   },
   {
-    label: "Deposit and alarm",
-    title: "A deposit — and an alarm bell",
+    label: "Deposit and penalty",
+    title: "A deposit that can be taken away",
     question: "What if a messenger stops working?",
-    figure: "Messengers put LINK into a deposit box. The price board stays frozen; a clock reaches three hours; someone rings the bell; each messenger loses 700 LINK and the person who rang gets 7,000 LINK.",
+    figure: "Messengers lock LINK as a deposit. The ETH price stops updating; a clock reaches three hours; someone raises an alert; each messenger loses 700 LINK and the person who raised it gets 7,000 LINK.",
     beats: [
       {
         title: "Messengers leave a deposit.",
         body: ["To take the job, messengers lock up LINK as a deposit. Ordinary holders can add LINK too."],
-        life: "A courier leaves a deposit before taking parcels.",
         term: "Real name: staking (up to 45 million LINK).",
       },
       {
-        title: "Frozen for 3 hours? Ring the bell.",
-        body: ["If the ETH price on Ethereum isn't updated for more than three hours, anyone in the deposit pool can ring the alarm."],
-        life: "The price board hasn't changed all afternoon.",
+        title: "No update for 3 hours? Anyone can report it.",
+        body: ["If the ETH price on Ethereum isn't updated for more than three hours, anyone who has LINK in the deposit pool can send an alert to the blockchain."],
       },
       {
-        title: "Fine for them, reward for you.",
-        body: ["Each messenger on that job loses 700 LINK; whoever rang the bell gets 7,000 LINK. Ordinary holders are not fined."],
-        life: "Late couriers lose part of their deposit; the person who reported it gets a bonus.",
+        title: "The messengers are fined, the reporter is paid.",
+        body: ["Each messenger on that job loses 700 LINK; whoever sent the alert gets 7,000 LINK. Ordinary holders are not fined."],
         insight: "So far this covers one price (ETH/USD) and the fine is small — a start, not full insurance.",
       },
     ],
@@ -213,24 +189,21 @@ export const chaptersEn: Chapter[] = [
     label: "LINK in, LINK out",
     title: "The LINK token: money in, money out",
     question: "Does more use mean a higher LINK price?",
-    figure: "A piggy bank fills slowly with LINK bought from fees. Next to it, a much wider tap pours LINK out of the company's wallets onto an exchange.",
-    takeaway: "Usage now buys LINK — but about 14 times more LINK flows out to the market than the piggy bank buys.",
+    figure: "On one side, LINK bought with fees slowly fills a reserve. On the other, a much larger flow of LINK leaves the company's wallets for an exchange.",
+    takeaway: "Usage now buys LINK — but about 14 times more LINK flows out to the market than the reserve buys.",
     beats: [
       {
         title: "Only 1 billion LINK will ever exist.",
         body: ["All were created in 2017: 35% sold to the public (about $32 million), 35% kept for messengers and the ecosystem, 30% kept by the company."],
-        life: "A fixed box of 1 billion tokens.",
       },
       {
         title: "Fees are turned into LINK and saved.",
         body: ["Customers can pay in other currencies; the fees are automatically turned into LINK and put in a reserve. By 13 November 2026 it held about 6.68 million LINK."],
-        life: "A piggy bank that fills a little every day.",
         term: "Real name: Chainlink Reserve.",
       },
       {
-        title: "But a bigger tap is open.",
-        body: ["Each quarter about 19 million LINK leave the company's wallets, mostly to the Binance exchange — about 6 million a month, versus about 0.45 million a month going into the piggy bank."],
-        life: "Filling a bucket with a cup while a hose drains it.",
+        title: "But far more LINK is being released.",
+        body: ["Each quarter about 19 million LINK leave the company's wallets, mostly to the Binance exchange — about 6 million a month, versus about 0.45 million a month going into the reserve."],
         insight: "About 14 LINK out for every 1 LINK in.",
       },
     ],
@@ -250,9 +223,8 @@ export const chaptersEn: Chapter[] = [
         body: ["Lending apps boomed and all needed prices. On 10 May 2021 LINK hit $52.88 — about 580 times the sale price."],
       },
       {
-        title: "2022: a price board got stuck.",
-        body: ["When the LUNA coin crashed to $0.01, Chainlink's LUNA board kept showing its built-in minimum of $0.107. Attackers borrowed against the wrong price; the Venus app lost about $11 million."],
-        life: "A shop's board still says gold is $100 after it fell to $10.",
+        title: "2022: a price got stuck.",
+        body: ["When the LUNA coin crashed to $0.01, Chainlink's LUNA price kept showing its built-in minimum of $0.107. Attackers borrowed against the wrong price; the Venus app lost about $11 million."],
         insight: "Lesson for apps like Khoa's: double-check the price and keep an emergency stop.",
       },
       {
@@ -279,7 +251,7 @@ export const chaptersEn: Chapter[] = [
       {
         title: "The service is not the token.",
         body: [
-          "Khoa will use Chainlink prices, plus his own safety checks. If you buy LINK, you bet on the token, not just the service: watch the releases, the piggy bank and how much is paid in LINK. As of November 2026 Vietnam has no licensed crypto exchange. This is education, not investment advice.",
+          "Khoa will use Chainlink prices, plus his own safety checks. If you buy LINK, you bet on the token, not just the service: watch the releases, the reserve and how much is paid in LINK. As of November 2026 Vietnam has no licensed crypto exchange. This is education, not investment advice.",
         ],
       },
     ],
@@ -296,17 +268,14 @@ export const chaptersVi: Chapter[] = [
       {
         title: "Khoa mở một tiệm cầm đồ — trên mạng.",
         body: ["Khách để lại 1 ETH làm vật cầm cố rồi vay đô la. Ứng dụng là một chương trình tự chạy trên blockchain, không có nhân viên."],
-        life: "Giống tiệm cầm đồ: bạn để lại vàng, bạn vay tiền mặt.",
       },
       {
         title: "Muốn cho vay an toàn, phải biết giá hôm nay.",
         body: ["Nếu 1 ETH đáng 3.000 USD, ứng dụng có thể cho vay 2.000 USD. Nếu giá giảm, nó phải biết ngay."],
-        life: "Tiệm cầm đồ phải biết giá vàng hôm nay trước khi đưa tiền.",
       },
       {
         title: "Nhưng blockchain là một căn phòng kính kín.",
         body: ["Chương trình trên blockchain chỉ thấy những gì đã ghi sẵn bên trong. Nó không mở được trang web, không gọi được cho sàn."],
-        life: "Một tiệm không cửa sổ, không điện thoại, không internet.",
         term: "Tên gọi thật: hợp đồng thông minh không đọc được dữ liệu bên ngoài chuỗi.",
       },
     ],
@@ -320,97 +289,85 @@ export const chaptersVi: Chapter[] = [
       {
         title: "Người đó gọi là người báo giá.",
         body: ["Một ai đó bên ngoài xem giá rồi ghi giá vào blockchain."],
-        life: "Một người chạy ra tiệm vàng hỏi giá rồi quay về báo.",
         term: "Tên gọi thật: oracle.",
       },
       {
         title: "Chỉ một người thì rủi ro.",
         body: ["Nếu người đó nói dối, ngủ quên hay bị mua chuộc, ứng dụng cho vay sai và có người mất tiền."],
-        life: "Một tờ báo giá sai là tiệm cầm đồ phát tiền quá tay.",
       },
       {
         title: "Chainlink: nhiều người báo giá độc lập.",
         body: ["Chainlink là mạng gồm nhiều công ty riêng biệt cùng làm việc này, nên không một bên nào gian lận hay làm dừng dịch vụ được."],
-        life: "Thay vì tin một người, bạn cử chín người không làm cho nhau.",
         insight: "Các công ty thật đang chạy máy báo giá cho Chainlink, trong đó có Swisscom và Deutsche Telekom.",
       },
     ],
   },
   {
-    label: "Hỏi chín tiệm vàng",
-    title: "Hỏi chín tiệm, lấy giá ở giữa",
+    label: "Chín nguồn giá",
+    title: "Chín nguồn giá, lấy giá ở giữa",
     question: "Chín người mang về chín mức giá, tin giá nào?",
-    figure: "Chín người đưa tin mỗi người tới một tiệm vàng khác nhau. Các mức giá xếp hàng; một giá lạ bị bỏ; giá ở giữa được chọn; cả chín ký một tờ; chỉ tờ đó đi vào căn phòng kính.",
+    figure: "Chín người báo giá, mỗi người xem giá ở một sàn khác nhau. Các mức giá xếp hàng; một giá lạ bị bỏ; giá ở giữa được chọn; cả chín ký một tờ; chỉ tờ đó đi vào căn phòng kính.",
     beats: [
       {
-        title: "① Mỗi người hỏi một tiệm khác nhau.",
+        title: "① Mỗi người xem giá ở một sàn khác nhau.",
         body: ["Mỗi người báo giá tự lấy giá từ nguồn riêng, ví dụ các sàn khác nhau."],
-        life: "Chín người chạy, chín tiệm vàng.",
       },
       {
         title: "② Xếp giá theo thứ tự, lấy giá ở giữa.",
-        body: ["Các mức giá được xếp hàng và lấy giá nằm giữa. Một giá vô lý ở rìa bị bỏ qua."],
-        life: "Tám tiệm nói 100, một tiệm nói 92 — bạn không tin con số 92.",
+        body: ["Các mức giá được xếp từ thấp tới cao rồi lấy giá nằm giữa. Ví dụ tám nguồn báo khoảng 100, một nguồn báo 92: con số 92 bị bỏ, giá được dùng là 100,1."],
         term: "Tên gọi thật: trung vị (median).",
       },
       {
         title: "③ Tất cả cùng ký một tờ.",
-        body: ["Thay vì chín tờ riêng, họ thống nhất một tờ báo giá và đa số cùng ký. Blockchain tự kiểm tra các chữ ký."],
-        life: "Một tờ biên nhận nhiều con dấu thì khó làm giả hơn một con dấu.",
+        body: ["Thay vì chín tờ riêng, họ thống nhất một tờ báo giá và đa số cùng ký. Blockchain tự kiểm tra các chữ ký, nên muốn làm giả thì phải mua chuộc được đa số."],
       },
       {
         title: "④ Chỉ một tờ đi vào — nên rẻ.",
         body: ["Ghi lên blockchain phải trả phí. Gửi một tờ đã ký thay vì chín tờ giúp người báo giá giảm tới 90% phí (từ năm 2021)."],
-        life: "Một chuyến giao thay vì chín chuyến.",
         term: "Tên gọi thật: Off-Chain Reporting (OCR).",
       },
     ],
   },
   {
-    label: "Bảng giá hay gọi điện",
-    title: "Bảng giá treo tường, hay gọi điện hỏi?",
+    label: "Hai cách lấy giá",
+    title: "Giá có sẵn, hay giá khi cần?",
     question: "Khi nào giá mới được đưa vào?",
-    figure: "Bên trái: bảng giá trên tường đổi số khi giá lệch đủ nhiều hoặc mỗi giờ. Bên phải: khách gọi điện hỏi giá ngay lúc mua.",
+    figure: "Bên trái: giá được ghi sẵn trên blockchain, ghi lại khi lệch đủ nhiều hoặc mỗi giờ. Bên phải: ứng dụng xin giá mới đúng lúc giao dịch.",
     beats: [
       {
-        title: "Bảng giá treo tường.",
-        body: ["Giá ETH được cập nhật khi lệch 0,5% — hoặc ít nhất mỗi giờ một lần. Đủ dùng cho tiệm cầm đồ như của Khoa."],
-        life: "Bảng giá vàng ở cửa tiệm.",
+        title: "Cách 1: giá ghi sẵn trên blockchain.",
+        body: ["Chainlink ghi giá ETH lên blockchain mỗi khi giá lệch 0,5%, và ít nhất mỗi giờ một lần. Ứng dụng nào cũng đọc được bất cứ lúc nào. Đủ dùng cho ứng dụng cho vay như của Khoa."],
         term: "Tên gọi thật: Data Feeds (kiểu đẩy).",
       },
       {
-        title: "Gọi điện hỏi giá.",
+        title: "Cách 2: ứng dụng xin giá khi cần.",
         body: ["Ứng dụng giao dịch nhanh không chờ được một giờ. Chúng xin một mức giá mới, có chữ ký, đúng lúc giao dịch — trong chưa tới một giây."],
-        life: "Gọi cho tiệm hỏi \"giá bây giờ bao nhiêu?\" ngay trước khi mua.",
         term: "Tên gọi thật: Data Streams (kiểu kéo).",
       },
       {
-        title: "Cùng chữ ký, khác cách giao.",
-        body: ["Cả hai đều được nhiều người báo giá ký. Bảng giá thì luôn có sẵn; gọi điện thì nhanh hơn và chỉ trả tiền khi dùng."],
+        title: "Cùng chữ ký, khác thời điểm.",
+        body: ["Cả hai đều được nhiều người báo giá ký. Cách 1 luôn có sẵn nhưng có thể cũ tới một giờ; cách 2 mới hơn và ứng dụng chỉ trả tiền khi xin."],
       },
     ],
   },
   {
-    label: "Không có tiệm riêng",
-    title: "Chainlink không có tiệm riêng",
+    label: "Không có chain riêng",
+    title: "Chainlink không có blockchain riêng",
     question: "Chainlink có phải là một blockchain như Ethereum hay Solana?",
     figure: "Năm căn phòng kính — Ethereum, Solana, Base, Arbitrum, BNB Chain — được cùng một đội người báo giá phục vụ. Chainlink không có phòng nào của riêng mình.",
     takeaway: "Chainlink không phải blockchain. Nó là dịch vụ làm việc cho nhiều blockchain. LINK là cách trả tiền cho dịch vụ đó.",
     beats: [
       {
         title: "Chainlink không phải blockchain.",
-        body: ["Ethereum, Solana, BNB Chain là những \"tiệm\". Chainlink không có tiệm nào — đội của nó phục vụ hàng chục tiệm cùng lúc."],
-        life: "Giống một công ty giao hàng: không sở hữu cửa hàng nào, nhưng phục vụ tất cả.",
+        body: ["Ethereum, Solana, BNB Chain là các blockchain: nơi các ứng dụng (như tiệm của Khoa) chạy. Chainlink không có blockchain riêng — đội người báo giá của nó làm việc cho hàng chục blockchain cùng lúc."],
       },
       {
         title: "LINK là tiền công của người báo giá.",
         body: ["LINK là một token nằm trên Ethereum. Nó dùng để trả công cho Chainlink và làm tiền đặt cọc của người báo giá."],
-        life: "Tiền công bạn trả cho người chạy việc.",
       },
       {
         title: "Nên cách kiếm tiền cũng khác.",
         body: ["ETH, SOL, BNB thu tiền khi người ta dùng blockchain của họ. LINK chỉ thu khi có người trả tiền cho dịch vụ Chainlink."],
-        life: "ETH giống tiền thuê mặt bằng; LINK giống phí giao hàng.",
         insight: "Vì vậy mạng có thể rất bận mà giá LINK vẫn yếu — xem chương 9.",
       },
     ],
@@ -424,18 +381,15 @@ export const chaptersVi: Chapter[] = [
       {
         title: "Kiểm két sắt.",
         body: ["Có những đồng coin hứa được bảo đảm bằng đô la hay vàng trong két. Người báo giá báo lên chuỗi trong két thật sự có bao nhiêu."],
-        life: "Người kiểm kho đếm vàng trong két rồi dán con số ra ngoài.",
         term: "Tên gọi thật: Proof of Reserve.",
       },
       {
         title: "Két không đủ thì không in thêm.",
         body: ["Chương trình của đồng coin có thể từ chối in thêm nếu két không đủ. Các bên như 21Shares đang dùng cách này."],
-        life: "Máy in tự khoá khi số đếm trong két quá thấp.",
       },
       {
         title: "Bốc thăm công bằng.",
         body: ["Blockchain không tự gieo xúc xắc được. Chainlink mang vào một con số ngẫu nhiên kèm bằng chứng; ai sửa con số là bằng chứng không khớp."],
-        life: "Bốc thăm có giấy chứng nhận niêm phong ai cũng kiểm tra được.",
         term: "Tên gọi thật: VRF (số ngẫu nhiên kiểm chứng được).",
       },
     ],
@@ -450,42 +404,36 @@ export const chaptersVi: Chapter[] = [
       {
         title: "Những cây cầu cũ từng bị cướp.",
         body: ["Năm 2022 kẻ trộm lấy 624 triệu USD từ Ronin, 325 triệu từ Wormhole, 190 triệu từ Nomad — đều là \"cầu nối\" giữa các blockchain."],
-        life: "Một cửa khẩu chỉ có một người gác đang ngủ gật.",
       },
       {
         title: "Hai trạm kiểm tra không dùng chung gì.",
         body: ["Với Chainlink, một đội kiểm tra tiền, rồi một đội khác, riêng biệt, kiểm lại bằng phần mềm khác. Cả hai phải đồng ý."],
-        life: "Hai trạm hải quan, hai đội nhân viên, hai loại máy khác nhau.",
         term: "Tên gọi thật: CCIP và Risk Management Network.",
       },
       {
         title: "Trạm thứ hai có thể đóng cổng.",
         body: ["Thấy điều gì lạ, trạm này dừng mọi lệnh chuyển cho tới khi sửa xong. Sau khi các cầu khác bị hack, các dự án giữ hơn 3 tỷ USD đã chuyển sang đây."],
-        life: "Một thanh chắn đỏ hạ xuống trên mọi làn.",
       },
     ],
   },
   {
-    label: "Tiền cọc & còi báo động",
-    title: "Tiền đặt cọc — và chiếc còi báo động",
+    label: "Tiền cọc & tiền phạt",
+    title: "Tiền đặt cọc có thể bị trừ",
     question: "Nếu người báo giá ngừng làm việc thì sao?",
-    figure: "Người báo giá bỏ LINK vào hộp đặt cọc. Bảng giá đứng im; đồng hồ chạy tới ba giờ; có người bấm còi; mỗi người báo giá mất 700 LINK, người bấm còi nhận 7.000 LINK.",
+    figure: "Người báo giá khoá LINK làm tiền cọc. Giá ETH ngừng cập nhật; đồng hồ chạy tới ba giờ; có người gửi báo cáo; mỗi người báo giá mất 700 LINK, người báo cáo nhận 7.000 LINK.",
     beats: [
       {
         title: "Người báo giá phải đặt cọc.",
         body: ["Muốn nhận việc, người báo giá khoá LINK làm tiền cọc. Người giữ LINK bình thường cũng có thể góp vào."],
-        life: "Shipper đặt cọc trước khi nhận hàng đi giao.",
         term: "Tên gọi thật: staking (tối đa 45 triệu LINK).",
       },
       {
-        title: "Đứng im 3 giờ? Bấm còi.",
-        body: ["Nếu giá ETH trên Ethereum không được cập nhật quá ba giờ, bất kỳ ai trong quỹ đặt cọc đều có thể bấm báo động."],
-        life: "Bảng giá không đổi số cả buổi chiều.",
+        title: "3 giờ không cập nhật? Ai cũng báo được.",
+        body: ["Nếu giá ETH trên Ethereum không được cập nhật quá ba giờ, bất kỳ ai có LINK trong quỹ đặt cọc đều có thể gửi báo cáo lên blockchain."],
       },
       {
-        title: "Họ bị phạt, bạn được thưởng.",
-        body: ["Mỗi người báo giá phụ trách việc đó mất 700 LINK; người bấm còi nhận 7.000 LINK. Người giữ LINK bình thường không bị phạt."],
-        life: "Shipper giao trễ bị trừ cọc; người báo lại được thưởng.",
+        title: "Người báo giá bị phạt, người báo cáo được thưởng.",
+        body: ["Mỗi người báo giá phụ trách việc đó mất 700 LINK; người gửi báo cáo nhận 7.000 LINK. Người giữ LINK bình thường không bị phạt."],
         insight: "Hiện mới áp cho một mức giá (ETH/USD) và mức phạt còn nhỏ — là bước đầu, chưa phải bảo hiểm đầy đủ.",
       },
     ],
@@ -494,24 +442,21 @@ export const chaptersVi: Chapter[] = [
     label: "LINK vào & LINK ra",
     title: "Token LINK: tiền vào, tiền ra",
     question: "Dùng nhiều hơn có làm giá LINK tăng?",
-    figure: "Một con heo đất được bỏ thêm LINK mua từ tiền phí, từ từ đầy lên. Bên cạnh, một vòi nước to hơn nhiều xả LINK từ ví công ty ra sàn.",
-    takeaway: "Lượng dùng giờ đã mua LINK — nhưng LINK chảy ra thị trường nhiều gấp khoảng 14 lần số bỏ vào heo đất.",
+    figure: "Một bên: LINK mua bằng tiền phí, từ từ dồn vào quỹ dự trữ. Bên kia: lượng LINK lớn hơn nhiều rời ví công ty để lên sàn.",
+    takeaway: "Lượng dùng giờ đã mua LINK — nhưng LINK được xả ra thị trường nhiều gấp khoảng 14 lần số quỹ dự trữ mua vào.",
     beats: [
       {
         title: "Chỉ có đúng 1 tỷ LINK.",
         body: ["Tất cả được tạo năm 2017: 35% bán ra công chúng (khoảng 32 triệu USD), 35% để dành cho người báo giá và hệ sinh thái, 30% công ty giữ."],
-        life: "Một hộp cố định 1 tỷ token.",
       },
       {
-        title: "Tiền phí đổi thành LINK rồi cất đi.",
+        title: "Tiền phí được đổi thành LINK và giữ lại.",
         body: ["Khách có thể trả phí bằng tiền khác; phí được tự đổi sang LINK và bỏ vào quỹ. Đến 13/11/2026 quỹ có khoảng 6,68 triệu LINK."],
-        life: "Một con heo đất mỗi ngày đầy thêm một chút.",
         term: "Tên gọi thật: Chainlink Reserve.",
       },
       {
-        title: "Nhưng có một vòi xả to hơn.",
-        body: ["Mỗi quý khoảng 19 triệu LINK rời ví công ty, phần lớn lên sàn Binance — khoảng 6 triệu mỗi tháng, so với khoảng 0,45 triệu mỗi tháng bỏ vào heo đất."],
-        life: "Múc nước vào xô bằng cái ca, trong khi vòi dưới đáy đang xả.",
+        title: "Nhưng lượng LINK được xả ra lớn hơn nhiều.",
+        body: ["Mỗi quý khoảng 19 triệu LINK rời ví công ty, phần lớn lên sàn Binance — khoảng 6 triệu mỗi tháng, so với khoảng 0,45 triệu mỗi tháng vào quỹ dự trữ."],
         insight: "Khoảng 14 LINK ra cho mỗi 1 LINK vào.",
       },
     ],
@@ -531,9 +476,8 @@ export const chaptersVi: Chapter[] = [
         body: ["Các ứng dụng cho vay bùng nổ và đều cần giá. Ngày 10/5/2021 LINK chạm 52,88 USD — gấp khoảng 580 lần giá bán ban đầu."],
       },
       {
-        title: "2022: một bảng giá bị kẹt.",
-        body: ["Khi đồng LUNA sụp xuống 0,01 USD, bảng giá LUNA của Chainlink vẫn hiện mức sàn cài sẵn 0,107 USD. Kẻ tấn công vay theo giá sai; ứng dụng Venus mất khoảng 11 triệu USD."],
-        life: "Bảng giá ở tiệm vẫn ghi vàng 100 khi giá thật đã rơi còn 10.",
+        title: "2022: một mức giá bị kẹt.",
+        body: ["Khi đồng LUNA sụp xuống 0,01 USD, giá LUNA của Chainlink vẫn hiện mức sàn cài sẵn 0,107 USD. Kẻ tấn công vay theo giá sai; ứng dụng Venus mất khoảng 11 triệu USD."],
         insight: "Bài học cho ứng dụng như của Khoa: tự kiểm tra lại giá và có nút dừng khẩn cấp.",
       },
       {
@@ -560,7 +504,7 @@ export const chaptersVi: Chapter[] = [
       {
         title: "Dịch vụ không phải là token.",
         body: [
-          "Khoa sẽ dùng giá của Chainlink, kèm bước tự kiểm tra. Nếu bạn mua LINK, bạn đặt cược vào token chứ không chỉ vào dịch vụ: hãy theo dõi lượng xả, heo đất và bao nhiêu phí được trả bằng LINK. Tính tới tháng 11/2026 Việt Nam chưa có sàn crypto được cấp phép. Đây là nội dung giáo dục, không phải lời khuyên đầu tư.",
+          "Khoa sẽ dùng giá của Chainlink, kèm bước tự kiểm tra. Nếu bạn mua LINK, bạn đặt cược vào token chứ không chỉ vào dịch vụ: hãy theo dõi lượng xả, quỹ dự trữ và bao nhiêu phí được trả bằng LINK. Tính tới tháng 11/2026 Việt Nam chưa có sàn crypto được cấp phép. Đây là nội dung giáo dục, không phải lời khuyên đầu tư.",
         ],
       },
     ],

@@ -1,11 +1,8 @@
-# LINK, made simple — beginner edition
+# USDT, explained (Hiểu USDT)
 
-Chainlink and LINK explained for complete beginners with one everyday story: Khoa's pawnshop sits in a
-sealed glass room (the blockchain) and can't see today's gold price. Chainlink is the team of independent
-price messengers who ask nine shops, keep the middle price, sign one slip and bring it in.
+Scroll-driven, bilingual (EN/VI) explainer of Tether's USDT, part of the mi-a7k2x9 series. Live at `/mi-a7k2x9/usdt/`.
 
-11 chapters, each a 2D SVG scene with numbered steps and a caption under the stage; every text beat has an
-"in real life" comparison and, optionally, the real technical name. EN/VI.
+Story (13 chapters): intro (vault door) · 1 print & burn · 2 inside the vault (100 squares) · 3 who keeps the interest · 4 born for traders (2014) · 5 the years of doubt · 6 the anchor slips (May 2022) · 7 bigger than ever · 8 USDT in Vietnam · 9 new rules (with USDT/USDC/USAT table) · strengths · weaknesses · conclusion (3D coin).
 
-Build: `NEXT_PUBLIC_BASE_PATH=/mi-a7k2x9/link-v3 npx next build` → `out/`. /link/ (metro) and /link-v2/
-(The Missing Link) are kept. Chainlink logo supplied by the reader. Education, not investment advice.
+Build: `NEXT_PUBLIC_BASE_PATH=/mi-a7k2x9/usdt npx next build` → copy `out/` to `public/usdt` in the repo.
+Data: Coin Metrics community data (CC BY-NC 4.0) for supply to Dec 2025; Tether quarterly reports, DefiLlama and dated press after. Sources listed in `src/data/coins/usdt/references.ts`.

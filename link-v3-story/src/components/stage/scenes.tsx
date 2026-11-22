@@ -275,17 +275,23 @@ function NoShop({ b, t }: SceneProps) {
       <g className={vis(b >= 2)}>
         <rect x={24} y={420} width={290} height={110} rx={16} fill="#fff" stroke={C.line} />
         <rect x={326} y={420} width={290} height={110} rx={16} fill={C.blueSoft} stroke="#c8d6f6" />
-        <T x={169} y={462} size={30}>
+        <T x={169} y={458} size={26}>
           🏬
         </T>
-        <T x={169} y={500} size={13} weight={700}>
-          {s.rent}
+        <T x={169} y={494} size={14} weight={800}>
+          {s.rent.split("|")[0]}
         </T>
-        <T x={471} y={462} size={30}>
-          📦
+        <T x={169} y={514} size={12.5} color={C.mute}>
+          {s.rent.split("|")[1]}
         </T>
-        <T x={471} y={500} size={13} weight={700} color={C.blueDeep}>
-          {s.delivery}
+        <T x={471} y={458} size={26}>
+          🔗
+        </T>
+        <T x={471} y={494} size={14} weight={800} color={C.blueDeep}>
+          {s.delivery.split("|")[0]}
+        </T>
+        <T x={471} y={514} size={12.5} color={C.blueDeep}>
+          {s.delivery.split("|")[1]}
         </T>
       </g>
     </g>
