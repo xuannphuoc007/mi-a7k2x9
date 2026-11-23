@@ -35,13 +35,17 @@ const fmtDate = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asi
 const fmtHour = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit' }).format(new Date(t * 1000))
 const fmtFull = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(t * 1000))
 
-function TipBox({ active, payload, label, unit, labels }: {
-  active?: boolean; payload?: { dataKey: string; value: number; color: string }[]; label?: number; unit: string; labels: Record<string, string>
+const fmtDay = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(t * 1000))
+
+export type TipDetails = Record<number, { label: string; value: string }[]>
+
+function TipBox({ active, payload, label, unit, labels, details }: {
+  active?: boolean; payload?: { dataKey: string; value: number; color: string }[]; label?: number; unit: string; labels: Record<string, string>; details?: TipDetails
 }) {
   if (!active || !payload?.length || label === undefined) return null
   return (
     <div className="bg-panel border border-line px-2.5 py-1.5 text-xs">
-      <div className="text-muted num mb-1">{fmtFull(label)}</div>
+      <div className="text-muted num mb-1">{details ? fmtDay(label) : fmtFull(label)}</div>
       {payload.map((p) => (
         <div key={p.dataKey} className="flex items-center gap-2">
           <span className="h-2 w-2" style={{ background: p.color }} />
@@ -49,14 +53,23 @@ function TipBox({ active, payload, label, unit, labels }: {
           <span className="num ml-auto">{fmtNum(p.value)} {unit}</span>
         </div>
       ))}
+      {details?.[label]?.map((d) => (
+        <div key={d.label} className="flex items-center gap-2">
+          <span className="h-2 w-2" />
+          <span className="text-muted">{d.label}</span>
+          <span className="num ml-auto">{d.value}</span>
+        </div>
+      ))}
     </div>
   )
 }
 
-export default function SeriesChart({ lines, unit, height = 220, type = 'area', zero = false, timeAxis = false, markers = [], refLines = [] }: {
+export default function SeriesChart({ lines, unit, height = 220, type = 'area', zero = false, timeAxis = false, markers = [], refLines = [], details }: {
   lines: SeriesLine[]; unit: string; height?: number; type?: 'area' | 'bar'; zero?: boolean; timeAxis?: boolean; markers?: SeriesMarker[]
   /** Đường ngang tham chiếu, ví dụ biên ±0,3%. */
   refLines?: number[]
+  /** Dòng bổ sung trong khung hiện khi rê chuột, khoá là mốc thời gian của cột. */
+  details?: TipDetails
 }) {
   const data = merge(lines)
   const spanDays = data.length ? (data[data.length - 1].t - data[0].t) / 86400 : 0
@@ -64,7 +77,7 @@ export default function SeriesChart({ lines, unit, height = 220, type = 'area', 
   const labels = Object.fromEntries(lines.map((l) => [l.key, l.label]))
   const axis = { stroke: 'rgb(var(--muted))', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', tickLine: false, axisLine: false }
   const grid = <CartesianGrid stroke="rgb(var(--line))" strokeOpacity={0.6} vertical={false} />
-  const tip = <Tooltip content={<TipBox unit={unit} labels={labels} />} cursor={{ stroke: 'rgb(var(--line))' }} />
+  const tip = <Tooltip content={<TipBox unit={unit} labels={labels} details={details} />} cursor={{ stroke: 'rgb(var(--line))' }} />
   if (type === 'bar') {
     const k = lines[0].key
     return (

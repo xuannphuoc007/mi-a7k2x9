@@ -52,6 +52,11 @@ export default function IntradayPage() {
   const outDays = days.filter((d) => Math.abs(openToClose(d)) > band)
 
   const candles: Candle[] = days.map((d) => ({ time: dayTs(d.date), open: d.open, high: d.high, low: d.low, close: d.last, volume: 0 }))
+  const f0 = (v: number) => fmtNum(v, 0)
+  const barDetails = Object.fromEntries(days.map((d) => [dayTs(d.date, 12), [
+    { label: 'Giá mở', value: f0(d.open) }, { label: 'Giá đóng', value: f0(d.last) },
+    { label: 'Cao nhất', value: f0(d.high) }, { label: 'Thấp nhất', value: f0(d.low) },
+  ]]))
   const o2cBars = days.map((d) => [dayTs(d.date, 12), openToClose(d)] as [number, number])
 
   const sel = days.find((d) => d.date === pick) ?? latest
@@ -76,8 +81,8 @@ export default function IntradayPage() {
         <LazyCandle candles={candles} height={300} daily />
       </Card>
 
-      <Card title="Mở → đóng mỗi ngày" subtitle={`Đường nét đứt là ±${fmtNum(band, 1)}%.`}>
-        <LazySeries type="bar" height={220} unit="%" lines={[{ key: 'o2c', label: 'Mở → đóng', points: o2cBars }]} refLines={[band, -band]} />
+      <Card title="Mở → đóng mỗi ngày" subtitle={`Đường nét đứt là ±${fmtNum(band, 1)}%. Rê chuột vào từng cột để xem giá mở, đóng, cao nhất, thấp nhất.`}>
+        <LazySeries type="bar" height={220} unit="%" lines={[{ key: 'o2c', label: 'Mở → đóng', points: o2cBars }]} refLines={[band, -band]} details={barDetails} />
       </Card>
 
       <Card title="Trong ngày"
