@@ -236,7 +236,18 @@ def parse_daily_candles(j: dict) -> list[dict]:
         ts = int(dt.datetime(day.year, day.month, day.day, tzinfo=dt.timezone.utc).timestamp())
         rows[ts] = {"time": ts, "open": float(o), "high": float(max(h, o, c)), "low": float(min(lo, o, c)),
                     "close": float(c), "volume": 0}
-    return [rows[t] for t in sorted(rows)]
+    out = [rows[t] for t in sorted(rows)]
+    return _open_from_prev_close(out)
+
+
+def _open_from_prev_close(candles: list[dict]) -> list[dict]:
+    """Yahoo ghi giá mở trùng giá đóng ở hơn một nửa số ngày của cặp này nên giá mở không đáng tin.
+    Thị trường ngoại hối giao dịch liên tục, nên lấy giá mở của ngày = giá đóng của ngày giao dịch trước."""
+    for prev, cur in zip(candles, candles[1:]):
+        cur["open"] = prev["close"]
+        cur["high"] = max(cur["high"], cur["open"], cur["close"])
+        cur["low"] = min(cur["low"], cur["open"], cur["close"])
+    return candles
 
 
 def tv_day_bar(ticker: str) -> dict | None:
@@ -289,7 +300,8 @@ def collect_market_fx(ctx) -> dict:
         bar = tv_day_bar("FX_IDC:USDVND") if src == f"{SRC_TV} FX_IDC:USDVND" else None
         today = int(dt.datetime.combine(now_vn().date(), dt.time(), tzinfo=dt.timezone.utc).timestamp())
         if bar and now_vn().weekday() < 5:
-            candles = [c for c in candles if c["time"] != today] + [{"time": today, **bar, "volume": 0}]
+            hist = [c for c in candles if c["time"] != today]
+            candles = _open_from_prev_close(hist + [{"time": today, **bar, "volume": 0}])
         out["candles"] = {"usdvnd_market": {"1d": candles, "1h": [], "source": src + ", nến ngày Yahoo Finance",
                                             "unit": "VND", "volume_unit": ""}}
     return out

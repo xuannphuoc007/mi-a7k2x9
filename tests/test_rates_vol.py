@@ -42,6 +42,7 @@ def test_daily_candles():
     assert len(c) > 200 and all(x["high"] >= max(x["open"], x["close"]) >= min(x["open"], x["close"]) >= x["low"] for x in c)
     assert all(dt.datetime.fromtimestamp(x["time"], dt.timezone.utc).weekday() < 5 for x in c)
     assert [x["time"] for x in c] == sorted({x["time"] for x in c})
+    assert all(b["open"] == a["close"] for a, b in zip(c, c[1:]))  # giá mở = giá đóng ngày trước
 
 
 def test_merge_rule():
@@ -91,7 +92,7 @@ def test_pipeline_end_to_end(tmp_path, fake_http):
     assert m["sbv_central_rate"]["value"] == 25615 and m["sbv_central_rate"]["quality"] != "missing"
     assert m["usdvnd_market"]["value"] and m["sofr"]["value"]
     cd = s["candles"]["usdvnd_market"]["1d"]
-    assert len(cd) > 200 and cd[-1]["close"] == 25705.0 and cd[-1]["high"] == 25730.0  # nến hôm nay lấy từ TradingView
+    assert len(cd) > 200 and cd[-1]["close"] == 25705.0 and cd[-1]["open"] == cd[-2]["close"] and cd[-1]["high"] >= cd[-1]["open"]  # nến hôm nay lấy từ TradingView
     assert m["interbank_overnight_rate"]["value"] == 4.51 and m["interbank_vnd_1m_rate"]["value"] == 5.27
     assert m["sbv_sell_rate"]["value"] == 26845
     assert m["usdvnd_interbank"]["value"] == 25720 and m["usdvnd_interbank"]["period"] == "2026-11-05"
