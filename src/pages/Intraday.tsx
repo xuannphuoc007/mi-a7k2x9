@@ -56,6 +56,8 @@ export default function IntradayPage() {
   const lastBar = bars[bars.length - 1]
   const prevBar = bars.length > 1 ? bars[bars.length - 2] : null
   const o2c = o2cOf(lastBar)
+  // Ngày cuối cùng là hôm nay thì nến chưa đóng: "đóng" lúc này chỉ là giá tại lần lấy gần nhất
+  const forming = lastBar.date >= snap.date
   const vsPrevBar = prevBar ? (lastBar.close / prevBar.close - 1) * 100 : null
   const outDays = bars.filter((b) => Math.abs(o2cOf(b)) > band)
 
@@ -77,15 +79,15 @@ export default function IntradayPage() {
       <PageHeader title="USD/VND" desc="Biến động theo ngày, so với giá mở cửa." />
 
       <div className="grid gap-x-8 gap-y-5 grid-cols-2 lg:grid-cols-4">
-        <Stat label="Giá mới nhất" value={fmtNum(lastBar.close, 0)} sub={dmy(lastBar.date)} />
+        <Stat label="Giá mới nhất" value={fmtNum(lastBar.close, 0)} sub={`${dmy(lastBar.date)}${forming ? ', tạm thời' : ''}`} />
         <Stat label="So với đóng cửa hôm trước" value={vsPrevBar === null ? '–' : pct(vsPrevBar)} className={vsPrevBar === null ? undefined : tone(vsPrevBar)}
           sub={prevBar ? `${fmtNum(prevBar.close, 0)} → ${fmtNum(lastBar.close, 0)}` : undefined} />
-        <Stat label="Mở → đóng hôm nay" value={pct(o2c)} className={tone(o2c)} sub={`${fmtNum(lastBar.open, 0)} → ${fmtNum(lastBar.close, 0)}`} />
+        <Stat label={forming ? 'Mở → hiện tại (chưa đóng)' : 'Mở → đóng'} value={pct(o2c)} className={tone(o2c)} sub={`${fmtNum(lastBar.open, 0)} → ${fmtNum(lastBar.close, 0)}`} />
         <Stat label={`Ngày vượt ±${fmtNum(band, 1)}%`} value={`${outDays.length} / ${bars.length}`} className={outDays.length ? 'text-warn' : undefined}
           sub={outDays.length ? outDays.map((d) => dmy(d.date).slice(0, 5)).join(', ') : undefined} />
       </div>
 
-      <Card title="Nến theo ngày" subtitle="Mở, cao nhất, thấp nhất, đóng của từng ngày giao dịch.">
+      <Card title="Nến theo ngày" subtitle={`Mở, cao nhất, thấp nhất, đóng của từng ngày giao dịch.${forming ? ' Nến cuối cùng là hôm nay, chưa đóng: cao, thấp và giá đóng là số tại lần lấy gần nhất.' : ''}`}>
         <LazyCandle candles={candles} height={300} daily />
       </Card>
 
