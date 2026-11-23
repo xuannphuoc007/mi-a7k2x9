@@ -25,7 +25,7 @@ function Stat({ label, value, sub, className }: { label: string; value: string; 
 }
 
 export default function IntradayPage() {
-  const { snap } = useData()
+  const { snap, latest: latestData } = useData()
   const [pick, setPick] = useState<string | null>(null)
   const all = snap?.tables.intraday
   // Chỉ lấy ngày giao dịch (bỏ cuối tuần): cuối tuần thị trường nghỉ, giá đứng yên nên không vẽ
@@ -46,18 +46,26 @@ export default function IntradayPage() {
 
   const band = all.band_pct
   const latest = days[days.length - 1]
-  const prev = days.length > 1 ? days[days.length - 2] : null
-  const vsPrev = prev ? (latest.last / prev.last - 1) * 100 : null
-  const o2c = openToClose(latest)
-  const outDays = days.filter((d) => Math.abs(openToClose(d)) > band)
+  // Nến ngày: ưu tiên nến ngày thật (Yahoo, hôm nay thêm TradingView) vì các điểm trong ngày rất thưa, có tuần giá không đổi
+  const daily = (latestData?.candles?.usdvnd_market?.['1d'] ?? []).slice(-30)
+  const dayOf = (t: number) => new Date(t * 1000).toISOString().slice(0, 10)
+  const bars = daily.length
+    ? daily.map((c) => ({ date: dayOf(c.time), open: c.open, high: c.high, low: c.low, close: c.close }))
+    : days.map((d) => ({ date: d.date, open: d.open, high: d.high, low: d.low, close: d.last }))
+  const o2cOf = (b: { open: number; close: number }) => (b.close / b.open - 1) * 100
+  const lastBar = bars[bars.length - 1]
+  const prevBar = bars.length > 1 ? bars[bars.length - 2] : null
+  const o2c = o2cOf(lastBar)
+  const vsPrevBar = prevBar ? (lastBar.close / prevBar.close - 1) * 100 : null
+  const outDays = bars.filter((b) => Math.abs(o2cOf(b)) > band)
 
-  const candles: Candle[] = days.map((d) => ({ time: dayTs(d.date), open: d.open, high: d.high, low: d.low, close: d.last, volume: 0 }))
+  const candles: Candle[] = bars.map((b) => ({ time: dayTs(b.date), open: b.open, high: b.high, low: b.low, close: b.close, volume: 0 }))
   const f0 = (v: number) => fmtNum(v, 0)
-  const barDetails = Object.fromEntries(days.map((d) => [dayTs(d.date, 12), [
-    { label: 'Giá mở', value: f0(d.open) }, { label: 'Giá đóng', value: f0(d.last) },
-    { label: 'Cao nhất', value: f0(d.high) }, { label: 'Thấp nhất', value: f0(d.low) },
+  const barDetails = Object.fromEntries(bars.map((b) => [dayTs(b.date, 12), [
+    { label: 'Giá mở', value: f0(b.open) }, { label: 'Giá đóng', value: f0(b.close) },
+    { label: 'Cao nhất', value: f0(b.high) }, { label: 'Thấp nhất', value: f0(b.low) },
   ]]))
-  const o2cBars = days.map((d) => [dayTs(d.date, 12), openToClose(d)] as [number, number])
+  const o2cBars = bars.map((b) => [dayTs(b.date, 12), o2cOf(b)] as [number, number])
 
   const sel = days.find((d) => d.date === pick) ?? latest
   const flat = (v: number) => sel.points.map(([t]) => [t, v] as [number, number])
@@ -69,11 +77,11 @@ export default function IntradayPage() {
       <PageHeader title="USD/VND" desc="Biến động theo ngày, so với giá mở cửa." />
 
       <div className="grid gap-x-8 gap-y-5 grid-cols-2 lg:grid-cols-4">
-        <Stat label="Giá mới nhất" value={fmtNum(latest.last, 0)} sub={dmy(latest.date)} />
-        <Stat label="So với đóng cửa hôm trước" value={vsPrev === null ? '–' : pct(vsPrev)} className={vsPrev === null ? undefined : tone(vsPrev)}
-          sub={prev ? `${fmtNum(prev.last, 0)} → ${fmtNum(latest.last, 0)}` : undefined} />
-        <Stat label="Mở → đóng hôm nay" value={pct(o2c)} className={tone(o2c)} sub={`${fmtNum(latest.open, 0)} → ${fmtNum(latest.last, 0)}`} />
-        <Stat label={`Ngày vượt ±${fmtNum(band, 1)}%`} value={`${outDays.length} / ${days.length}`} className={outDays.length ? 'text-warn' : undefined}
+        <Stat label="Giá mới nhất" value={fmtNum(lastBar.close, 0)} sub={dmy(lastBar.date)} />
+        <Stat label="So với đóng cửa hôm trước" value={vsPrevBar === null ? '–' : pct(vsPrevBar)} className={vsPrevBar === null ? undefined : tone(vsPrevBar)}
+          sub={prevBar ? `${fmtNum(prevBar.close, 0)} → ${fmtNum(lastBar.close, 0)}` : undefined} />
+        <Stat label="Mở → đóng hôm nay" value={pct(o2c)} className={tone(o2c)} sub={`${fmtNum(lastBar.open, 0)} → ${fmtNum(lastBar.close, 0)}`} />
+        <Stat label={`Ngày vượt ±${fmtNum(band, 1)}%`} value={`${outDays.length} / ${bars.length}`} className={outDays.length ? 'text-warn' : undefined}
           sub={outDays.length ? outDays.map((d) => dmy(d.date).slice(0, 5)).join(', ') : undefined} />
       </div>
 

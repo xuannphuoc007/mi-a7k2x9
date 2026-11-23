@@ -12,9 +12,10 @@
 """
 from __future__ import annotations
 
+import datetime as dt
 import re
 
-from ..common import date_to_iso, http_get, http_post, iso_vn, metric, now_vn, s_to_iso, to_float
+from ..common import VN_TZ, date_to_iso, http_get, http_post, iso_vn, metric, now_vn, s_to_iso, to_float
 
 SBV_PAGE = "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1"
 SRC_SBV_OFFICIAL = "NHNN (sbv.gov.vn), thông báo tỷ giá trung tâm"
@@ -203,11 +204,53 @@ def tv_quote(ticker: str) -> float | None:
         return None
 
 
+_YAHOO_RAW: dict[str, dict] = {}
+
+
 def _yahoo_or_none(url: str):
     try:
-        return parse_yahoo(http_get(url, params={"range": "1y", "interval": "1d"}, headers=BROWSER_UA))
+        j = http_get(url, params={"range": "1y", "interval": "1d"}, headers=BROWSER_UA)
+        out = parse_yahoo(j)
+        _YAHOO_RAW[url] = j
+        return out
     except Exception:  # noqa: BLE001
         return None
+
+
+def parse_daily_candles(j: dict) -> list[dict]:
+    """Nến ngày (mở, cao, thấp, đóng) từ phản hồi Yahoo. Mỗi ngày giờ Việt Nam một nến, bỏ cuối tuần.
+    Thời điểm nến là 00:00 UTC của ngày đó, đúng định dạng biểu đồ ngày của web."""
+    res = (j.get("chart", {}).get("result") or [None])[0] or {}
+    q = ((res.get("indicators") or {}).get("quote") or [{}])[0]
+    rows: dict[int, dict] = {}
+    for i, t in enumerate(res.get("timestamp") or []):
+        try:
+            o, h, lo, c = q["open"][i], q["high"][i], q["low"][i], q["close"][i]
+        except (KeyError, IndexError):
+            continue
+        if None in (o, h, lo, c):
+            continue
+        day = dt.datetime.fromtimestamp(t, VN_TZ).date()
+        if day.weekday() >= 5:
+            continue
+        ts = int(dt.datetime(day.year, day.month, day.day, tzinfo=dt.timezone.utc).timestamp())
+        rows[ts] = {"time": ts, "open": float(o), "high": float(max(h, o, c)), "low": float(min(lo, o, c)),
+                    "close": float(c), "volume": 0}
+    return [rows[t] for t in sorted(rows)]
+
+
+def tv_day_bar(ticker: str) -> dict | None:
+    """Nến của ngày hiện tại từ TradingView (mở, cao, thấp, giá hiện tại). Lỗi thì None."""
+    try:
+        j = http_post(TV_URL, {"symbols": {"tickers": [ticker]}, "columns": ["open", "high", "low", "close"]},
+                      headers=BROWSER_UA)
+        rows = j.get("data") or []
+        v = [to_float(x) for x in rows[0]["d"]] if rows else []
+        if len(v) == 4 and None not in v and v[2] <= v[3] <= v[1]:
+            return {"open": v[0], "high": v[1], "low": v[2], "close": v[3]}
+    except Exception:  # noqa: BLE001
+        pass
+    return None
 
 
 def _quote_with_history(url: str, tv_ticker: str, lo: float, hi: float):
@@ -239,7 +282,17 @@ def collect_market_fx(ctx) -> dict:
              + (". Giá hiện tại từ TradingView, lịch sử từ Yahoo Finance" if tv else ""))}
     series = {"usdvnd_market": {"label": "USD/VND thị trường quốc tế", "unit": "VND", "source": src,
                                 "points": pts}}
-    return {"metrics": m, "series": series}
+    out = {"metrics": m, "series": series}
+    raw = _YAHOO_RAW.get(YAHOO_URL)
+    candles = parse_daily_candles(raw) if raw else []
+    if candles:
+        bar = tv_day_bar("FX_IDC:USDVND") if src == f"{SRC_TV} FX_IDC:USDVND" else None
+        today = int(dt.datetime.combine(now_vn().date(), dt.time(), tzinfo=dt.timezone.utc).timestamp())
+        if bar and now_vn().weekday() < 5:
+            candles = [c for c in candles if c["time"] != today] + [{"time": today, **bar, "volume": 0}]
+        out["candles"] = {"usdvnd_market": {"1d": candles, "1h": [], "source": src + ", nến ngày Yahoo Finance",
+                                            "unit": "VND", "volume_unit": ""}}
+    return out
 
 
 DXY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB"

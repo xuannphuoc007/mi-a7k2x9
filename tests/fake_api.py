@@ -163,6 +163,9 @@ def post_router(url, body, **kw):
         return bybit_ads(body)
     if "bitget" in url:
         return bitget_ads(body)
+    if "tradingview" in url:
+        vals = {"open": 25690.0, "high": 25730.0, "low": 25680.0, "close": 25705.0}
+        return {"data": [{"s": body["symbols"]["tickers"][0], "d": [vals[c] for c in body["columns"]]}]}
     raise AssertionError(f"URL không có trong fake router: {url}")
 
 
@@ -204,7 +207,7 @@ def yahoo_dxy_json():
     stamps = [t0 + 86400 * i for i in range(365)]
     closes = [98 + 0.01 * i + math.sin(i / 7) for i in range(365)]
     return {"chart": {"result": [{"meta": {"regularMarketPrice": closes[-1], "regularMarketTime": stamps[-1]},
-                                  "timestamp": stamps, "indicators": {"quote": [{"close": closes}]}}],
+                                  "timestamp": stamps, "indicators": {"quote": [{"open": closes, "high": [c + 5 for c in closes], "low": [c - 5 for c in closes], "close": closes}]}}],
                       "error": None}}
 
 
@@ -213,7 +216,7 @@ def yahoo_json():
     stamps = [t0 + 86400 * i for i in range(365)]
     closes = [25000 + 3 * i + 20 * math.sin(i) for i in range(365)]
     return {"chart": {"result": [{"meta": {"regularMarketPrice": closes[-1], "regularMarketTime": stamps[-1]},
-                                  "timestamp": stamps, "indicators": {"quote": [{"close": closes}]}}],
+                                  "timestamp": stamps, "indicators": {"quote": [{"open": closes, "high": [c + 5 for c in closes], "low": [c - 5 for c in closes], "close": closes}]}}],
                       "error": None}}
 
 

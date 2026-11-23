@@ -4,11 +4,11 @@ from pathlib import Path
 import pytest
 
 from scripts import run_pipeline
-from scripts.collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vn_fx, vn_rates
+from scripts.collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vira, vn_fx, vn_rates
 from scripts.validators.quality import check_snapshot
 from tests import fake_api
 
-MODULES = (crypto, derivatives, macro, sentiment, stablecoins, vn_fx, vn_rates, p2p, news)
+MODULES = (crypto, derivatives, macro, sentiment, stablecoins, vira, vn_fx, vn_rates, p2p, news)
 
 
 @pytest.fixture
@@ -17,6 +17,7 @@ def fake_http(monkeypatch):
         return fake_api.router("GET", url, params, as_text=as_text, as_bytes=as_bytes)
 
     monkeypatch.setattr(p2p, "http_post", fake_api.post_router)
+    monkeypatch.setattr(vn_rates, "http_post", fake_api.post_router)
 
     for mod in MODULES:
         if hasattr(mod, "http_get"):
