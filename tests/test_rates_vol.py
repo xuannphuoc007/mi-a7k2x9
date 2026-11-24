@@ -83,7 +83,7 @@ def test_pipeline_end_to_end(tmp_path, fake_http):
     m = s["metrics"]
     assert m["sbv_central_rate"]["value"] == 25615 and m["sbv_central_rate"]["quality"] != "missing"
     assert m["usdvnd_market"]["value"] == 25705.0 and "Investing" in m["usdvnd_market"]["source"] and m["sofr"]["value"]
-    assert "usdvnd_market" not in s["candles"] and "usdvnd_market" not in s["series"]  # không còn nến/chuỗi Yahoo-TradingView
+    assert "usdvnd_market" not in s["candles"] and "usdvnd_market" not in s["series"]  # không có file CSV: không còn nến Yahoo/TradingView
     assert s["tables"]["usdvnd_ticks"]["ticks"][-1]["v"] == 25705.0
     assert m["interbank_overnight_rate"]["value"] == 4.51 and m["interbank_vnd_1m_rate"]["value"] == 5.27
     assert m["sbv_sell_rate"]["value"] == 26845
@@ -152,3 +152,16 @@ def test_vira_takes_each_figure_from_newest_bulletin_that_has_it(monkeypatch):
     r = vira_mod.collect({})
     assert r["metrics"]["usdvnd_interbank"]["value"] == 25720
     assert r["metrics"]["interbank_usd_overnight_rate"]["period"] == "2026-11-05"
+
+
+def test_pipeline_candles_from_csv_only(tmp_path, fake_http, monkeypatch):
+    import json
+    from scripts.collectors import investing_csv
+    f = tmp_path / "inv.csv"
+    f.write_text('"Ngày","Lần cuối","Mở","Cao","Thấp","KL","% Thay đổi"\n"23/11/2026","25,785.0","25,805.0","25,847.5","25,783.0","","-0.06%"\n', encoding="utf-8")
+    monkeypatch.setattr(investing_csv, "CSV_PATH", f)
+    out = tmp_path / "out"
+    assert run_pipeline.run(out, force=True) == 0
+    s = json.loads((out / "latest.json").read_text(encoding="utf-8"))
+    cd = s["candles"]["usdvnd_market"]
+    assert cd["1d"][0]["close"] == 25785.0 and "Investing" in cd["source"] and "Yahoo" not in cd["source"]

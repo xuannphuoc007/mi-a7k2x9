@@ -63,12 +63,14 @@ def apply(snap: dict, path: Path | None = None) -> str | None:
     """Thay nến ngày USD/VND bằng nến của file CSV Investing, nối thêm nến các ngày sau file từ điểm giá Investing.
     Không còn dùng nến Yahoo/TradingView khi có file. Trả về ngày cuối của file, hoặc None nếu không dùng."""
     p = path or CSV_PATH
-    entry = (snap.get("candles") or {}).get("usdvnd_market")
-    if not entry or not p.exists():
+    if not p.exists():
         return None
     cs = parse_csv(p.read_text(encoding="utf-8"))
     if not cs:
         return None
+    # Không còn nguồn nến nào khác (đã bỏ Yahoo/TradingView) nên tự tạo mục nến nếu chưa có
+    entry = snap.setdefault("candles", {}).setdefault(
+        "usdvnd_market", {"1d": [], "1h": [], "source": "", "unit": "VND", "volume_unit": ""})
     ticks = ((snap.get("tables") or {}).get("usdvnd_ticks") or {}).get("ticks") or []
     entry["1d"] = cs + today_candles(cs[-1]["close"], cs[-1]["time"], ticks)
     last = dt.datetime.fromtimestamp(cs[-1]["time"], dt.timezone.utc).strftime("%d/%m/%Y")

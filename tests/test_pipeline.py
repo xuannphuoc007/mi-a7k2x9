@@ -162,7 +162,8 @@ def test_investing_csv_parse_and_apply(tmp_path):
     today = out[2]
     assert (today["open"], today["high"], today["low"], today["close"]) == (25785.0, 25830.0, 25770.0, 25770.0)
     assert "Investing" in snap["candles"]["usdvnd_market"]["source"] and "TradingView" not in snap["candles"]["usdvnd_market"]["source"]
-    assert investing_csv.apply({"candles": {}}, f) is None
+    empty = {"tables": {}}                                              # chưa có mục nến nào: tự tạo từ file
+    assert investing_csv.apply(empty, f) == "23/11/2026" and len(empty["candles"]["usdvnd_market"]["1d"]) == 2
     assert investing_csv.apply(snap, tmp_path / "none.csv") is None
 
 
