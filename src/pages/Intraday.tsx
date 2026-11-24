@@ -119,7 +119,7 @@ export default function IntradayPage() {
       </Card>
 
       <p className="text-[13px] text-muted">
-        Nguồn: Yahoo Finance, TradingView (giá tham chiếu quốc tế, không phải Investing.com). Điểm giá mới nhất {stamp(lastAt)}.
+        Nguồn: {latestData?.candles?.usdvnd_market?.source ?? 'Investing.com, Yahoo Finance'} (giá tham chiếu quốc tế). Điểm giá trong ngày mới nhất {stamp(lastAt)}.
       </p>
 
       <div className="border-t-2 border-fg" />
