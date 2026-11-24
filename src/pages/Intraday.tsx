@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { LazyCandle, LazySeries } from '../charts/lazy'
+import P2PIntraday from '../components/P2PIntraday'
 import { Card, EmptyState, PageHeader } from '../components/ui'
 import { useData } from '../hooks/useData'
 import type { Candle } from '../types/snapshot'
@@ -40,6 +41,7 @@ export default function IntradayPage() {
       <div className="space-y-9">
         <PageHeader title="USD/VND" desc="Biến động theo ngày." />
         <EmptyState title="Chưa có dữ liệu">Lần cập nhật kế tiếp sẽ có.</EmptyState>
+        <P2PIntraday data={snap.tables.p2p_intraday} />
       </div>
     )
   }
@@ -119,6 +121,9 @@ export default function IntradayPage() {
       <p className="text-[13px] text-muted">
         Nguồn: Yahoo Finance, TradingView (giá tham chiếu quốc tế, không phải Investing.com). Điểm giá mới nhất {stamp(lastAt)}.
       </p>
+
+      <div className="border-t-2 border-fg" />
+      <P2PIntraday data={snap.tables.p2p_intraday} />
     </div>
   )
 }

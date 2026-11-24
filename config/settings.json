@@ -40,7 +40,10 @@
     "min_changes": 2,
     "unusual_gap_min": 240,
     "stale_after_hours": 4,
-    "assessment": { "min_sessions": 10, "min_price_changes": 30 }
+    "assessment": {
+      "min_sessions": 10,
+      "min_price_changes": 30
+    }
   },
   "reference_fx": {
     "_comment": "Giá USD/VND tham chiếu dùng để tính P2P premium: vcb_sell (Vietcombank bán chuyển khoản) | vcb_mid | sbv_central",
@@ -130,5 +133,15 @@
       "30": 12,
       "90": 35
     }
+  },
+  "site_url": "https://xuannphuoc007.github.io/mi-a7k2x9/",
+  "p2p_intraday": {
+    "_comment": "Điểm giá USDT/VND P2P Binance trong ngày: chỉ merchant, lệnh amount_vnd, lấy top_n giá tốt nhất sau lọc.",
+    "amount_vnd": 50000000,
+    "top_n": 10,
+    "min_completion_rate": 0.95,
+    "min_month_orders": 100,
+    "keep_days": 7,
+    "band_pct": 0.3
   }
 }

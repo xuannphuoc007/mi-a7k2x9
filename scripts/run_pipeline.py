@@ -19,7 +19,7 @@ from pathlib import Path
 
 from .analyzers import analytics as an
 from .analyzers import digest, fx_forward, intraday, news_signal, tone
-from .collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vira, vn_fx, vn_rates
+from .collectors import crypto, derivatives, macro, news, p2p, p2p_ticks, sentiment, stablecoins, vira, vn_fx, vn_rates
 from .common import VN_TZ, date_to_iso, env, iso_vn, metric, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
 
@@ -61,6 +61,8 @@ SOURCES = [
     ("manual", "Nhập tay — NHNN, liên ngân hàng, tồn kho nội bộ", vn_fx.collect_manual, "manual",
      "config/manual_inputs.json", None),
     ("p2p", "USDT/VND P2P — Binance, OKX, Bybit, Bitget", p2p.collect, "p2p", "website P2P của từng sàn", None),
+    ("p2p_intraday", "USDT/VND P2P Binance — điểm giá trong ngày (merchant)", p2p_ticks.collect, "p2p",
+     p2p_ticks.URL, None),
 ]
 MONTHLY_KEYS = {"cpiaucsl", "cpilfesl", "pcepi", "pcepilfe", "payems", "unrate"}
 LIGHT_DROP = ("series", "candles")
@@ -168,7 +170,7 @@ def run(out: Path, force: bool = False) -> int:
         log.info("Đã có snapshot lịch trình cho %s — bỏ qua lần chạy dự phòng.", today)
         return 0
 
-    ctx = {"settings": settings, "config_dir": ROOT / "config", "today": today}
+    ctx = {"settings": settings, "config_dir": ROOT / "config", "today": today, "prev_latest": prev_latest}
     snap: dict = {"schema_version": 1, "date": today.isoformat(), "metrics": {}, "series": {},
                   "candles": {}, "tables": {}, "sources": []}
     prev_sources = {s["id"]: s for s in prev_latest.get("sources", [])}

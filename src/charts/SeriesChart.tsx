@@ -30,7 +30,8 @@ function merge(lines: SeriesLine[]) {
   return [...rows.values()].sort((a, b) => a.t - b.t)
 }
 
-const fmtAxis = (v: number) => (Math.abs(v) >= 1e4 ? compact(v) : fmtNum(v, Math.abs(v) < 1 ? 3 : 2))
+// Từ 10 nghìn đến dưới 1 triệu (tỷ giá) ghi đủ số, rút gọn sẽ ra nhiều nhãn trùng nhau như "26,5 nghìn"
+const fmtAxis = (v: number) => (Math.abs(v) >= 1e6 ? compact(v) : Math.abs(v) >= 1e4 ? fmtNum(v, 0) : fmtNum(v, Math.abs(v) < 1 ? 3 : 2))
 const fmtDate = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit' }).format(new Date(t * 1000))
 const fmtHour = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit' }).format(new Date(t * 1000))
 const fmtFull = (t: number) => new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(t * 1000))

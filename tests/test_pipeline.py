@@ -4,11 +4,11 @@ from pathlib import Path
 import pytest
 
 from scripts import run_pipeline
-from scripts.collectors import crypto, derivatives, macro, news, p2p, sentiment, stablecoins, vira, vn_fx, vn_rates
+from scripts.collectors import crypto, derivatives, macro, news, p2p, p2p_ticks, sentiment, stablecoins, vira, vn_fx, vn_rates
 from scripts.validators.quality import check_snapshot
 from tests import fake_api
 
-MODULES = (crypto, derivatives, macro, sentiment, stablecoins, vira, vn_fx, vn_rates, p2p, news)
+MODULES = (crypto, derivatives, macro, sentiment, stablecoins, vira, vn_fx, vn_rates, p2p, p2p_ticks, news)
 
 
 @pytest.fixture
@@ -18,6 +18,7 @@ def fake_http(monkeypatch):
 
     monkeypatch.setattr(p2p, "http_post", fake_api.post_router)
     monkeypatch.setattr(vn_rates, "http_post", fake_api.post_router)
+    monkeypatch.setattr(p2p_ticks, "http_post", fake_api.post_router)
 
     for mod in MODULES:
         if hasattr(mod, "http_get"):
@@ -100,3 +101,34 @@ def test_repository_seed_data_valid():
     if not p.exists():
         pytest.skip("Chưa có dữ liệu — workflow chưa chạy lần nào")
     assert check_snapshot(json.loads(p.read_text(encoding="utf-8"))) == []
+
+
+def test_p2p_ticks_filter_and_merge(monkeypatch):
+    def ads(url, body, **kw):
+        assert body["publisherType"] == "merchant" and body["transAmount"] == "50000000"
+        rows = [  # (giá, tỷ lệ hoàn thành, số lệnh, USDT còn)
+            (26400, 0.99, 500, 10000), (26380, 0.90, 500, 10000),  # tỷ lệ hoàn thành thấp -> bỏ
+            (26390, 0.99, 50, 10000),                               # ít lệnh -> bỏ
+            (26385, 0.99, 500, 100),                                # không đủ USDT cho 50 triệu -> bỏ
+            (26410, 0.98, 300, 5000), (26420, 0.97, 200, 5000)]
+        return {"data": [{"adv": {"price": str(p), "tradableQuantity": str(q)},
+                          "advertiser": {"monthFinishRate": r, "monthOrderCount": n}} for p, r, n, q in rows]}
+    monkeypatch.setattr(p2p_ticks, "http_post", ads)
+    cfg = dict(p2p_ticks.DEFAULTS)
+    buy = p2p_ticks.quote("BUY", cfg)
+    assert buy == {"best": 26400, "median": 26410, "n": 3}
+    sell = p2p_ticks.quote("SELL", cfg)
+    assert sell["best"] == 26420
+    old = [{"t": 100}, {"t": 200}, {"t": 200}]
+    merged = p2p_ticks.merge(old, {"t": 300}, now_s=300, keep_days=1)
+    assert [t["t"] for t in merged] == [100, 200, 300]
+    assert p2p_ticks.merge(old, None, now_s=200 + 86400 + 1, keep_days=1) == []
+
+
+def test_p2p_ticks_in_snapshot(tmp_path, fake_http):
+    assert run_pipeline.run(tmp_path) == 0
+    t = json.loads((tmp_path / "latest.json").read_text(encoding="utf-8"))["tables"]["p2p_intraday"]
+    assert len(t["ticks"]) == 1 and t["ticks"][0]["buy"] == 26800 and t["ticks"][0]["sell"] == 26700
+    assert run_pipeline.run(tmp_path, force=True) == 0  # lần chạy sau giữ điểm cũ
+    t = json.loads((tmp_path / "latest.json").read_text(encoding="utf-8"))["tables"]["p2p_intraday"]
+    assert len(t["ticks"]) >= 1

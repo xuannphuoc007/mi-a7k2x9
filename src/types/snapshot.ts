@@ -254,6 +254,7 @@ export interface Snapshot {
     vol_board?: VolRow[]
     forward?: ForwardTable
     news?: NewsItem[]
+    p2p_intraday?: P2PIntraday
     intraday?: {
       band_pct: number; since: string; source: string
       config?: {
@@ -306,4 +307,14 @@ export interface DataIndex {
   latest: string
   updated_at: string
   dates: IndexEntry[]
+}
+
+export interface P2PTick {
+  t: number
+  buy: number | null; buy_med: number | null; n_buy: number
+  sell: number | null; sell_med: number | null; n_sell: number
+}
+export interface P2PIntraday {
+  source: string; amount_vnd: number; top_n: number; min_completion_rate: number; min_month_orders: number
+  band_pct: number; updated_at: string | null; ticks: P2PTick[]
 }
