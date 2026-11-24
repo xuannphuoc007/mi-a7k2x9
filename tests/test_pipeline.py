@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from scripts import run_pipeline
-from scripts.collectors import crypto, derivatives, macro, news, p2p, p2p_ticks, sentiment, stablecoins, vira, vn_fx, vn_rates
+from scripts.collectors import crypto, derivatives, macro, investing_csv, news, p2p, p2p_ticks, sentiment, stablecoins, vira, vn_fx, vn_rates
 from scripts.validators.quality import check_snapshot
 from tests import fake_api
 
@@ -19,6 +19,7 @@ def fake_http(monkeypatch):
     monkeypatch.setattr(p2p, "http_post", fake_api.post_router)
     monkeypatch.setattr(vn_rates, "http_post", fake_api.post_router)
     monkeypatch.setattr(p2p_ticks, "http_post", fake_api.post_router)
+    monkeypatch.setattr(investing_csv, "CSV_PATH", Path("/không/có/file.csv"))  # test không đọc file thật
     monkeypatch.setattr(vn_rates, "investing_usdvnd_quote", lambda: None)  # test không gọi mạng thật
 
     for mod in MODULES:
@@ -133,3 +134,35 @@ def test_p2p_ticks_in_snapshot(tmp_path, fake_http):
     assert run_pipeline.run(tmp_path, force=True) == 0  # lần chạy sau giữ điểm cũ
     t = json.loads((tmp_path / "latest.json").read_text(encoding="utf-8"))["tables"]["p2p_intraday"]
     assert len(t["ticks"]) >= 1
+
+
+CSV_SAMPLE = '\ufeff"Ngày","Lần cuối","Mở","Cao","Thấp","KL","% Thay đổi"\n' \
+    '"23/11/2026","25,785.0","25,805.0","25,847.5","25,783.0","","-0.06%"\n' \
+    '"20/11/2026","25,801.5","25,752.5","25,812.0","25,732.5","","0.18%"\n' \
+    '"xx/11/2026","1","2","3","4","",""\n' \
+    '"19/11/2026","25,755.0","25,692.5","25,762.5","25,792.5","",""\n'  # thấp > mở: hỏng, bỏ
+
+
+def test_investing_csv_parse_and_overlay(tmp_path):
+    cs = investing_csv.parse_csv(CSV_SAMPLE)
+    assert [(c["open"], c["close"]) for c in cs] == [(25752.5, 25801.5), (25805.0, 25785.0)]
+    day = lambda d: int(__import__("datetime").datetime(2026, 11, d, tzinfo=__import__("datetime").timezone.utc).timestamp())
+    yahoo = [{"time": day(d), "open": 1.0, "high": 25800.0, "low": 25700.0, "close": 25750.0, "volume": 0} for d in (20, 23, 24)]
+    yahoo[2]["close"] = 25790.0
+    out = investing_csv.overlay(yahoo, cs)
+    assert [c["time"] for c in out] == [day(20), day(23), day(24)]
+    assert out[1]["close"] == 25785.0 and out[1]["open"] == 25805.0          # lấy của file
+    assert out[2]["open"] == 25785.0 and out[2]["close"] == 25790.0           # ngày chưa có trong file: mở = đóng hôm trước
+    f = tmp_path / "x.csv"
+    f.write_text(CSV_SAMPLE, encoding="utf-8")
+    snap = {"candles": {"usdvnd_market": {"1d": yahoo, "source": "TradingView"}}}
+    assert investing_csv.apply(snap, f) == "23/11/2026"
+    assert "đến 23/11/2026" in snap["candles"]["usdvnd_market"]["source"]
+    assert investing_csv.apply({"candles": {}}, f) is None
+    assert investing_csv.apply(snap, tmp_path / "none.csv") is None
+
+
+def test_investing_csv_real_file_is_valid():
+    real = Path(__file__).resolve().parents[1] / "config" / "investing_usdvnd_daily.csv"
+    cs = investing_csv.parse_csv(real.read_text(encoding="utf-8"))
+    assert len(cs) > 200 and cs == sorted(cs, key=lambda c: c["time"])
