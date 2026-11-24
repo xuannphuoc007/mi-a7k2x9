@@ -255,7 +255,7 @@ export interface Snapshot {
     forward?: ForwardTable
     news?: NewsItem[]
     p2p_intraday?: P2PIntraday
-    usdvnd_ticks?: { source: string; ticks: { t: number; v: number }[] }
+    usdvnd_ticks?: { source: string; band_pct?: number; ticks: { t: number; v: number }[] }
     intraday?: {
       band_pct: number; since: string; source: string
       config?: {

@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 from .analyzers import analytics as an
-from .analyzers import digest, fx_forward, intraday, news_signal, tone, usdvnd_ticks
+from .analyzers import digest, fx_forward, news_signal, tone, usdvnd_ticks
 from .collectors import crypto, derivatives, investing_csv, macro, news, p2p, p2p_ticks, sentiment, stablecoins, vira, vn_fx, vn_rates
 from .common import VN_TZ, date_to_iso, env, iso_vn, metric, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
@@ -51,10 +51,8 @@ SOURCES = [
     ("interbank_on", "NHNN — lãi suất liên ngân hàng VND (qua đêm, 1 tháng)", vn_rates.collect_interbank_on, "vn_daily",
      "https://sbv.gov.vn/vi/lãi-suất1", None),
     ("vira", "VIRA — USD/VND liên ngân hàng, lãi suất liên ngân hàng USD", vira.collect, "vn_daily", vira.LIST_URL, None),
-    ("market_fx", "Investing.com / Yahoo Finance — USD/VND thị trường quốc tế", vn_rates.collect_market_fx, "fx_vn",
-     "https://finance.yahoo.com/quote/USDVND=X", None),
-    ("intraday_fx", "Investing.com / Yahoo Finance — USD/VND thị trường quốc tế", vn_rates.collect_intraday, "fx_vn",
-     "https://finance.yahoo.com/quote/USDVND=X", None),
+    ("market_fx", "Investing.com — USD/VND thị trường quốc tế", vn_rates.collect_market_fx, "fx_vn",
+     "https://www.investing.com/currencies/usd-vnd", None),
     ("dxy", "Yahoo Finance — DXY (chỉ số đô la ICE)", vn_rates.collect_dxy, "macro",
      "https://finance.yahoo.com/quote/DX-Y.NYB", None),
     ("news", "Tin tức — CNBC, BBC, Fed, CoinDesk, VnExpress, CafeF…", news.collect, "news", "RSS", None),
@@ -232,11 +230,6 @@ def run(out: Path, force: bool = False) -> int:
             v7, v30 = an.realized_vol_ann(cl, 7), an.realized_vol_ann(cl, 30)
             snap["tables"].setdefault("volatility", {})[sym] = {"vol_7d": v7, "vol_30d": v30,
                                                                   "source": "Binance Spot 1D (tính)"}
-
-    intraday_tbl = intraday.build(snap, prev_latest, today, settings)
-    if intraday_tbl:
-        snap["tables"]["intraday"] = intraday_tbl
-    snap["tables"].pop("intraday_raw", None)
 
     hist = load_history(out, today)
     fwd = fx_forward.build(snap, settings)

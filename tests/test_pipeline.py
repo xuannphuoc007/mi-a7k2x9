@@ -20,7 +20,7 @@ def fake_http(monkeypatch):
     monkeypatch.setattr(vn_rates, "http_post", fake_api.post_router)
     monkeypatch.setattr(p2p_ticks, "http_post", fake_api.post_router)
     monkeypatch.setattr(investing_csv, "CSV_PATH", Path("/không/có/file.csv"))  # test không đọc file thật
-    monkeypatch.setattr(vn_rates, "investing_usdvnd_quote", lambda: None)  # test không gọi mạng thật
+    monkeypatch.setattr(vn_rates, "investing_usdvnd_quote", lambda: 25705.0)  # test không gọi mạng thật
 
     for mod in MODULES:
         if hasattr(mod, "http_get"):

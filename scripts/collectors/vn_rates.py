@@ -15,7 +15,7 @@ from __future__ import annotations
 import datetime as dt
 import re
 from curl_cffi import requests as cffi_requests
-from ..common import VN_TZ, date_to_iso, http_get, http_post, iso_vn, metric, now_vn, s_to_iso, to_float
+from ..common import VN_TZ, date_to_iso, http_get, http_post, iso_vn, metric, missing, now_vn, s_to_iso, to_float
 
 SBV_PAGE = "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1"
 SRC_SBV_OFFICIAL = "NHNN (sbv.gov.vn), thông báo tỷ giá trung tâm"
@@ -218,53 +218,6 @@ def _yahoo_or_none(url: str):
         return None
 
 
-def parse_daily_candles(j: dict) -> list[dict]:
-    """Nến ngày (mở, cao, thấp, đóng) từ phản hồi Yahoo. Mỗi ngày giờ Việt Nam một nến, bỏ cuối tuần.
-    Thời điểm nến là 00:00 UTC của ngày đó, đúng định dạng biểu đồ ngày của web."""
-    res = (j.get("chart", {}).get("result") or [None])[0] or {}
-    q = ((res.get("indicators") or {}).get("quote") or [{}])[0]
-    rows: dict[int, dict] = {}
-    for i, t in enumerate(res.get("timestamp") or []):
-        try:
-            o, h, lo, c = q["open"][i], q["high"][i], q["low"][i], q["close"][i]
-        except (KeyError, IndexError):
-            continue
-        if None in (o, h, lo, c):
-            continue
-        day = dt.datetime.fromtimestamp(t, VN_TZ).date()
-        if day.weekday() >= 5:
-            continue
-        ts = int(dt.datetime(day.year, day.month, day.day, tzinfo=dt.timezone.utc).timestamp())
-        rows[ts] = {"time": ts, "open": float(o), "high": float(max(h, o, c)), "low": float(min(lo, o, c)),
-                    "close": float(c), "volume": 0}
-    out = [rows[t] for t in sorted(rows)]
-    return _open_from_prev_close(out)
-
-
-def _open_from_prev_close(candles: list[dict]) -> list[dict]:
-    """Yahoo ghi giá mở trùng giá đóng ở hơn một nửa số ngày của cặp này nên giá mở không đáng tin.
-    Thị trường ngoại hối giao dịch liên tục, nên lấy giá mở của ngày = giá đóng của ngày giao dịch trước."""
-    for prev, cur in zip(candles, candles[1:]):
-        cur["open"] = prev["close"]
-        cur["high"] = max(cur["high"], cur["open"], cur["close"])
-        cur["low"] = min(cur["low"], cur["open"], cur["close"])
-    return candles
-
-
-def tv_day_bar(ticker: str) -> dict | None:
-    """Nến của ngày hiện tại từ TradingView (mở, cao, thấp, giá hiện tại). Lỗi thì None."""
-    try:
-        j = http_post(TV_URL, {"symbols": {"tickers": [ticker]}, "columns": ["open", "high", "low", "close"]},
-                      headers=BROWSER_UA)
-        rows = j.get("data") or []
-        v = [to_float(x) for x in rows[0]["d"]] if rows else []
-        if len(v) == 4 and None not in v and v[2] <= v[3] <= v[1]:
-            return {"open": v[0], "high": v[1], "low": v[2], "close": v[3]}
-    except Exception:  # noqa: BLE001
-        pass
-    return None
-
-
 def _quote_with_history(url: str, tv_ticker: str, lo: float, hi: float):
     """Giá hiện tại ưu tiên TradingView, lịch sử và dự phòng từ Yahoo. Trả (giá, thời điểm iso, điểm, nguồn)."""
     yh = _yahoo_or_none(url)
@@ -285,7 +238,7 @@ def _change(price: float, pts: list) -> float | None:
 
 
 def investing_usdvnd_quote() -> float | None:
-    """Giá USD/VND hiện tại từ Investing.com. Lỗi hoặc bị chặn thì trả None để lùi về TradingView/Yahoo."""
+    """Giá USD/VND hiện tại từ Investing.com. Lỗi hoặc bị chặn thì trả None."""
     headers = {
         "Origin": "https://www.investing.com",
         "Referer": "https://www.investing.com/",
@@ -302,40 +255,18 @@ def investing_usdvnd_quote() -> float | None:
 
 
 def collect_market_fx(ctx) -> dict:
-    # Vẫn lấy lịch sử (pts) và giá dự phòng từ TradingView / Yahoo
-    price, ts, pts, tv = _quote_with_history(YAHOO_URL, "FX_IDC:USDVND", 15000, 40000)
-    src = f"{SRC_TV} FX_IDC:USDVND" if tv else SRC_YAHOO
-    note_extra = ". Giá hiện tại từ TradingView, lịch sử từ Yahoo Finance" if tv else ""
-    candle_src = src  # nến ngày chỉ dùng Yahoo/TradingView, không trộn số Investing vào
+    """USD/VND thị trường quốc tế: CHỈ giá hiện tại từ Investing.com. Không dùng Yahoo/TradingView.
+    Không lấy được thì chỉ số báo "chưa có dữ liệu" (không lùi về nguồn khác)."""
+    price = investing_usdvnd_quote()
+    label = "USD/VND thị trường quốc tế"
+    if price is None:
+        return {"metrics": {"usdvnd_market": missing(label, "VND", SRC_INVESTING,
+                                                     "Chưa có dữ liệu: Investing.com không trả giá lần này")},
+                "warnings": ["Investing.com không trả giá"]}
+    return {"metrics": {"usdvnd_market": metric(
+        label, price, "VND", SRC_INVESTING, iso_vn(now_vn()), kind="mid",
+        note="Giá tham chiếu quốc tế từ Investing.com (không phải giá ngân hàng), có thể lệch so với giá liên ngân hàng trong nước")}}
 
-    # Chỉ giá hiện tại (chỉ số) ưu tiên Investing.com; nến ngày bên dưới KHÔNG bị ghi đè
-    inv = investing_usdvnd_quote()
-    if inv is not None:
-        price = inv
-        ts = iso_vn(now_vn())
-        src = SRC_INVESTING
-        note_extra = ". Giá hiện tại từ Investing.com, lịch sử từ Yahoo Finance"
-
-    m = {"usdvnd_market": metric(
-        "USD/VND thị trường quốc tế", price, "VND", src, ts, kind="mid",
-        change_24h=_change(price, pts),
-        note="Giá tham chiếu quốc tế (không phải giá ngân hàng), có thể lệch so với giá liên ngân hàng trong nước"
-             + note_extra)}
-    series = {"usdvnd_market": {"label": "USD/VND thị trường quốc tế", "unit": "VND", "source": src,
-                                "points": pts}}
-    out = {"metrics": m, "series": series}
-    raw = _YAHOO_RAW.get(YAHOO_URL)
-    candles = parse_daily_candles(raw) if raw else []
-    if candles:
-        today = int(dt.datetime.combine(now_vn().date(), dt.time(), tzinfo=dt.timezone.utc).timestamp())
-        if now_vn().weekday() < 5:
-            bar = tv_day_bar("FX_IDC:USDVND") if tv else None
-            if bar:
-                hist = [c for c in candles if c["time"] != today]
-                candles = _open_from_prev_close(hist + [{"time": today, **bar, "volume": 0}])
-        out["candles"] = {"usdvnd_market": {"1d": candles, "1h": [], "source": candle_src + ", nến ngày Yahoo Finance",
-                                            "unit": "VND", "volume_unit": ""}}
-    return out
 
 DXY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB"
 SRC_DXY = "Yahoo Finance DX-Y.NYB (ICE US Dollar Index)"
@@ -353,45 +284,3 @@ def collect_dxy(ctx) -> dict:
     return {"metrics": m, "series": series}
 
 
-def audit_yahoo(j: dict) -> dict:
-    """Số liệu kiểm toán dữ liệu gốc của một phản hồi Yahoo: lưới thời gian, số nến có giá, số nến null."""
-    res = (j.get("chart", {}).get("result") or [None])[0]
-    if not res:
-        raise RuntimeError(f"Yahoo không trả dữ liệu: {(j.get('chart') or {}).get('error')}")
-    stamps = [int(t) for t in (res.get("timestamp") or [])]
-    closes = ((res.get("indicators") or {}).get("quote") or [{}])[0].get("close") or []
-    pts = [[t, float(c)] for t, c in zip(stamps, closes) if c is not None]
-    vals = [v for _, v in pts]
-    return {
-        "grid": stamps, "points": pts,
-        "audit": {
-            "raw_bars": len(stamps), "non_null": len(pts), "null": len(stamps) - len(pts),
-            "null_pct": round((len(stamps) - len(pts)) / len(stamps) * 100, 2) if stamps else None,
-            "equal_to_previous_kept": sum(1 for i in range(1, len(vals)) if vals[i] == vals[i - 1]),
-            "window_start": stamps[0] if stamps else None, "window_end": stamps[-1] if stamps else None,
-            "last_priced_bar": pts[-1][0] if pts else None,
-            "market_time": (res.get("meta") or {}).get("regularMarketTime"),
-        },
-    }
-
-
-def collect_intraday(ctx) -> dict:
-    """USD/VND từ Yahoo: nến 1 phút (7 ngày gần nhất) và nến 5 phút (1 tháng) để vẽ và mô phỏng từng ngày.
-    Chỉ bỏ nến có close = null do Yahoo trả về, không lọc nến giá không đổi. Một khung lỗi thì dùng khung còn lại;
-    cả hai lỗi thì báo lỗi nguồn."""
-    raw: dict = {"grid": {}, "api": {}}
-    errs = []
-    for tag, rng, itv in (("y5", "1mo", "5m"), ("y1", "7d", "1m")):
-        try:
-            a = audit_yahoo(http_get(YAHOO_URL, params={"range": rng, "interval": itv}, headers=BROWSER_UA))
-        except Exception as e:  # noqa: BLE001
-            errs.append(f"{itv}: {e}")
-            continue
-        raw[tag] = a["points"]
-        raw["grid"][tag] = a["grid"]
-        raw["api"][tag] = {"interval": itv, "range": rng, **a["audit"]}
-    if "y5" not in raw and "y1" not in raw:
-        raise RuntimeError("; ".join(errs))
-    times = [v["market_time"] for v in raw["api"].values() if v.get("market_time")]
-    raw["last_market_ts"] = max(times) if times else None
-    return {"tables": {"intraday_raw": raw}, "warnings": errs}

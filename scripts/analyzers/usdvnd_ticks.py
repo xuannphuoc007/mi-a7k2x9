@@ -21,4 +21,6 @@ def record(snap: dict, ctx: dict, keep_days: int = 7) -> None:
         tick = {"t": now_s, "v": float(m["value"])}
     ticks = merge(_old_ticks(ctx, KEY), tick, now_s, keep_days)
     if ticks:
-        snap["tables"][KEY] = {"source": "Investing.com USD/VND (giá hiện tại mỗi lần web cập nhật)", "ticks": ticks}
+        band = ((ctx.get("settings") or {}).get("intraday") or {}).get("band_pct", 0.3)
+        snap["tables"][KEY] = {"source": "Investing.com USD/VND (giá hiện tại mỗi lần web cập nhật)",
+                               "band_pct": band, "ticks": ticks}
