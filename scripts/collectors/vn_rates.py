@@ -306,8 +306,9 @@ def collect_market_fx(ctx) -> dict:
     price, ts, pts, tv = _quote_with_history(YAHOO_URL, "FX_IDC:USDVND", 15000, 40000)
     src = f"{SRC_TV} FX_IDC:USDVND" if tv else SRC_YAHOO
     note_extra = ". Giá hiện tại từ TradingView, lịch sử từ Yahoo Finance" if tv else ""
+    candle_src = src  # nến ngày chỉ dùng Yahoo/TradingView, không trộn số Investing vào
 
-    # Ưu tiên ghi đè giá hiện tại bằng Investing.com
+    # Chỉ giá hiện tại (chỉ số) ưu tiên Investing.com; nến ngày bên dưới KHÔNG bị ghi đè
     inv = investing_usdvnd_quote()
     if inv is not None:
         price = inv
@@ -328,16 +329,11 @@ def collect_market_fx(ctx) -> dict:
     if candles:
         today = int(dt.datetime.combine(now_vn().date(), dt.time(), tzinfo=dt.timezone.utc).timestamp())
         if now_vn().weekday() < 5:
-            bar = tv_day_bar("FX_IDC:USDVND") if (tv or inv is not None) else None
+            bar = tv_day_bar("FX_IDC:USDVND") if tv else None
             if bar:
-                if inv is not None:
-                    # Cập nhật giá đóng cửa hiện tại theo Investing.com
-                    bar["close"] = inv
-                    bar["high"] = max(bar["high"], inv)
-                    bar["low"] = min(bar["low"], inv)
                 hist = [c for c in candles if c["time"] != today]
                 candles = _open_from_prev_close(hist + [{"time": today, **bar, "volume": 0}])
-        out["candles"] = {"usdvnd_market": {"1d": candles, "1h": [], "source": src + ", nến ngày Yahoo Finance",
+        out["candles"] = {"usdvnd_market": {"1d": candles, "1h": [], "source": candle_src + ", nến ngày Yahoo Finance",
                                             "unit": "VND", "volume_unit": ""}}
     return out
 

@@ -19,6 +19,7 @@ def fake_http(monkeypatch):
     monkeypatch.setattr(p2p, "http_post", fake_api.post_router)
     monkeypatch.setattr(vn_rates, "http_post", fake_api.post_router)
     monkeypatch.setattr(p2p_ticks, "http_post", fake_api.post_router)
+    monkeypatch.setattr(vn_rates, "investing_usdvnd_quote", lambda: None)  # test không gọi mạng thật
 
     for mod in MODULES:
         if hasattr(mod, "http_get"):
