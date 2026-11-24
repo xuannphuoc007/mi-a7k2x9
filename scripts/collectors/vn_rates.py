@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import datetime as dt
 import re
-
+from curl_cffi import requests as cffi_requests
 from ..common import VN_TZ, date_to_iso, http_get, http_post, iso_vn, metric, now_vn, s_to_iso, to_float
 
 SBV_PAGE = "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1"
@@ -30,7 +30,8 @@ SRC_SBV = "NHNN, tỷ giá trung tâm (qua allratestoday.com, bên thứ ba)"
 YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/USDVND=X"
 SRC_YAHOO = "Yahoo Finance USDVND=X"
 BROWSER_UA = {"User-Agent": "Mozilla/5.0 (compatible; MarketIntelligence/1.0)"}
-
+INVESTING_USDVND_URL = "https://endpoints.investing.com/pd-instruments/v1/instruments/2214?domain_id=1"
+SRC_INVESTING = "Investing.com USD/VND"
 
 def parse_sbv(j: dict) -> dict:
     """Trả về {central, buy, sell, date}. Chịu được hai dạng: danh sách `rates` hoặc một cặp đơn lẻ."""
@@ -283,29 +284,62 @@ def _change(price: float, pts: list) -> float | None:
     return (price / prev - 1) * 100 if prev else None
 
 
+def investing_usdvnd_quote() -> float | None:
+    """Giá USD/VND hiện tại từ Investing.com. Lỗi hoặc bị chặn thì trả None để lùi về TradingView/Yahoo."""
+    headers = {
+        "Origin": "https://www.investing.com",
+        "Referer": "https://www.investing.com/",
+        "Accept": "application/json, text/plain, */*",
+        "domain-id": "1",
+    }
+    try:
+        r = cffi_requests.get(INVESTING_USDVND_URL, headers=headers, impersonate="chrome", timeout=15)
+        r.raise_for_status()
+        val = to_float((r.json().get("price") or {}).get("last"))
+        return val if val is not None and 15000 <= val <= 40000 else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def collect_market_fx(ctx) -> dict:
+    # Vẫn lấy lịch sử (pts) và giá dự phòng từ TradingView / Yahoo
     price, ts, pts, tv = _quote_with_history(YAHOO_URL, "FX_IDC:USDVND", 15000, 40000)
     src = f"{SRC_TV} FX_IDC:USDVND" if tv else SRC_YAHOO
+    note_extra = ". Giá hiện tại từ TradingView, lịch sử từ Yahoo Finance" if tv else ""
+
+    # Ưu tiên ghi đè giá hiện tại bằng Investing.com
+    inv = investing_usdvnd_quote()
+    if inv is not None:
+        price = inv
+        ts = iso_vn(now_vn())
+        src = SRC_INVESTING
+        note_extra = ". Giá hiện tại từ Investing.com, lịch sử từ Yahoo Finance"
+
     m = {"usdvnd_market": metric(
         "USD/VND thị trường quốc tế", price, "VND", src, ts, kind="mid",
         change_24h=_change(price, pts),
         note="Giá tham chiếu quốc tế (không phải giá ngân hàng), có thể lệch so với giá liên ngân hàng trong nước"
-             + (". Giá hiện tại từ TradingView, lịch sử từ Yahoo Finance" if tv else ""))}
+             + note_extra)}
     series = {"usdvnd_market": {"label": "USD/VND thị trường quốc tế", "unit": "VND", "source": src,
                                 "points": pts}}
     out = {"metrics": m, "series": series}
     raw = _YAHOO_RAW.get(YAHOO_URL)
     candles = parse_daily_candles(raw) if raw else []
     if candles:
-        bar = tv_day_bar("FX_IDC:USDVND") if src == f"{SRC_TV} FX_IDC:USDVND" else None
         today = int(dt.datetime.combine(now_vn().date(), dt.time(), tzinfo=dt.timezone.utc).timestamp())
-        if bar and now_vn().weekday() < 5:
-            hist = [c for c in candles if c["time"] != today]
-            candles = _open_from_prev_close(hist + [{"time": today, **bar, "volume": 0}])
+        if now_vn().weekday() < 5:
+            bar = tv_day_bar("FX_IDC:USDVND") if (tv or inv is not None) else None
+            if bar:
+                if inv is not None:
+                    # Cập nhật giá đóng cửa hiện tại theo Investing.com
+                    bar["close"] = inv
+                    bar["high"] = max(bar["high"], inv)
+                    bar["low"] = min(bar["low"], inv)
+                hist = [c for c in candles if c["time"] != today]
+                candles = _open_from_prev_close(hist + [{"time": today, **bar, "volume": 0}])
         out["candles"] = {"usdvnd_market": {"1d": candles, "1h": [], "source": src + ", nến ngày Yahoo Finance",
                                             "unit": "VND", "volume_unit": ""}}
     return out
-
 
 DXY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB"
 SRC_DXY = "Yahoo Finance DX-Y.NYB (ICE US Dollar Index)"
