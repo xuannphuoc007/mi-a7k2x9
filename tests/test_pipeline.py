@@ -143,21 +143,25 @@ CSV_SAMPLE = '\ufeff"Ngày","Lần cuối","Mở","Cao","Thấp","KL","% Thay đ
     '"19/11/2026","25,755.0","25,692.5","25,762.5","25,792.5","",""\n'  # thấp > mở: hỏng, bỏ
 
 
-def test_investing_csv_parse_and_overlay(tmp_path):
+def test_investing_csv_parse_and_apply(tmp_path):
+    import datetime as D
     cs = investing_csv.parse_csv(CSV_SAMPLE)
     assert [(c["open"], c["close"]) for c in cs] == [(25752.5, 25801.5), (25805.0, 25785.0)]
-    day = lambda d: int(__import__("datetime").datetime(2026, 11, d, tzinfo=__import__("datetime").timezone.utc).timestamp())
-    yahoo = [{"time": day(d), "open": 1.0, "high": 25800.0, "low": 25700.0, "close": 25750.0, "volume": 0} for d in (20, 23, 24)]
-    yahoo[2]["close"] = 25790.0
-    out = investing_csv.overlay(yahoo, cs)
-    assert [c["time"] for c in out] == [day(20), day(23), day(24)]
-    assert out[1]["close"] == 25785.0 and out[1]["open"] == 25805.0          # lấy của file
-    assert out[2]["open"] == 25785.0 and out[2]["close"] == 25790.0           # ngày chưa có trong file: mở = đóng hôm trước
+    vn = D.timezone(D.timedelta(hours=7))
+    ts = lambda d, h: int(D.datetime(2026, 11, d, h, tzinfo=vn).timestamp())
+    ticks = [{"t": ts(24, 9), "v": 25790.0}, {"t": ts(24, 11), "v": 25830.0}, {"t": ts(24, 15), "v": 25770.0},
+             {"t": ts(22, 9), "v": 25999.0},   # Chủ nhật: bỏ
+             {"t": ts(23, 9), "v": 25000.0}]   # ngày đã có trong file: bỏ
     f = tmp_path / "x.csv"
     f.write_text(CSV_SAMPLE, encoding="utf-8")
-    snap = {"candles": {"usdvnd_market": {"1d": yahoo, "source": "TradingView"}}}
+    snap = {"candles": {"usdvnd_market": {"1d": [{"time": 1, "open": 1, "high": 1, "low": 1, "close": 1}], "source": "TradingView"}},
+            "tables": {"usdvnd_ticks": {"ticks": ticks}}}
     assert investing_csv.apply(snap, f) == "23/11/2026"
-    assert "đến 23/11/2026" in snap["candles"]["usdvnd_market"]["source"]
+    out = snap["candles"]["usdvnd_market"]["1d"]
+    assert len(out) == 3 and out[0]["time"] != 1                         # nến Yahoo/TradingView không còn
+    today = out[2]
+    assert (today["open"], today["high"], today["low"], today["close"]) == (25785.0, 25830.0, 25770.0, 25770.0)
+    assert "Investing" in snap["candles"]["usdvnd_market"]["source"] and "TradingView" not in snap["candles"]["usdvnd_market"]["source"]
     assert investing_csv.apply({"candles": {}}, f) is None
     assert investing_csv.apply(snap, tmp_path / "none.csv") is None
 

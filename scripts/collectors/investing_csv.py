@@ -3,9 +3,9 @@
 File: config/investing_usdvnd_daily.csv (nút "Tải xuống" ở trang dữ liệu lịch sử USD/VND).
 Cột: Ngày (dd/mm/yyyy), Lần cuối (đóng), Mở, Cao, Thấp, KL, % Thay đổi; số dạng 25,785.0.
 
-Ngày nào có trong file thì lấy mở/cao/thấp/đóng của file thay cho nến Yahoo. Ngày chưa có trong file
-(thường là hôm nay và các ngày sau lần tải gần nhất) vẫn dùng Yahoo/TradingView. Muốn cập nhật thì tải
-lại file và ghi đè lên file cũ.
+Nến ngày lấy hoàn toàn từ file. Các ngày sau lần tải gần nhất (thường là hôm nay) dựng từ điểm giá
+Investing mà web ghi mỗi lần cập nhật. Yahoo/TradingView không còn dùng cho nến khi có file. Muốn cập nhật
+thì tải lại file và ghi đè lên file cũ.
 """
 from __future__ import annotations
 
@@ -39,22 +39,29 @@ def parse_csv(text: str) -> list[dict]:
     return [out[t] for t in sorted(out)]
 
 
-def overlay(candles: list[dict], csv_candles: list[dict]) -> list[dict]:
-    """Nến CSV thay nến cùng ngày; nến khác (Yahoo/TradingView) giữ lại và lấy giá mở = giá đóng ngày trước."""
-    by_t = {c["time"]: c for c in candles}
-    csv_t = {c["time"] for c in csv_candles}
-    by_t.update({c["time"]: c for c in csv_candles})
-    merged = [by_t[t] for t in sorted(by_t)]
-    for prev, cur in zip(merged, merged[1:]):
-        if cur["time"] not in csv_t:
-            cur["open"] = prev["close"]
-            cur["high"] = max(cur["high"], cur["open"], cur["close"])
-            cur["low"] = min(cur["low"], cur["open"], cur["close"])
-    return merged
+def today_candles(prev_close: float, last_t: int, ticks: list[dict]) -> list[dict]:
+    """Nến các ngày SAU file CSV, dựng từ điểm giá Investing mỗi lần web cập nhật.
+    Mở = đóng của nến trước; cao/thấp = lớn nhất/nhỏ nhất trong các điểm đã lấy (nên là số lấy mẫu, không phải
+    cao/thấp thật của ngày); đóng = điểm mới nhất. Bỏ thứ Bảy, Chủ nhật."""
+    by_day: dict[int, list[float]] = {}
+    for k in sorted(ticks, key=lambda x: x["t"]):
+        vn = dt.datetime.fromtimestamp(k["t"], dt.timezone(dt.timedelta(hours=7)))
+        if vn.weekday() >= 5:
+            continue
+        t = int(dt.datetime(vn.year, vn.month, vn.day, tzinfo=dt.timezone.utc).timestamp())
+        if t > last_t:
+            by_day.setdefault(t, []).append(float(k["v"]))
+    out, prev = [], prev_close
+    for t in sorted(by_day):
+        v = by_day[t]
+        out.append({"time": t, "open": prev, "high": max([prev, *v]), "low": min([prev, *v]), "close": v[-1], "volume": 0})
+        prev = v[-1]
+    return out
 
 
 def apply(snap: dict, path: Path | None = None) -> str | None:
-    """Gộp CSV vào snap['candles']['usdvnd_market']['1d']. Trả về ngày cuối của file, hoặc None nếu không dùng."""
+    """Thay nến ngày USD/VND bằng nến của file CSV Investing, nối thêm nến các ngày sau file từ điểm giá Investing.
+    Không còn dùng nến Yahoo/TradingView khi có file. Trả về ngày cuối của file, hoặc None nếu không dùng."""
     p = path or CSV_PATH
     entry = (snap.get("candles") or {}).get("usdvnd_market")
     if not entry or not p.exists():
@@ -62,7 +69,8 @@ def apply(snap: dict, path: Path | None = None) -> str | None:
     cs = parse_csv(p.read_text(encoding="utf-8"))
     if not cs:
         return None
-    entry["1d"] = overlay(entry.get("1d") or [], cs)
+    ticks = ((snap.get("tables") or {}).get("usdvnd_ticks") or {}).get("ticks") or []
+    entry["1d"] = cs + today_candles(cs[-1]["close"], cs[-1]["time"], ticks)
     last = dt.datetime.fromtimestamp(cs[-1]["time"], dt.timezone.utc).strftime("%d/%m/%Y")
-    entry["source"] = f"{LABEL} đến {last}; các ngày sau đó: {entry.get('source', 'Yahoo Finance')}"
+    entry["source"] = f"{LABEL} đến {last}; các ngày sau: điểm giá Investing mỗi lần web cập nhật"
     return last
