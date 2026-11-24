@@ -44,6 +44,9 @@ export default function IntradayPage() {
       </div>
     )
   }
+  // Chỉ hiện nguồn nếu là Investing; dữ liệu cũ còn ghi Yahoo/TradingView thì hiện tên Investing.com
+  const rawSource = latestData?.candles?.usdvnd_market?.source ?? ''
+  const candleSource = rawSource.startsWith('Investing') ? rawSource : 'Investing.com'
   const dayOf = (t: number) => new Date(t * 1000).toISOString().slice(0, 10)
   const allBars = daily.map((c) => ({ date: dayOf(c.time), open: c.open, high: c.high, low: c.low, close: c.close }))
   // Khoảng xem: tính theo số ngày lịch lùi từ nến cuối cùng
@@ -145,7 +148,7 @@ export default function IntradayPage() {
       </Card>
 
       <p className="text-[13px] text-muted">
-        Nguồn: {latestData?.candles?.usdvnd_market?.source ?? 'Investing.com'} (giá tham chiếu quốc tế).{lastAt ? ` Điểm giá trong ngày mới nhất ${stamp(lastAt)}.` : ''}
+        Nguồn: {candleSource} (giá tham chiếu quốc tế).{lastAt ? ` Điểm giá trong ngày mới nhất ${stamp(lastAt)}.` : ''}
       </p>
 
       <div className="border-t-2 border-fg" />
