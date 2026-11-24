@@ -53,13 +53,13 @@ def quote(side: str, cfg: dict) -> dict:
     return {"best": good[0], "median": statistics.median(good), "n": len(good)}
 
 
-def _old_ticks(ctx) -> list[dict]:
-    out = list(((ctx.get("prev_latest") or {}).get("tables", {}).get("p2p_intraday") or {}).get("ticks") or [])
+def _old_ticks(ctx, key: str = "p2p_intraday") -> list[dict]:
+    out = list(((ctx.get("prev_latest") or {}).get("tables", {}).get(key) or {}).get("ticks") or [])
     site = (ctx["settings"].get("site_url") or "").rstrip("/")
     if site:
         try:
             live = http_get(f"{site}/data/latest.json", retries=1)
-            out += ((live.get("tables") or {}).get("p2p_intraday") or {}).get("ticks") or []
+            out += ((live.get("tables") or {}).get(key) or {}).get("ticks") or []
         except Exception as e:  # noqa: BLE001
             log.info("Không đọc được điểm P2P trên website: %s", e)
     return out

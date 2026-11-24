@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 from .analyzers import analytics as an
-from .analyzers import digest, fx_forward, intraday, news_signal, tone
+from .analyzers import digest, fx_forward, intraday, news_signal, tone, usdvnd_ticks
 from .collectors import crypto, derivatives, investing_csv, macro, news, p2p, p2p_ticks, sentiment, stablecoins, vira, vn_fx, vn_rates
 from .common import VN_TZ, date_to_iso, env, iso_vn, metric, now_vn
 from .validators.quality import apply_quality, check_snapshot, clean_series
@@ -211,6 +211,7 @@ def run(out: Path, force: bool = False) -> int:
         log.error("Tất cả nguồn đều lỗi — không ghi snapshot.")
         return 2
 
+    usdvnd_ticks.record(snap, ctx)
     csv_last = investing_csv.apply(snap)
     if csv_last:
         log.info("Nến ngày USD/VND: dùng file CSV Investing đến %s", csv_last)

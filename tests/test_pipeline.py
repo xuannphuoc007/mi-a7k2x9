@@ -166,3 +166,16 @@ def test_investing_csv_real_file_is_valid():
     real = Path(__file__).resolve().parents[1] / "config" / "investing_usdvnd_daily.csv"
     cs = investing_csv.parse_csv(real.read_text(encoding="utf-8"))
     assert len(cs) > 200 and cs == sorted(cs, key=lambda c: c["time"])
+
+
+def test_usdvnd_ticks_only_from_investing(monkeypatch):
+    import time
+    from scripts.analyzers import usdvnd_ticks
+    old = int(time.time()) - 600
+    monkeypatch.setattr(usdvnd_ticks, "_old_ticks", lambda ctx, key: [{"t": old, "v": 25700.0}])
+    snap = {"metrics": {"usdvnd_market": {"value": 25785.0, "source": "Investing.com USD/VND"}}, "tables": {}}
+    usdvnd_ticks.record(snap, {})
+    assert [t["v"] for t in snap["tables"]["usdvnd_ticks"]["ticks"]] == [25700.0, 25785.0]
+    snap = {"metrics": {"usdvnd_market": {"value": 25705.0, "source": "TradingView FX_IDC:USDVND"}}, "tables": {}}
+    usdvnd_ticks.record(snap, {})  # nguồn khác Investing: không thêm điểm mới, chỉ giữ điểm cũ
+    assert [t["v"] for t in snap["tables"]["usdvnd_ticks"]["ticks"]] == [25700.0]
